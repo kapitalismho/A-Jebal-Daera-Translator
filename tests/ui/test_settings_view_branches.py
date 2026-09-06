@@ -2479,6 +2479,24 @@ def test_on_stt_selected_updates_provider_and_pipeline_flags(
     assert changed == []
 
 
+def test_on_stt_selected_stages_provider_without_immediate_apply(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = _vnext(stt_provider=STTProviderName.SONIOX.value)
+    applied: list[object] = []
+    view, _ = _make_settings_view(monkeypatch)
+    view.load_from_settings(settings, config_path=Path("settings.json"))
+    view.on_providers_changed = lambda: applied.append(True)
+
+    view._on_stt_selected(STTProviderName.ROLLING_FREE.value)
+
+    pending = view.build_provider_apply_settings()
+    assert settings.intent.stt.provider == STTProviderName.SONIOX.value
+    assert pending is not None
+    assert pending.intent.stt.provider == STTProviderName.ROLLING_FREE.value
+    assert applied == []
+
+
 def test_on_stt_selected_routes_compatibility_warning_through_snackbar_callback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

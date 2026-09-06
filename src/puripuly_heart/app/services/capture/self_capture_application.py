@@ -120,6 +120,15 @@ class SelfCaptureApplicationOwner:
         settings = self.settings_provider()
         if settings is None or not self.runtime_available():
             return
+        requested_provider = settings.provider_id
+        current_provider = (
+            getattr(owner.snapshot, "provider_id", None) if owner is not None else None
+        )
+        self.log_detailed(
+            "[STT][Runtime] provider refresh requested: "
+            f"current={current_provider or 'none'} requested={requested_provider}",
+            logging.INFO,
+        )
         owner = self.capture_owner()
         config = settings.config
         if owner.snapshot.desired_active:
@@ -131,6 +140,22 @@ class SelfCaptureApplicationOwner:
             )
         else:
             snapshot = await owner.prepare_provider(config)
+        if (
+            snapshot.provider_status is SelfCaptureProviderStatus.READY
+            and snapshot.failure_reason is None
+            and snapshot.runtime_signature == config.runtime_signature
+        ):
+            self.log_detailed(
+                "[STT][Runtime] provider handoff committed: "
+                f"provider={getattr(snapshot, 'provider_id', config.provider_id)}",
+                logging.INFO,
+            )
+        elif snapshot.provider_status is SelfCaptureProviderStatus.PENDING:
+            self.log_detailed(
+                "[STT][Runtime] provider handoff pending: "
+                f"requested={config.provider_id} reason={snapshot.admission_reason or 'boundary'}",
+                logging.INFO,
+            )
         self.state_sink(snapshot)
         self.project_availability(snapshot)
         self.restart_requested = False

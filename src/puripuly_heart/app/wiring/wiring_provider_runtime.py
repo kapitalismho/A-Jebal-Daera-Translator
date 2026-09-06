@@ -221,6 +221,32 @@ class ProviderRuntimeEffects:
             peer_stt_desired=self.peer_desired(settings),
         )
 
+    def self_runtime_convergence(self, settings: object) -> bool | None:
+        runtime = self.local_asr_runtime_provider()
+        owner = self.self_capture_provider()
+        if owner is None:
+            return None
+        if runtime is None:
+            return False if owner.snapshot.desired_active else None
+        expected = build_self_capture_session_config_from_vnext(
+            self.canonical_settings(settings),
+        )
+        capture = owner.snapshot
+        channel = runtime.snapshot.channel_for("self")
+        provider_status = getattr(capture.provider_status, "value", capture.provider_status)
+        return bool(
+            channel.provider_id == expected.provider_id
+            and channel.has_resources
+            and not channel.pending_handoff
+            and channel.phase in {"dormant", "ready", "running"}
+            and capture.provider_id == expected.provider_id
+            and capture.runtime_signature == expected.runtime_signature
+            and provider_status == "ready"
+            and capture.failure_reason is None
+            and capture.desired_active
+            == (capture.effective_active if capture.desired_active else False)
+        )
+
     def apply_common(self, settings: AppSettingsVNext) -> None:
         canonical = self.canonical_settings(settings)
         translation = canonical.intent.translation
@@ -519,6 +545,7 @@ def compose_provider_runtime(
             canonical_settings(current),
             canonical_settings(next_value),
         ),
+        self_runtime_convergence=effects.self_runtime_convergence,
     )
     return ProviderRuntimeComponents(
         runtime=runtime,

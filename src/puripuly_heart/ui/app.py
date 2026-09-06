@@ -1069,6 +1069,8 @@ class TranslatorApp:
                 if pending_settings is not None:
                     self.view_settings.has_provider_changes = False
 
+                    self._log_basic("[Settings] Applying staged provider intent")
+
                     async def _task():
                         await self.application.apply_provider_intent(pending_settings)
 
@@ -1554,6 +1556,8 @@ class TranslatorApp:
         ):
             pending_intent = consume_provider_apply_settings()
             view_settings.has_provider_changes = False
+        if pending_intent is not None:
+            self._log_basic("[Settings] Applying staged provider intent")
 
         async def _task():
             if pending_intent is None:

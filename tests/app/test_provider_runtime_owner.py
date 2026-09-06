@@ -26,6 +26,7 @@ def _runtime_owner(
     state: ProviderRuntimeState,
     current: object | None = None,
     cache: tuple[object | None, object | None, object | None] = (None, None, None),
+    convergence=None,
 ) -> ProviderRuntimeOwner:
     async def record(name: str) -> None:
         events.append(name)
@@ -52,6 +53,7 @@ def _runtime_owner(
         ),
         llm_signature_builder=lambda settings: ("llm", settings),
         gpu_restart_decision=lambda _current, _next: True,
+        self_runtime_convergence=convergence or (lambda _settings: None),
     )
 
 
@@ -74,6 +76,49 @@ def test_provider_runtime_owner_builds_plan_from_owned_signature_state() -> None
         should_refresh_self_stt=True,
         coordinated_gpu_restart=True,
     )
+
+
+def test_provider_runtime_owner_forces_self_refresh_when_live_runtime_is_stale() -> None:
+    owner = _runtime_owner(
+        events=[],
+        state=ProviderRuntimeState(True, True, True, True, True, False),
+        current="next",
+        cache=(("self", "next"), ("peer",), ("llm", "next")),
+        convergence=lambda _settings: False,
+    )
+
+    plan = owner.build_plan("next", force_rebuild_llm=False)
+
+    assert plan.should_refresh_self_stt is True
+
+
+@pytest.mark.asyncio
+async def test_provider_runtime_owner_rejects_stale_self_runtime_before_caching_success() -> None:
+    events: list[str] = []
+    owner = _runtime_owner(
+        events=events,
+        state=ProviderRuntimeState(True, True, True, True, True, False),
+        convergence=lambda _settings: False,
+    )
+
+    with pytest.raises(RuntimeError, match="did not converge"):
+        await owner.apply("settings", ProviderRuntimeApplyPlan(False, False, False))
+
+    assert events == ["common"]
+
+
+@pytest.mark.asyncio
+async def test_provider_runtime_owner_caches_only_after_self_runtime_converges() -> None:
+    events: list[str] = []
+    owner = _runtime_owner(
+        events=events,
+        state=ProviderRuntimeState(True, True, True, True, True, False),
+        convergence=lambda _settings: True,
+    )
+
+    await owner.apply("settings", ProviderRuntimeApplyPlan(False, False, False))
+
+    assert events == ["common", "signatures"]
 
 
 @pytest.mark.asyncio

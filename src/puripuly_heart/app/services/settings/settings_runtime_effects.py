@@ -39,6 +39,7 @@ from puripuly_heart.app.wiring_provider_runtime import (
 from puripuly_heart.app.wiring_runtime_pipeline import RuntimePipelineHandle
 from puripuly_heart.app.wiring_stt_factory import (
     build_peer_stt_runtime_signature_from_vnext,
+    build_self_capture_session_config_from_vnext,
     build_self_capture_vad_signature_from_vnext,
     build_self_stt_runtime_signature_from_vnext,
 )
@@ -409,6 +410,31 @@ class SettingsRuntimeEffectsAdapter:
     def sync_signatures(self, settings: AppSettingsVNext) -> None:
         self._sync_signatures(settings)
 
+    def _self_runtime_converged(self, settings: AppSettingsVNext) -> bool | None:
+        capture_provider = getattr(self, "_self_capture", None)
+        capture = capture_provider() if callable(capture_provider) else None
+        if capture is None or not capture.snapshot.desired_active:
+            return None
+        local_asr_runtime = getattr(self._pipeline, "local_asr_runtime", None)
+        if local_asr_runtime is None:
+            return False
+        expected = build_self_capture_session_config_from_vnext(self._canonical_settings(settings))
+        snapshot = capture.snapshot
+        channel = local_asr_runtime.snapshot.channel_for("self")
+        provider_status = getattr(snapshot.provider_status, "value", snapshot.provider_status)
+        return bool(
+            channel.provider_id == expected.provider_id
+            and channel.has_resources
+            and not channel.pending_handoff
+            and channel.phase in {"dormant", "ready", "running"}
+            and snapshot.provider_id == expected.provider_id
+            and snapshot.runtime_signature == expected.runtime_signature
+            and provider_status == "ready"
+            and snapshot.failure_reason is None
+            and snapshot.desired_active
+            == (snapshot.effective_active if snapshot.desired_active else False)
+        )
+
     def state(self, settings: AppSettingsVNext) -> SettingsRuntimeState:
         local_asr_runtime = self._pipeline.local_asr_runtime
         llm_runtime = self._pipeline.llm_runtime
@@ -515,6 +541,7 @@ class SettingsRuntimeEffectsAdapter:
 
         canonical = self._canonical_settings(settings)
         current_self_signature = build_self_stt_runtime_signature_from_vnext(canonical)
+        self_runtime_converged = self._self_runtime_converged(canonical)
         current_peer_signature = build_peer_stt_runtime_signature_from_vnext(canonical)
         next_peer_activation_requested = self._peer.owner.activation_requested(
             intent_enabled=self._settings.peer_translation_enabled(),
@@ -523,7 +550,7 @@ class SettingsRuntimeEffectsAdapter:
         should_restart_stt = (
             transition.previous_self_signature is not None
             and current_self_signature != transition.previous_self_signature
-        )
+        ) or self_runtime_converged is False
         should_refresh_peer = (
             transition.previous_peer_signature is None
             or current_peer_signature != transition.previous_peer_signature
@@ -531,8 +558,6 @@ class SettingsRuntimeEffectsAdapter:
             != self._settings.peer_translation_enabled()
             or transition.previous_peer_activation_requested != next_peer_activation_requested
         )
-
-        self._sync_signatures(settings)
 
         if transition.source_language_changed or transition.target_language_changed:
             self._runtime_logging.emit_detailed(
@@ -556,6 +581,8 @@ class SettingsRuntimeEffectsAdapter:
                 == build_self_capture_vad_signature_from_vnext(canonical)
             )
             await self._replace_self_stt(smooth_local)
+
+        self._sync_signatures(settings)
 
         if reload_settings_view and (
             transition.source_language_changed

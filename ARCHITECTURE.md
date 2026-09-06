@@ -244,6 +244,8 @@ Examples:
 
 Runtime state belongs to its lifecycle owner and is not persisted settings.
 
+When a settings draft exits, the typed intent is persisted and then passed through the provider-apply boundary. For an active Self capture, provider application must converge both the Self capture owner and the Local ASR channel to the requested live runtime signature before the applied signature cache is updated. Idle or disabled Self capture does not force provider preparation. A smooth active handoff keeps the current provider until the owning translation channel completes the utterance at `SpeechEnd`; failed, cancelled, or non-converged application leaves the previous cache truth intact.
+
 ## Provider Boundaries
 
 ### STT
