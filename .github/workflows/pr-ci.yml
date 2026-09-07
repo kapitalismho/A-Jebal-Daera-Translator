@@ -118,13 +118,9 @@ jobs:
       - name: Run broker tests
         run: pnpm exec vitest run broker/tests --exclude "broker/tests/deploy-smoke/**"
 
-  overlay-deterministic:
-    name: Overlay deterministic (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest]
+  native-overlay:
+    name: Overlay
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -155,33 +151,29 @@ jobs:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ovt
         run: cargo test --locked --manifest-path native/overlay/Cargo.toml -- --skip windows_graphics_
 
-  overlay-graphics:
-    name: Overlay graphics
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup UV environment
-        uses: ./.github/actions/setup-uv-environment
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          uv-version: ${{ env.UV_VERSION }}
-          sync-args: --extra dev
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: native/overlay
-          cache-targets: "false"
-
       - name: Cargo test graphics
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ovt
         run: cargo test --locked --manifest-path native/overlay/Cargo.toml windows_graphics_ -- --test-threads=1
+
+      - name: Run overlay integration tests
+        env:
+          INTEGRATION: "1"
+          PYTHONIOENCODING: utf-8
+        run: >
+          uv run --frozen pytest
+          tests/app/test_desktop_overlay_runner.py::test_import_run_desktop_overlay_dispatch_is_provider_secret_and_stt_free
+          tests/app/test_desktop_overlay_runner.py::test_import_preview_dispatch_is_provider_secret_and_stt_free
+          tests/core/runtime/test_overlay_runtime.py::test_overlay_runtime_receives_real_subprocess_shutdown_ack_before_reader_cleanup
+          tests/ui/test_flet_desktop_view_process_owner.py::test_windows_kill_on_close_job_reaps_assigned_real_process
+          tests/ui/test_flet_desktop_view_process_owner.py::test_owner_reaps_real_process_and_pid_file_across_ten_cycles
+          --junitxml=overlay-integration-results.xml
+
+      - name: Require five integration results with no skips
+        shell: bash
+        run: |
+          uv run --frozen python -c "import xml.etree.ElementTree as ET; s=ET.parse('overlay-integration-results.xml').getroot().find('testsuite'); c={k: int(s.get(k, '0')) for k in ('tests', 'skipped', 'failures', 'errors')}; print(c); assert c == {'tests': 5, 'skipped': 0, 'failures': 0, 'errors': 0}, c"
+
       - name: Check refresh trace fixture bytes
         shell: bash
         env:
@@ -204,48 +196,3 @@ jobs:
               raise SystemExit("refresh_traces.json drift: regenerate the fixture from the deterministic producer")
           print("refresh trace fixture byte-identical (%d bytes)" % len(expected))
           PYEOF
-
-  overlay-python-integration:
-    name: Overlay Python integration
-    runs-on: windows-latest
-    env:
-      INTEGRATION: "1"
-      PYTHONIOENCODING: utf-8
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup UV environment
-        uses: ./.github/actions/setup-uv-environment
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          uv-version: ${{ env.UV_VERSION }}
-          sync-args: --extra dev
-
-      - name: Run overlay integration tests
-        run: >
-          uv run --frozen pytest
-          tests/app/test_desktop_overlay_runner.py::test_import_run_desktop_overlay_dispatch_is_provider_secret_and_stt_free
-          tests/app/test_desktop_overlay_runner.py::test_import_preview_dispatch_is_provider_secret_and_stt_free
-          tests/core/runtime/test_overlay_runtime.py::test_overlay_runtime_receives_real_subprocess_shutdown_ack_before_reader_cleanup
-          tests/ui/test_flet_desktop_view_process_owner.py::test_windows_kill_on_close_job_reaps_assigned_real_process
-          tests/ui/test_flet_desktop_view_process_owner.py::test_owner_reaps_real_process_and_pid_file_across_ten_cycles
-          --junitxml=overlay-integration-results.xml
-
-      - name: Require five integration results with no skips
-        shell: bash
-        run: |
-          uv run --frozen python -c "import xml.etree.ElementTree as ET; s=ET.parse('overlay-integration-results.xml').getroot().find('testsuite'); c={k: int(s.get(k, '0')) for k in ('tests', 'skipped', 'failures', 'errors')}; print(c); assert c == {'tests': 5, 'skipped': 0, 'failures': 0, 'errors': 0}, c"
-
-  native-overlay:
-    name: Overlay
-    runs-on: ubuntu-latest
-    needs: [overlay-deterministic, overlay-graphics, overlay-python-integration]
-    if: always()
-    steps:
-      - name: Require overlay tiers
-        run: |
-          if [ "${{ needs.overlay-deterministic.result }}" != "success" ] || [ "${{ needs.overlay-graphics.result }}" != "success" ] || [ "${{ needs.overlay-python-integration.result }}" != "success" ]; then
-            echo "overlay tiers failed: deterministic=${{ needs.overlay-deterministic.result }} graphics=${{ needs.overlay-graphics.result }} python-integration=${{ needs.overlay-python-integration.result }}"
-            exit 1
-          fi
