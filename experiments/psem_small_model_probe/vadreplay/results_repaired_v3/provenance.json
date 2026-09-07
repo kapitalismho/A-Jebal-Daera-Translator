@@ -1,0 +1,10 @@
+{
+  "adapter_frames": "REUSED from main/results_repaired_v3/firered_C_main.jsonl (rev3).",
+  "evaluator_revision": 3,
+  "manifest_sha256": "c9470d21deb92bfed12c9b582df62317a5566e9ff6ef25a89559fef02aec87c3",
+  "revision": "PSEM-SMALL-MODEL-PROBE-v1-rev3",
+  "supersedes_without_overwriting": "vadreplay/results/* VOID, preserved in place.",
+  "vad_spans": "FRESH full-source Silero ONNX replay, same profile as before (thr 0.5, chunk 512, pre-roll/hangover 500ms).",
+  "winner_basis": "sole causal formulation with a valid CUT signal under rev3 MAIN48 (firered-C 4/16: C2 2/8 + C4 2/8; neovad-C 0/16, nothing to retain)",
+  "winner_only": "firered x C"
+}

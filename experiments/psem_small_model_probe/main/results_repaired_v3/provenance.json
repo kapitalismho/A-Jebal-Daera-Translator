@@ -1,0 +1,10 @@
+{
+  "evaluator_revision": 3,
+  "freeze_sha256": "f6cbeefd5ff0f3c77101c08403e2eddac13ab9608f5edd4a0cd83dc380595d72",
+  "frozen_taus_from": "cal/results_repaired_v3/thresholds.json (applied as-is, no MAIN48 retuning)",
+  "manifest": "manifest/manifest_rev3.jsonl",
+  "manifest_sha256": "c9470d21deb92bfed12c9b582df62317a5566e9ff6ef25a89559fef02aec87c3",
+  "raw_inference": "firered: REPLAYED verbatim from main/results/*_main.jsonl; neovad: FRESH native inference all 48/ep-regime with warm-up headers verified per episode",
+  "revision": "PSEM-SMALL-MODEL-PROBE-v1-rev3",
+  "stub_fallback": false
+}

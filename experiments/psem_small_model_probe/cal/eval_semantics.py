@@ -42,6 +42,42 @@ from experiments.psem_small_model_probe.cal.audio_resolve import SAMPLES_PER_MS
 # Provenance: V2 operational_label_contract.json (psem-handoff-v1)
 # constants_ms.annotation_boundary_jitter. See module docstring.
 CUT_TOLERANCE_MS = 50
+# Stratum truth (rev3): headline KEEP/CUT sets derive from the explicit
+# per-episode stratum C1..C6, never from display topology. C6 (OTHER) is
+# binding/uncertain: reported, excluded from KEEP/CUT headlines.
+KEEP_STRATA = frozenset({"C1", "C3", "C5"})
+CUT_STRATA = frozenset({"C2", "C4"})
+OTHER_STRATA = frozenset({"C6"})
+
+
+def stratum_of(record: dict[str, Any]) -> str | None:
+    """Explicit stratum C1..C6, or None when absent (pre-rev3 record)."""
+    s = record.get("stratum")
+    if s in KEEP_STRATA or s in CUT_STRATA or s in OTHER_STRATA:
+        return s
+    return None
+
+
+def episode_role(record: dict[str, Any], keep_topologies, cut_topologies) -> str:
+    """Headline role: stratum-first, legacy topology fallback.
+
+    Records carrying an explicit ``stratum`` resolve by stratum (topology
+    is display-only). Pre-rev3 records without ``stratum`` keep the exact
+    rev2 topology semantics (caller passes KEEP_TOPOLOGIES/CUT_TOPOLOGIES).
+    """
+    s = stratum_of(record)
+    if s is not None:
+        if s in KEEP_STRATA:
+            return "KEEP"
+        if s in CUT_STRATA:
+            return "CUT"
+        return "OTHER"
+    t = record.get("topology")
+    if t in keep_topologies:
+        return "KEEP"
+    if t in cut_topologies:
+        return "CUT"
+    return "OTHER"
 
 
 def _covering_interval(gt: dict, sample: int) -> dict | None:

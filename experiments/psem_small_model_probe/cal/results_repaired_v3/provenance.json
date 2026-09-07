@@ -1,0 +1,12 @@
+{
+  "cal_rows": "cal/CAL12_rev3.jsonl",
+  "cal_sha256": "dfff84810da0205bd3097622d29db9db04205e6a9ad9e3e50a72f0130a4c12ee",
+  "evaluator_revision": 3,
+  "freeze_sha256": "f6cbeefd5ff0f3c77101c08403e2eddac13ab9608f5edd4a0cd83dc380595d72",
+  "manifest": "manifest/manifest_rev3.jsonl",
+  "manifest_sha256": "c9470d21deb92bfed12c9b582df62317a5566e9ff6ef25a89559fef02aec87c3",
+  "raw_inference": "firered: REUSED archived raw anchors for kept 10, FRESH native inference for 2 new C2; neovad: FRESH native inference all 12 (warm-up semantics changed, reuse forbidden)",
+  "revision": "PSEM-SMALL-MODEL-PROBE-v1-rev3",
+  "selection_rule": "fixed-priority KEEP-false-cuts, then C2-only miss rate (never C4), then C2 delay; C6 diagnostic-only",
+  "stub_fallback": false
+}

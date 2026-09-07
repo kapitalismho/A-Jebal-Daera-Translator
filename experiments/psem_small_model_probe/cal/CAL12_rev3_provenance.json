@@ -1,0 +1,46 @@
+{
+ "corpora": [
+  "alimeeting",
+  "ami"
+ ],
+ "disjoint_from_main_ext": true,
+ "displaced_duplicate_c3_slot": [
+  "EN2006a:A00001",
+  "R1019_M1928:A00002"
+ ],
+ "file_sha256": "dfff84810da0205bd3097622d29db9db04205e6a9ad9e3e50a72f0130a4c12ee",
+ "kept_episodes": [
+  "EN2004a:A00001",
+  "EN2004a:A00002",
+  "EN2004a:A00003",
+  "EN2004a:A00004",
+  "EN2009d:A00001",
+  "R0004_M0012:A00001",
+  "R0004_M0012:A00002",
+  "R0004_M0012:A00003",
+  "R0004_M0012:A00004",
+  "R1019_M1928:A00001"
+ ],
+ "new_c2_episodes": {
+  "EN2009d:A00002": "pool=ami session=EN2009d trans_ms=82413 anchor=FEE096",
+  "R1019_M1928:A00003": "pool=alimeeting session=R1019_M1928 trans_ms=42370 anchor=SPK1909"
+ },
+ "note": "GT-only deterministic rebuild, model/threshold-blind; selection-only change (episodes); binding spans derived with the same builder finalize(); old CAL rows preserved",
+ "revision": "PSEM-SMALL-MODEL-PROBE-v1-rev3",
+ "sessions": [
+  "alimeeting/R0004_M0012",
+  "alimeeting/R1019_M1928",
+  "ami/EN2004a",
+  "ami/EN2009d"
+ ],
+ "source_manifest": "manifest/manifest_rev3.jsonl",
+ "source_manifest_sha256": "c9470d21deb92bfed12c9b582df62317a5566e9ff6ef25a89559fef02aec87c3",
+ "stratum_counts": {
+  "C1": 2,
+  "C2": 2,
+  "C3": 2,
+  "C4": 2,
+  "C5": 2,
+  "C6": 2
+ }
+}

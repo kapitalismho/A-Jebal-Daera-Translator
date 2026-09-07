@@ -74,6 +74,8 @@ class NeoVADAdapter:
         self._bound = False
         self._source_time_ms = 0
         self.bind_span_hash: str | None = None
+        self.bind_span_ms: int | None = None
+        self.warmup_frames = 0
         self.frames: list[dict] = []
         self.reset()
         self._reset_called = False
@@ -100,10 +102,14 @@ class NeoVADAdapter:
         if self._state is None:
             # reset() clears recurrent memory across episodes; lazily rebuild a
             # fresh state here so episode 2+ does not step with state=None.
-            import torch
-
-            self._state = self._model.init_state(1, "cpu", torch.float32)
+            self._state = self._fresh_state(self._model)
         return self._model
+
+    def _fresh_state(self, model):
+        """One fresh recurrent state for model (post-reset start)."""
+        import torch
+
+        return model.init_state(1, "cpu", torch.float32)
 
     def reset(self) -> None:
         self._state = None
@@ -111,7 +117,19 @@ class NeoVADAdapter:
         self._bound = False
         self._source_time_ms = 0
         self.bind_span_hash = None
+        self.bind_span_ms = None
+        self.warmup_frames = 0
         self.frames = []
+
+    def _warmup_frame(self, chunk: bytes) -> None:
+        """One warm-up step through the native streaming path.
+
+        Outputs are discarded; the eval clock (``_source_time_ms``) and the
+        eval frame log (``self.frames``) are untouched, so evaluation stays
+        anchored at evaluation_start. Kept separate from step() so warm-up
+        timestamps can never leak into eval frames.
+        """
+        self._raw_probs(chunk)
 
     def bind(self, reference_pcm16: bytes) -> None:
         if not self._reset_called:
@@ -124,8 +142,78 @@ class NeoVADAdapter:
             )
         if len(reference_pcm16) % unit != 0:
             raise ValueError("reference span must be a frame multiple")
+        # Recurrent warm-up: fresh post-reset state, then the FULL reference
+        # PCM chronologically through the native streaming step path
+        # (identical weights/reset/path for O and C spans; only the
+        # reference audio differs). Logits discarded; final state kept.
+        # Fail-closed without a loadable model: silent unwarmed bind is the
+        # rev1/rev2 O≈C bug, so _model_or_raise() must succeed here.
+        self._model_or_raise()
+        self._state = None
+        self._model_or_raise()  # lazily rebuilds exactly one fresh state
+        clock_before = self._source_time_ms
+        n = 0
+        for i in range(len(reference_pcm16) // unit):
+            self._warmup_frame(reference_pcm16[i * unit:(i + 1) * unit])
+            n += 1
+        if self._source_time_ms != clock_before or self.frames:
+            raise RuntimeError("warm-up leaked into eval clock/frame log")
         self.bind_span_hash = hashlib.sha256(reference_pcm16).hexdigest()
+        self.bind_span_ms = len(reference_pcm16) // (2 * self.sample_rate_hz // 1000)
+        self.warmup_frames = n
         self._bound = True
+
+    def state_fingerprint(self) -> str | None:
+        """Stable hash of the recurrent state (None when no state).
+
+        Duck-typed (torch/numpy/bytes-like) so fingerprints work without
+        importing torch: used by V2 checks to prove warmed-state !=
+        reset-state.
+        """
+        if self._state is None:
+            return None
+        h = hashlib.sha256()
+
+        def feed(o) -> None:
+            if isinstance(o, (bytes, bytearray, memoryview)):
+                h.update(bytes(o))
+                return
+            numpy = getattr(o, "numpy", None)
+            if callable(numpy):
+                try:
+                    arr = numpy()
+                    h.update(str(getattr(arr, "shape", "")).encode())
+                    h.update(arr.tobytes())
+                    return
+                except Exception:
+                    pass
+            tobytes = getattr(o, "tobytes", None)
+            if callable(tobytes):
+                try:
+                    h.update(tobytes())
+                    return
+                except Exception:
+                    pass
+            try:
+                namespace = vars(o)
+            except TypeError:
+                h.update(repr(o).encode())
+            else:
+                walk(namespace)
+
+        def walk(o) -> None:
+            if isinstance(o, (list, tuple)):
+                for x in o:
+                    walk(x)
+            elif isinstance(o, dict):
+                for k in sorted(o, key=repr):
+                    walk(k)
+                    walk(o[k])
+            else:
+                feed(o)
+
+        walk(self._state)
+        return h.hexdigest()
 
     def _raw_probs(self, chunk: bytes) -> tuple[float, float, float]:
         model = self._model_or_raise()
@@ -181,4 +269,12 @@ class NeoVADAdapter:
             "ecapa_sha": "none",
             "reset_ok": self._reset_called,
             "bind_span_hash": self.bind_span_hash,
+            "bind_span_ms": self.bind_span_ms,
+            "warmup_frames": self.warmup_frames,
+            "stub_fallback": False,
+            "prior_neovad_rows_void": (
+                "rev1/rev2 NeoVAD O≈C rows VOID for branch conclusions: "
+                "bind() did not warm recurrent state, so O and C spans "
+                "shared the same reset-state start"
+            ),
         }
