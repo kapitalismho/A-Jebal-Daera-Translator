@@ -1631,7 +1631,8 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn windows_directwrite_layout_secondary_origin_includes_scaled_primary_secondary_gap() {
+    fn windows_graphics_directwrite_layout_secondary_origin_includes_scaled_primary_secondary_gap()
+    {
         let policy = CaptionLayoutPolicy::default();
         let engine = super::DirectWriteLayoutEngine::new_for_test()
             .expect("DirectWrite layout should initialize on Windows");
@@ -1660,7 +1661,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn windows_layout_key_and_line_key_use_same_resolved_style_as_measurement() {
+    fn windows_graphics_layout_key_and_line_key_use_same_resolved_style_as_measurement() {
         let policy = CaptionLayoutPolicy::default();
         let engine = super::DirectWriteLayoutEngine::new_for_test()
             .expect("DirectWrite layout should initialize on Windows");
@@ -1688,7 +1689,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn windows_wrapped_mixed_script_layout_cache_key_is_reachable_on_second_resolve() {
+    fn windows_graphics_wrapped_mixed_script_layout_cache_key_is_reachable_on_second_resolve() {
         let policy = CaptionLayoutPolicy::default();
         let engine = super::DirectWriteLayoutEngine::new_for_test()
             .expect("DirectWrite layout should initialize on Windows");

@@ -2310,8 +2310,8 @@ fn runtime_renderer_uses_fixed_slot_bounds_when_secondary_slot_changes() {
 
 #[cfg(windows)]
 #[test]
-fn runtime_active_self_frames_do_not_hit_finalized_block_cache() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_active_self_frames_do_not_hit_finalized_block_cache() {
+    let renderer = CaptionRenderer::new().unwrap();
     let runtime = OverlayRuntime::new(OverlayPresentationSnapshot {
         revision: 1,
         calibration: OverlayPresentationCalibration::default(),

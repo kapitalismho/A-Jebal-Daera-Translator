@@ -461,7 +461,6 @@ impl RenderedFrame {
 enum TextureHandle {
     #[cfg(windows)]
     D3D11(ID3D11Texture2D),
-    #[cfg(not(windows))]
     Test(TestTextureHandle),
 }
 
@@ -470,7 +469,6 @@ impl TextureHandle {
         match self {
             #[cfg(windows)]
             Self::D3D11(texture) => texture.as_raw(),
-            #[cfg(not(windows))]
             Self::Test(texture) => texture.as_ptr(),
         }
     }
@@ -479,17 +477,16 @@ impl TextureHandle {
     fn d3d11_texture(&self) -> Option<&ID3D11Texture2D> {
         match self {
             Self::D3D11(texture) => Some(texture),
+            Self::Test(_) => None,
         }
     }
 }
 
-#[cfg(not(windows))]
 #[derive(Debug)]
 struct TestTextureHandle {
     marker: Box<u8>,
 }
 
-#[cfg(not(windows))]
 impl TestTextureHandle {
     fn new() -> Self {
         Self {
@@ -505,7 +502,6 @@ impl TestTextureHandle {
 enum RenderBackend {
     #[cfg(windows)]
     Windows(WindowsCaptionRenderer),
-    #[cfg(not(windows))]
     Test(TestCaptionRenderer),
 }
 
@@ -527,15 +523,7 @@ impl RenderBackend {
     }
 
     fn new_test() -> Result<Self, CaptionRenderError> {
-        #[cfg(windows)]
-        {
-            return WindowsCaptionRenderer::new(None).map(Self::Windows);
-        }
-
-        #[cfg(not(windows))]
-        {
-            Ok(Self::Test(TestCaptionRenderer::default()))
-        }
+        Ok(Self::Test(TestCaptionRenderer::default()))
     }
 
     fn render(
@@ -552,7 +540,6 @@ impl RenderBackend {
             Self::Windows(renderer) => {
                 renderer.render(policy, presentation, blocks, width, height, debug_overlay)
             }
-            #[cfg(not(windows))]
             Self::Test(renderer) => {
                 let _ = presentation;
                 let layout =
@@ -566,7 +553,6 @@ impl RenderBackend {
         match self {
             #[cfg(windows)]
             Self::Windows(renderer) => renderer.presentation_backend,
-            #[cfg(not(windows))]
             Self::Test(_) => PresentationBackend::Test,
         }
     }
@@ -575,7 +561,6 @@ impl RenderBackend {
         match self {
             #[cfg(windows)]
             Self::Windows(renderer) => renderer.adapter_identity,
-            #[cfg(not(windows))]
             Self::Test(_) => AdapterIdentity::Test,
         }
     }
@@ -587,21 +572,17 @@ impl RenderBackend {
         match self {
             #[cfg(windows)]
             Self::Windows(renderer) => renderer.prepare_frame_for_submission(cancellation).await,
-            #[cfg(not(windows))]
             Self::Test(_) if cancellation.is_cancelled() => ReadinessOutcome::Cancelled,
-            #[cfg(not(windows))]
             Self::Test(_) => ReadinessOutcome::Ready,
         }
     }
 }
 
-#[cfg(not(windows))]
 #[derive(Default)]
 struct TestCaptionRenderer {
     previous_layout: Option<ResolvedFrameLayout>,
 }
 
-#[cfg(not(windows))]
 impl TestCaptionRenderer {
     fn render(
         &mut self,
@@ -630,7 +611,6 @@ impl TestCaptionRenderer {
         })
     }
 }
-
 #[cfg(windows)]
 struct WindowsCaptionRenderer {
     d2d_factory: ID2D1Factory1,
@@ -2668,7 +2648,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn line_cache_key_and_text_format_key_share_resolved_style_identity() {
+    fn windows_graphics_line_cache_key_and_text_format_key_share_resolved_style_identity() {
         let renderer = super::WindowsCaptionRenderer::new(None)
             .expect("Windows caption renderer should initialize for style-key test");
         let policy = CaptionLayoutPolicy::default();
@@ -2701,7 +2681,8 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn line_text_format_cache_key_uses_measured_line_style_without_reresolving_text() {
+    fn windows_graphics_line_text_format_cache_key_uses_measured_line_style_without_reresolving_text(
+    ) {
         let renderer = super::WindowsCaptionRenderer::new(None)
             .expect("Windows caption renderer should initialize for style-key test");
         let policy = CaptionLayoutPolicy::default();

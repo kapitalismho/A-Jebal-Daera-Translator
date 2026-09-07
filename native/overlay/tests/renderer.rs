@@ -4,11 +4,12 @@ use puripuly_heart_overlay::renderer::LineRole;
 #[cfg(windows)]
 use puripuly_heart_overlay::WindowsBundledFontCollection;
 use puripuly_heart_overlay::{
-    bundled_font_path_from_exe_dir, BlockBounds, BundledFaceId, CaptionBlock, CaptionBlockVariant,
-    CaptionChannel, CaptionDebugOverlay, CaptionLayoutPolicy, CaptionPresentation, CaptionRenderer,
-    DamageBand, FontFallbackReason, FontLanguageBucket, FontResolver, FontSource, FontWeight,
-    OverlayPlacementPolicy, OverlayPresentationBlock, OverlayPresentationBlockVariant,
-    OverlayPresentationCalibration, OverlayPresentationSnapshot, OverlayState,
+    bundled_font_path_from_exe_dir, AdapterIdentity, BlockBounds, BundledFaceId, CaptionBlock,
+    CaptionBlockVariant, CaptionChannel, CaptionDebugOverlay, CaptionLayoutPolicy,
+    CaptionPresentation, CaptionRenderer, DamageBand, FontFallbackReason, FontLanguageBucket,
+    FontResolver, FontSource, FontWeight, OverlayPlacementPolicy, OverlayPresentationBlock,
+    OverlayPresentationBlockVariant, OverlayPresentationCalibration, OverlayPresentationSnapshot,
+    OverlayState, PresentationBackend, ReadinessCancellation, ReadinessOutcome,
 };
 fn assert_close(actual: f32, expected: f32) {
     assert!(
@@ -378,7 +379,7 @@ fn renderer_runtime_bundled_font_path_uses_packaged_app_data_fonts_directory() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_loads_committed_ttc_as_bundled_collection() {
+fn windows_graphics_loads_committed_ttc_as_bundled_collection() {
     let font_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("..")
         .join("..")
@@ -1559,8 +1560,8 @@ fn renderer_presentation_text_scale_changes_block_bounds_height() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_returns_a_renderable_d3d11_texture_result() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_returns_a_renderable_d3d11_texture_result() {
+    let renderer = CaptionRenderer::new().unwrap();
     let frame = renderer.render_blocks(vec![test_block("hello")]).unwrap();
 
     assert!(frame.texture_ptr().is_some());
@@ -1594,8 +1595,8 @@ fn renderer_windows_public_layout_api_uses_fallback_measurement_for_mixed_script
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_startup_warmup_reports_attempts_without_populating_visual_caches() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_startup_warmup_reports_attempts_without_populating_visual_caches() {
+    let renderer = CaptionRenderer::new().unwrap();
     let frame = renderer.render_empty_frame().unwrap();
     let diagnostics = frame.diagnostics();
 
@@ -1609,8 +1610,8 @@ fn renderer_windows_startup_warmup_reports_attempts_without_populating_visual_ca
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_pipeline_reports_directwrite_layout_for_mixed_script_frame() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_pipeline_reports_directwrite_layout_for_mixed_script_frame() {
+    let renderer = CaptionRenderer::new().unwrap();
     let frame = renderer
         .render_blocks(vec![CaptionBlock::new(
             "mix",
@@ -1628,8 +1629,8 @@ fn renderer_windows_pipeline_reports_directwrite_layout_for_mixed_script_frame()
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_first_active_self_frame_after_empty_frame_is_renderable() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_first_active_self_frame_after_empty_frame_is_renderable() {
+    let renderer = CaptionRenderer::new().unwrap();
     let empty = renderer.render_empty_frame().unwrap();
     let active = CaptionBlock::new("self:active", "live self preview")
         .with_variant(CaptionBlockVariant::ActiveSelf)
@@ -1649,8 +1650,8 @@ fn renderer_windows_first_active_self_frame_after_empty_frame_is_renderable() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_first_finalized_bilingual_frame_after_empty_frame_is_renderable() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_first_finalized_bilingual_frame_after_empty_frame_is_renderable() {
+    let renderer = CaptionRenderer::new().unwrap();
     let empty = renderer.render_empty_frame().unwrap();
     let finalized = bilingual_block("self:1", "hello there", "secondary line", true)
         .with_channel(CaptionChannel::SelfChannel);
@@ -1668,8 +1669,8 @@ fn renderer_windows_first_finalized_bilingual_frame_after_empty_frame_is_rendera
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_secondary_only_finalized_peer_frame_is_renderable() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_secondary_only_finalized_peer_frame_is_renderable() {
+    let renderer = CaptionRenderer::new().unwrap();
     let source_only_peer = CaptionBlock::new("peer:source-only", "")
         .with_channel(CaptionChannel::PeerChannel)
         .with_variant(CaptionBlockVariant::Finalized)
@@ -1691,8 +1692,8 @@ fn renderer_windows_secondary_only_finalized_peer_frame_is_renderable() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_debug_overlay_frame_is_renderable() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_debug_overlay_frame_is_renderable() {
+    let renderer = CaptionRenderer::new().unwrap();
     let frame = renderer
         .render_blocks_with_debug_overlay(
             vec![test_block("hello")],
@@ -1712,8 +1713,8 @@ fn renderer_windows_debug_overlay_frame_is_renderable() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_clears_debug_overlay_band_when_overlay_is_removed() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_clears_debug_overlay_band_when_overlay_is_removed() {
+    let renderer = CaptionRenderer::new().unwrap();
     let block = test_block("hello");
 
     let first = renderer
@@ -1733,8 +1734,8 @@ fn renderer_windows_clears_debug_overlay_band_when_overlay_is_removed() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_second_render_hits_layout_and_block_caches() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_second_render_hits_layout_and_block_caches() {
+    let renderer = CaptionRenderer::new().unwrap();
     let block = bilingual_block("self:1", "hello there", "secondary line", true)
         .with_channel(CaptionChannel::SelfChannel);
 
@@ -1754,8 +1755,8 @@ fn renderer_windows_second_render_hits_layout_and_block_caches() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_text_format_cache_reports_hits_for_same_bucket_new_line_visual() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_text_format_cache_reports_hits_for_same_bucket_new_line_visual() {
+    let renderer = CaptionRenderer::new().unwrap();
     let first = CaptionBlock::new("self:active", "live preview one")
         .with_variant(CaptionBlockVariant::ActiveSelf)
         .with_channel(CaptionChannel::SelfChannel);
@@ -1773,8 +1774,8 @@ fn renderer_windows_text_format_cache_reports_hits_for_same_bucket_new_line_visu
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_draws_general_text_with_explicit_non_default_locale() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_draws_general_text_with_explicit_non_default_locale() {
+    let renderer = CaptionRenderer::new().unwrap();
     let frame = renderer
         .render_blocks(vec![
             CaptionBlock::new("fr", "bonjour tout le monde").with_primary_language("fr-CA")
@@ -1787,8 +1788,8 @@ fn renderer_windows_draws_general_text_with_explicit_non_default_locale() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_reuses_finalized_block_cache_across_animation_states() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_reuses_finalized_block_cache_across_animation_states() {
+    let renderer = CaptionRenderer::new().unwrap();
     let stable = bilingual_block("self:1", "hello there", "secondary line", true)
         .with_channel(CaptionChannel::SelfChannel);
 
@@ -1806,8 +1807,8 @@ fn renderer_windows_reuses_finalized_block_cache_across_animation_states() {
 
 #[cfg(windows)]
 #[test]
-fn renderer_windows_secondary_translation_update_reuses_primary_line_cache_only() {
-    let renderer = CaptionRenderer::new_for_test().unwrap();
+fn windows_graphics_secondary_translation_update_reuses_primary_line_cache_only() {
+    let renderer = CaptionRenderer::new().unwrap();
     let primary_text =
         "this primary text should wrap into multiple lines so cached line visuals can be reused";
     let first = bilingual_block("self:1", primary_text, "secondary one", true)
@@ -1844,4 +1845,54 @@ fn renderer_runtime_backend_is_rejected_outside_windows() {
     assert!(error
         .to_string()
         .contains("Direct3D11 caption renderer is only available on Windows"));
+}
+
+#[cfg(windows)]
+#[tokio::test]
+async fn windows_graphics_real_readiness_reports_ready_and_honours_cancellation() {
+    let renderer = CaptionRenderer::new().unwrap();
+    assert!(renderer.presentation_backend() != PresentationBackend::Test);
+
+    let live_cancellation = ReadinessCancellation::default();
+    assert_eq!(
+        renderer
+            .prepare_frame_for_submission(&live_cancellation)
+            .await,
+        ReadinessOutcome::Ready
+    );
+
+    let cancelled = ReadinessCancellation::default();
+    cancelled.cancel();
+    assert_eq!(
+        renderer.prepare_frame_for_submission(&cancelled).await,
+        ReadinessOutcome::Cancelled
+    );
+}
+
+#[tokio::test]
+async fn renderer_test_backend_reports_test_identity_with_immediate_readiness() {
+    let renderer = CaptionRenderer::new_for_test().unwrap();
+
+    assert_eq!(renderer.presentation_backend(), PresentationBackend::Test);
+    assert_eq!(renderer.adapter_identity(), AdapterIdentity::Test);
+
+    let frame = renderer.render_blocks(vec![test_block("hello")]).unwrap();
+    assert!(frame.texture_ptr().is_some());
+    #[cfg(windows)]
+    assert!(frame.d3d11_texture().is_none());
+
+    let live_cancellation = ReadinessCancellation::default();
+    assert_eq!(
+        renderer
+            .prepare_frame_for_submission(&live_cancellation)
+            .await,
+        ReadinessOutcome::Ready
+    );
+
+    let cancelled = ReadinessCancellation::default();
+    cancelled.cancel();
+    assert_eq!(
+        renderer.prepare_frame_for_submission(&cancelled).await,
+        ReadinessOutcome::Cancelled
+    );
 }

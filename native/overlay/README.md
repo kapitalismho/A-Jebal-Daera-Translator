@@ -16,7 +16,8 @@ Run commands from the repository root.
 ## Verification
 
 ```powershell
-cargo test --manifest-path native/overlay/Cargo.toml -q
+cargo test --locked --manifest-path native/overlay/Cargo.toml -- --skip windows_graphics_
+cargo test --locked --manifest-path native/overlay/Cargo.toml windows_graphics_ -- --test-threads=1
 cargo build --manifest-path native/overlay/Cargo.toml --locked --release --bin PuriPulyHeartOverlay --target-dir target
 
 New-Item -ItemType Directory -Force -Path build/overlay | Out-Null
