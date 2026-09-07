@@ -2795,8 +2795,8 @@ def test_peer_rolling_auto_keeps_source_mode_and_omits_deepgram() -> None:
 
     assert resolved.source_mode == "auto"
     assert [definition.name.value for definition in backend.providers] == [
-        "gemini_transcribe",
         "elevenlabs_scribe",
+        "gemini_transcribe",
     ]
 
 
@@ -2949,6 +2949,29 @@ def test_rolling_backend_accepts_list_members_in_provider_options() -> None:
     assert [definition.name.value for definition in backend.providers] == [
         "elevenlabs_scribe",
         "deepgram",
+    ]
+
+
+def test_rolling_auto_with_deepgram_only_falls_back_to_first_priority() -> None:
+    from puripuly_heart.core.storage.secrets import InMemorySecretStore
+
+    resolved = replace(
+        _resolved_stt_config(
+            provider="rolling_free",
+            credential_reference=None,
+            provider_options={
+                "mode": "rolling_free",
+                "members": ["deepgram"],
+            },
+        ),
+        source_mode="auto",
+    )
+    backend = create_stt_backend_from_resolved_config(
+        resolved,
+        secrets=InMemorySecretStore(),
+    )
+    assert [definition.name.value for definition in backend.providers] == [
+        "elevenlabs_scribe",
     ]
 
 

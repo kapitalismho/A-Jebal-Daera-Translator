@@ -6941,13 +6941,13 @@ def test_cloud_free_tier_modal_is_single_column_multi_select(
     assert captured["kwargs"]["show_description"] is False
     assert captured["kwargs"]["multi_select"] is True
     assert [option.value for option in captured["options"]] == [
-        STTProviderName.GEMINI_TRANSCRIBE.value,
         STTProviderName.ELEVENLABS_SCRIBE.value,
+        STTProviderName.GEMINI_TRANSCRIBE.value,
         STTProviderName.DEEPGRAM.value,
     ]
     assert [option.label for option in captured["options"]] == [
-        t("provider.gemini_transcribe"),
         t("provider.elevenlabs_scribe"),
+        t("provider.gemini_transcribe"),
         t("provider.deepgram"),
     ]
     assert captured["current"] == (STTProviderName.GEMINI_TRANSCRIBE.value,)

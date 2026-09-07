@@ -86,7 +86,7 @@
 | 10 | Gemini Transcribe (Live) |
 | 11 | ElevenLabs Scribe |
 | 12 | Qwen Audio 3.0 ASR Flash Streaming |
-| 13 | Free cloud ASR auto-selection (Gemini → ElevenLabs → Deepgram) |
+| 13 | Free cloud ASR auto-selection (ElevenLabs Scribe → Gemini → Deepgram) |
 
 - Used by: `PuriPuly_SelfASR`, `PuriPuly_PeerASR`
 
