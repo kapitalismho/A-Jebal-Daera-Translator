@@ -60,11 +60,20 @@ ProviderRuntimeSignatureCacheProvider = Callable[
 ProviderRuntimeSignatureBuilder = Callable[[object], object]
 ProviderRuntimePeerSignatureBuilder = Callable[[object, object | None], object]
 ProviderRuntimeGpuRestartDecision = Callable[[object, object], bool]
+ProviderRuntimeSelfConvergenceProvider = Callable[[object], bool | None]
 LlmProviderReplace = Callable[[object | None], Awaitable[object | None]]
 LlmProviderFactory = Callable[[object], object | Awaitable[object | None] | None]
 LlmProviderRebuildContextProvider = Callable[[], "LlmProviderRebuildContext | None"]
 LlmProviderAvailabilitySink = Callable[[bool], None]
 LlmProviderMessageSink = Callable[[str], None]
+
+
+def _unknown_self_runtime_convergence(_settings: object) -> bool | None:
+    return None
+
+
+class ProviderRuntimeConvergenceError(RuntimeError):
+    code = "stt_runtime_apply_not_converged"
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,6 +130,9 @@ class ProviderRuntimeOwner:
     peer_signature_builder: ProviderRuntimePeerSignatureBuilder
     llm_signature_builder: ProviderRuntimeSignatureBuilder
     gpu_restart_decision: ProviderRuntimeGpuRestartDecision
+    self_runtime_convergence: ProviderRuntimeSelfConvergenceProvider = (
+        _unknown_self_runtime_convergence
+    )
 
     def build_plan(
         self,
@@ -150,7 +162,9 @@ class ProviderRuntimeOwner:
             ),
             should_refresh_peer=(peer_signature is None or next_peer_signature != peer_signature),
             should_refresh_self_stt=(
-                self_signature is None or next_self_signature != self_signature
+                self_signature is None
+                or next_self_signature != self_signature
+                or self.self_runtime_convergence(next_settings) is False
             ),
             coordinated_gpu_restart=(
                 current_settings is not None
@@ -168,6 +182,7 @@ class ProviderRuntimeOwner:
             await self.rebuild_llm()
         if plan.coordinated_gpu_restart:
             await self.recover_gpu(settings, plan)
+            self._require_self_runtime_convergence(settings)
             self.signature_sink(settings)
             if plan.should_rebuild_llm and not self.state_provider(settings).llm_available:
                 self.llm_retry_sink()
@@ -176,9 +191,16 @@ class ProviderRuntimeOwner:
             await self.refresh_peer()
         if plan.should_refresh_self_stt:
             await self.refresh_self_stt()
+        self._require_self_runtime_convergence(settings)
         self.signature_sink(settings)
         if plan.should_rebuild_llm and not self.state_provider(settings).llm_available:
             self.llm_retry_sink()
+
+    def _require_self_runtime_convergence(self, settings: object) -> None:
+        if self.self_runtime_convergence(settings) is False:
+            raise ProviderRuntimeConvergenceError(
+                "Self STT runtime did not converge to requested settings",
+            )
 
     def unavailable_result(
         self,
@@ -431,7 +453,7 @@ class ProviderRuntimeApplyAdapter:
         _ = request
         try:
             await self.owner.apply(self.settings, self.plan)
-        except Exception:
+        except Exception as exc:
             return RuntimeApplyResult(
                 status=RUNTIME_APPLY_STATUS_FAILED,
                 message=UserMessageRef(
@@ -442,7 +464,11 @@ class ProviderRuntimeApplyAdapter:
                 diagnostics=_settings_mutation_diagnostics(
                     component="gui_controller",
                     operation=self.operation,
-                    code="provider_runtime_apply_exception",
+                    code=(
+                        getattr(exc, "code", None)
+                        if isinstance(getattr(exc, "code", None), str)
+                        else "provider_runtime_apply_exception"
+                    ),
                     category=DIAGNOSTIC_CATEGORY_LIFECYCLE,
                     surface=self.surface,
                 ),
@@ -574,7 +600,9 @@ __all__ = [
     "OverlayOscOutputRuntimeApplyAdapter",
     "ProviderRuntimeApplyAdapter",
     "ProviderRuntimeApplyPlan",
+    "ProviderRuntimeConvergenceError",
     "ProviderRuntimeOwner",
+    "ProviderRuntimeSelfConvergenceProvider",
     "ProviderRuntimeState",
     "SettingsRuntimeState",
     "SttLanguageAudioRuntimeApplyAdapter",

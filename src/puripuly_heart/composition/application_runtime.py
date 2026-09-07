@@ -419,6 +419,7 @@ def compose_application_runtime(
     audio_diagnostics: AudioDiagnosticsApplicationOwner | None = None
     self_application: SelfCaptureApplicationOwner | None = None
     microphone: MicrophoneTestRuntime | None = None
+    last_self_capture_lifecycle: str | None = None
     vrc_mic_sync: OscControlIntegrationOwner | None = None
     manual_typing: ManualTypingOwner | None = None
     clipboard: ClipboardAutoTranslationOwner | None = None
@@ -976,7 +977,32 @@ def compose_application_runtime(
         if vrc_mic_sync is not None:
             vrc_mic_sync.publish_delta()
 
-    def on_self_capture_state(_snapshot: SelfCaptureSessionSnapshot) -> None:
+    def on_self_capture_state(snapshot: SelfCaptureSessionSnapshot) -> None:
+        nonlocal last_self_capture_lifecycle
+        provider_status = getattr(snapshot.provider_status, "value", snapshot.provider_status)
+        capture_state = getattr(snapshot.state, "value", snapshot.state)
+        if (
+            snapshot.failure_reason is not None
+            or provider_status == "failed"
+            or capture_state == "faulted"
+        ):
+            lifecycle = "failed"
+        elif provider_status == "pending":
+            lifecycle = "pending"
+        elif capture_state in {"admission_pending", "starting"}:
+            lifecycle = "preparing"
+        elif provider_status == "ready" and snapshot.desired_active and snapshot.effective_active:
+            lifecycle = "committed"
+        elif provider_status == "releasing" or capture_state == "stopping":
+            lifecycle = "stopping"
+        else:
+            lifecycle = "idle"
+        if lifecycle != last_self_capture_lifecycle:
+            log_basic(
+                "[STT][Runtime] self capture "
+                f"{lifecycle}: provider={snapshot.provider_id or 'none'}"
+            )
+            last_self_capture_lifecycle = lifecycle
         require_local_asr().adapters.notice.sync()
         publish_osc_state_from_runtime()
 

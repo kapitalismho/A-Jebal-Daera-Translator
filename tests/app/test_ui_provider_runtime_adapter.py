@@ -79,8 +79,8 @@ async def test_rolling_member_secret_change_rebinds_without_provider_apply() -> 
     apply = AsyncMock(return_value=True)
     rebound: list[tuple[str, str]] = []
     adapter = _adapter(settings, change_secret=change_secret, apply=apply)
-    adapter.provider_application.rebind_rolling_stt_secret = (
-        lambda key, value: rebound.append((key, value))
+    adapter.provider_application.rebind_rolling_stt_secret = lambda key, value: rebound.append(
+        (key, value)
     )
 
     assert await adapter.persist_provider_secret_change(
@@ -99,14 +99,17 @@ async def test_failed_secret_change_does_not_rebind_rolling() -> None:
     apply = AsyncMock(return_value=True)
     rebound: list[tuple[str, str]] = []
     adapter = _adapter(settings, change_secret=change_secret, apply=apply)
-    adapter.provider_application.rebind_rolling_stt_secret = (
-        lambda key, value: rebound.append((key, value))
+    adapter.provider_application.rebind_rolling_stt_secret = lambda key, value: rebound.append(
+        (key, value)
     )
 
-    assert await adapter.persist_provider_secret_change(
-        "gemini_transcribe_api_key",
-        "rotated-key",
-    ) is False
+    assert (
+        await adapter.persist_provider_secret_change(
+            "gemini_transcribe_api_key",
+            "rotated-key",
+        )
+        is False
+    )
 
     assert rebound == []
     apply.assert_not_awaited()

@@ -7,6 +7,7 @@ from tests.helpers.paths import REPO_ROOT, SOURCE_ROOT
 
 TEST_ROOT = REPO_ROOT / "tests"
 TRANSLATION_CONSUMERS = {
+    "app/test_stt_provider_apply_vertical.py",
     "core/test_audio_vad_loop.py",
     "core/test_channel_runtime.py",
     "core/test_context_memory.py",

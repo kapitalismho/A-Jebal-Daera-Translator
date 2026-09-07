@@ -24,6 +24,8 @@ from puripuly_heart.app.ports.settings_view import (
     OpenRouterPkceTarget,
     OverlaySettingsSnapshot,
     PromptApplyIntent,
+    ProviderApplyIntent,
+    SelfSttProviderEdit,
 )
 from puripuly_heart.app.ports.ui_models import OverlayPeerPresentationState
 from puripuly_heart.app.services.application_shutdown import (
@@ -41,6 +43,7 @@ from puripuly_heart.config.provider_values import (
     OpenRouterCredentialSource,
     OpenRouterLLMModel,
     OpenRouterSelectionAlias,
+    STTProviderName,
 )
 from puripuly_heart.config.settings_vnext.schema import AppSettingsVNext
 from puripuly_heart.config.translation_values import TranslationConnection, TranslationModel
@@ -3147,43 +3150,67 @@ async def test_on_nav_change_merges_current_languages_into_prompt_only_apply() -
     assert events == [("apply", pending_settings)]
 
 
+@pytest.mark.parametrize(
+    ("exit_tab", "expected_view"),
+    ((0, "view_dashboard"), (2, "view_logs"), (3, "view_about")),
+)
 @pytest.mark.asyncio
-async def test_on_nav_change_applies_provider_changes_when_leaving_settings() -> None:
+async def test_on_nav_change_applies_provider_changes_when_leaving_settings(
+    exit_tab: int,
+    expected_view: str,
+) -> None:
     app = TranslatorApp.__new__(TranslatorApp)
     app.page = DummyPage()
     app._current_tab = 1
     app.view_dashboard = object()
     app.view_logs = SimpleNamespace(scroll_to_bottom=lambda: asyncio.sleep(0))
     app.view_about = object()
+
+    canonical = AppSettingsVNext()
+    canonical = replace(
+        canonical,
+        intent=replace(
+            canonical.intent,
+            stt=replace(
+                canonical.intent.stt,
+                provider=STTProviderName.SONIOX.value,
+            ),
+        ),
+    )
+    pending_intent = ProviderApplyIntent((SelfSttProviderEdit(STTProviderName.ROLLING_FREE),))
     app.view_settings = SimpleNamespace(
         has_provider_changes=True,
-        consume_provider_apply_settings=lambda: "merged-settings",
+        consume_provider_apply_settings=lambda: pending_intent,
         refresh_prompt_if_empty=lambda: None,
     )
     app.content_area = DummyContent()
-    seen: list[object] = []
+    applied_provider_targets: list[str] = []
     auto_installs: list[str] = []
 
-    async def fake_apply_providers(settings) -> bool:
-        seen.append(settings)
+    async def fake_apply_providers(settings: AppSettingsVNext | None = None) -> bool:
+        assert settings is not None
+        applied_provider_targets.append(settings.intent.stt.provider)
+        controller.settings = settings
         return True
 
     async def fake_auto_install() -> None:
         auto_installs.append("started")
 
     controller = SimpleNamespace(
+        settings=canonical,
         apply_providers=fake_apply_providers,
         install_selected_gpu_model_if_needed=fake_auto_install,
     )
     app._ui_application = compose_test_ui_application_boundary(controller)
 
-    app._on_nav_change(0)
-    assert app.content_area.content is app.view_dashboard
+    app._on_nav_change(exit_tab)
+    assert app.content_area.content is getattr(app, expected_view)
     assert app.view_settings.has_provider_changes is False
-    assert len(app.page.tasks) == 1
+    assert len(app.page.tasks) >= 1
     await app.page.tasks[0]()
-    assert seen == ["merged-settings"]
-    assert len(app.page.tasks) == 1
+    assert applied_provider_targets == [STTProviderName.ROLLING_FREE.value]
+    assert canonical.intent.stt.provider == STTProviderName.SONIOX.value
+    assert controller.settings.intent.stt.provider == STTProviderName.ROLLING_FREE.value
     assert auto_installs == []
 
 

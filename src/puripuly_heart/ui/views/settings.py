@@ -4609,7 +4609,7 @@ class SettingsView(ft.Column):
             return
         old_provider = current_settings.stt_provider.value
         self._emit_runtime_basic(
-            f"[Settings] STT provider changed: {old_provider} -> {selected.value}"
+            f"[Settings] STT provider draft changed: {old_provider} -> {selected.value}"
         )
         draft = self._ensure_provider_settings_draft()
         self._provider_draft = replace(
