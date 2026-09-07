@@ -725,6 +725,7 @@ def _make_llm_selection_view(
         "DEFAULT PROMPT",
     )
     view._update_peer_provider_visibility = lambda: None
+    view._sync_cloud_free_tier_card = lambda settings=None: None
     return view
 
 
