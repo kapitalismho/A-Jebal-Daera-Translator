@@ -9,10 +9,6 @@ from uuid import uuid4
 
 import numpy as np
 import pytest
-from puripuly_heart.app.services.settings_transaction_result import SettingsTransactionResultOwner
-from puripuly_heart.core.local_asr_provider_runtime import (
-    LocalASRProviderRuntimeCallbacks,
-)
 
 from puripuly_heart.app.adapters.self_capture.self_capture_provider import (
     SelfCaptureProviderAdapter,
@@ -31,6 +27,9 @@ from puripuly_heart.app.services.provider.provider_settings import ProviderAppli
 from puripuly_heart.app.services.settings.settings_application import (
     settings_view_surface_snapshots,
 )
+from puripuly_heart.app.services.settings.settings_transaction_result import (
+    SettingsTransactionResultOwner,
+)
 from puripuly_heart.app.services.ui_application import UiApplicationBoundary
 from puripuly_heart.app.wiring.wiring_provider_runtime import compose_provider_runtime
 from puripuly_heart.app.wiring.wiring_stt_factory import (
@@ -40,6 +39,9 @@ from puripuly_heart.app.wiring.wiring_stt_factory import (
 from puripuly_heart.config.provider_values import STTProviderName
 from puripuly_heart.config.settings_vnext.schema import AppSettingsVNext
 from puripuly_heart.core.clock import SystemClock
+from puripuly_heart.core.local_asr.local_asr_provider_runtime import (
+    LocalASRProviderRuntimeCallbacks,
+)
 from puripuly_heart.core.messages import (
     TRANSACTION_STATUS_SETTINGS_COMMIT_SUCCESS_RUNTIME_DEGRADED,
 )
@@ -452,10 +454,12 @@ async def test_provider_apply_intent_full_vertical_rolling_gemini_soniox_reverse
     old_transport = harness_factory.provider_factory.backends[-1]
     assert isinstance(old_transport, _TransportBackend)
     apply_rolling = asyncio.create_task(boundary.apply_provider_intent(rolling_intent))
-    for _ in range(1000):
-        await asyncio.sleep(0.001)
-        if runtime.snapshot.channel_for("self").pending_handoff or apply_rolling.done():
-            break
+
+    async def _wait_until_handoff_pending_or_apply_done() -> None:
+        while not (runtime.snapshot.channel_for("self").pending_handoff or apply_rolling.done()):
+            await asyncio.sleep(0)
+
+    await asyncio.wait_for(_wait_until_handoff_pending_or_apply_done(), timeout=2.0)
     assert not apply_rolling.done()
     assert runtime.snapshot.channel_for("self").pending_handoff is True
     assert runtime.snapshot.channel_for("self").provider_id == STTProviderName.SONIOX.value

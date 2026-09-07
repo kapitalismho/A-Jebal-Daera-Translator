@@ -4109,6 +4109,24 @@ async def test_desktop_overlay_post_start_paths_update_retained_controls_in_plac
         await window.close()
 
 
+async def _await_bounds_sample_completion(
+    window: desktop_overlay.FletDesktopRendererWindow,
+    app: FakeFletApp,
+    *,
+    require_sampled: bool = True,
+) -> None:
+    outcomes = await asyncio.gather(*app.page.tasks, return_exceptions=True)
+    for outcome in outcomes:
+        if isinstance(outcome, BaseException) and not isinstance(outcome, asyncio.CancelledError):
+            raise outcome
+    bounds_task = window._bounds_sample_task
+    if bounds_task is None:
+        if require_sampled:
+            raise AssertionError("bounds sample task was never scheduled")
+        return
+    await asyncio.wait_for(bounds_task, timeout=1.0)
+
+
 @pytest.mark.asyncio
 async def test_desktop_overlay_window_bounds_events_debounce_zero_samples_and_programmatic_echoes() -> (
     None
@@ -4131,7 +4149,7 @@ async def test_desktop_overlay_window_bounds_events_debounce_zero_samples_and_pr
         app.page.window.width = 0
         app.page.window.height = 0
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.MOVE))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert sink.events == []
 
         app.page.window.left = 100
@@ -4140,7 +4158,7 @@ async def test_desktop_overlay_window_bounds_events_debounce_zero_samples_and_pr
         app.page.window.height = 240
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.MOVE))
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.MOVED))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert sink.events == [
             {
                 "type": "overlay_event",
@@ -4167,7 +4185,7 @@ async def test_desktop_overlay_window_bounds_events_debounce_zero_samples_and_pr
             }
         )
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.RESIZED))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert len(sink.events) == 1
 
         app.page.window.left = 300
@@ -4184,7 +4202,7 @@ async def test_desktop_overlay_window_bounds_events_debounce_zero_samples_and_pr
                 "height": 330,
             }
         )
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert len(sink.events) == 1
 
         app.page.window.left = 360
@@ -4192,7 +4210,7 @@ async def test_desktop_overlay_window_bounds_events_debounce_zero_samples_and_pr
         app.page.window.width = 1280
         app.page.window.height = 330
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.RESIZE))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert sink.events[-1]["payload"] == {
             "event": "window_bounds_changed",
             "source": "user",
@@ -4229,7 +4247,9 @@ async def test_desktop_overlay_shutdown_cancels_queued_bounds_callback_without_e
     await window.close()
     if app.page.tasks:
         await asyncio.gather(*app.page.tasks, return_exceptions=True)
-    await asyncio.sleep(0.03)
+    bounds_sample_task = window._bounds_sample_task
+    if bounds_sample_task is not None:
+        await asyncio.gather(bounds_sample_task, return_exceptions=True)
 
     assert sink.events == []
     assert app.page.window.on_event is None
@@ -4262,7 +4282,7 @@ async def test_desktop_overlay_bounds_programmatic_echo_gate_is_generation_based
         )
 
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.RESIZED))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert sink.events == []
 
         await window.dispatch_runtime_control(
@@ -4276,7 +4296,7 @@ async def test_desktop_overlay_bounds_programmatic_echo_gate_is_generation_based
         )
         await asyncio.sleep(0.30)
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.RESIZED))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
         assert sink.events == []
 
         app.page.window.left = 360
@@ -4284,7 +4304,7 @@ async def test_desktop_overlay_bounds_programmatic_echo_gate_is_generation_based
         app.page.window.width = 1280
         app.page.window.height = 330
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.MOVED))
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app)
 
         assert sink.events == [
             {
@@ -4359,7 +4379,7 @@ async def test_desktop_overlay_drops_bounds_event_while_runtime_locked_after_unl
         app.page.window.height = 320
         app.page.window.on_event(FakeWindowEvent(ft.WindowEventType.MOVED))
         await window.dispatch_runtime_control({"command": "set_interaction_mode", "mode": "edit"})
-        await asyncio.sleep(0.03)
+        await _await_bounds_sample_completion(window, app, require_sampled=False)
 
         assert all(
             event.get("payload", {}).get("event") != "window_bounds_changed"
@@ -4613,10 +4633,12 @@ async def test_desktop_overlay_snapshot_batching_matches_sequential_width_refere
         await renderer.enqueue_snapshot(final_short)
         run_task = asyncio.create_task(renderer.run())
         await _next_bridge_event(bridge, expected_type="overlay_ready")
-        for _ in range(20):
-            if _page_text_values(app.page) == {"응"}:
-                break
-            await asyncio.sleep(0.01)
+
+        async def _wait_until_batched_text_rendered() -> None:
+            while _page_text_values(app.page) != {"응"}:
+                await asyncio.sleep(0)
+
+        await asyncio.wait_for(_wait_until_batched_text_rendered(), timeout=1.0)
         assert _page_text_values(app.page) == {"응"}
         assert _caption_card_controls(app.page)[0].width == pytest.approx(sequential_width)
         await bridge.broadcast_shutdown()
@@ -4649,11 +4671,16 @@ async def test_desktop_overlay_runtime_control_barrier_continues_through_real_qu
         await renderer.enqueue_snapshot(_scheduled_snapshot(2, "before control"))
         await renderer.enqueue_runtime_control({"command": "set_interaction_mode", "mode": "edit"})
         await renderer.enqueue_snapshot(_scheduled_snapshot(3, "after control"))
-        await asyncio.wait_for(window.rendered_snapshot.wait(), timeout=1.0)
-        for _ in range(20):
-            if window.execution == ["snapshot:2", "control:set_interaction_mode", "snapshot:3"]:
-                break
-            await asyncio.sleep(0.01)
+
+        async def _wait_until_barrier_execution_ordered() -> None:
+            while window.execution != [
+                "snapshot:2",
+                "control:set_interaction_mode",
+                "snapshot:3",
+            ]:
+                await asyncio.sleep(0)
+
+        await asyncio.wait_for(_wait_until_barrier_execution_ordered(), timeout=1.0)
         assert window.execution == ["snapshot:2", "control:set_interaction_mode", "snapshot:3"]
         await bridge.broadcast_shutdown()
         assert await asyncio.wait_for(run_task, timeout=1.0) == 0
@@ -4727,8 +4754,6 @@ async def test_desktop_overlay_renderer_diagnostic_local_port_waits_for_delayed_
                 break
         assert envelope is not None
         assert envelope.record["event_type"] == "render_commit"
-        assert run_task.done() is False
-        await asyncio.sleep(0.02)
         assert run_task.done() is False
         assert port.acknowledge_render_commit(2) is True
         acknowledgement = await asyncio.wait_for(port.next_event(), timeout=1.0)
@@ -5369,7 +5394,12 @@ async def test_desktop_overlay_later_malformed_snapshot_is_ignored_and_controls_
         await bridge.broadcast_desktop_runtime_control(
             {"command": "set_interaction_mode", "mode": "edit"}
         )
-        await asyncio.sleep(0.05)
+
+        async def _wait_until_runtime_control_dispatched() -> None:
+            while len(window.runtime_controls) != 1:
+                await asyncio.sleep(0)
+
+        await asyncio.wait_for(_wait_until_runtime_control_dispatched(), timeout=1.0)
 
         assert [snapshot.revision for snapshot in window.snapshots] == [1]
         assert window.runtime_controls == [{"command": "set_interaction_mode", "mode": "edit"}]

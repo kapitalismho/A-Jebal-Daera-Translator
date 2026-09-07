@@ -370,7 +370,6 @@ async fn run_overlay_binary_with_scripted_bridge(
                     {
                         return;
                     }
-                    tokio::time::sleep(Duration::from_millis(50)).await;
                 }
             }
         }
@@ -405,6 +404,40 @@ async fn run_overlay_binary_with_scripted_bridge(
 }
 
 #[derive(Default)]
+struct SharedSubmitProgress {
+    submits: AtomicUsize,
+    text_submits: AtomicUsize,
+}
+
+async fn wait_for_test_progress(what: &str, mut observed: impl FnMut() -> bool) {
+    let settled = tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            if observed() {
+                break;
+            }
+            tokio::task::yield_now().await;
+        }
+    })
+    .await;
+    assert!(settled.is_ok(), "submit progress timeout what={what}");
+}
+async fn consume_overlay_ready(
+    what: &str,
+    ws: &mut tokio_tungstenite::WebSocketStream<tokio::net::TcpStream>,
+) {
+    let observed = tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            let message = ws.next().await.unwrap().unwrap();
+            if message.to_text().unwrap().contains("overlay_ready") {
+                break;
+            }
+        }
+    })
+    .await;
+    assert!(observed.is_ok(), "overlay ready timeout what={what}");
+}
+
+#[derive(Default)]
 struct RecordingSubmitter {
     calls: usize,
     spatial_reanchor_calls: usize,
@@ -416,6 +449,7 @@ struct RecordingSubmitter {
     last_visible: Option<bool>,
     fail_show: bool,
     fail_hide: bool,
+    progress: Option<Arc<SharedSubmitProgress>>,
 }
 
 impl RecordingSubmitter {
@@ -444,6 +478,12 @@ impl OverlayFrameSubmitter for RecordingSubmitter {
             "submit:text"
         };
         self.operations.push(operation);
+        if let Some(progress) = &self.progress {
+            progress.submits.fetch_add(1, Ordering::SeqCst);
+            if operation == "submit:text" {
+                progress.text_submits.fetch_add(1, Ordering::SeqCst);
+            }
+        }
         if self.fail {
             return Err(OpenVrError::Submit("submit failed".into()));
         }
@@ -860,7 +900,6 @@ async fn connect_test_bridge_with_followups(
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
     let (bridge, snapshot) = BridgeClient::connect(&manifest).await.unwrap();
-    tokio::time::sleep(Duration::from_millis(10)).await;
     (bridge, snapshot, server)
 }
 
@@ -1250,6 +1289,8 @@ async fn spatial_reanchor_is_deferred_until_latest_gpu_ready_frame_after_preempt
     let address = listener.local_addr().unwrap();
     let readiness_started = Arc::new(tokio::sync::Notify::new());
     let server_readiness_started = readiness_started.clone();
+    let submit_progress = Arc::new(SharedSubmitProgress::default());
+    let server_progress = submit_progress.clone();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
         let mut ws = accept_async(stream).await.unwrap();
@@ -1300,11 +1341,13 @@ async fn spatial_reanchor_is_deferred_until_latest_gpu_ready_frame_after_preempt
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        wait_for_test_progress("spatial-preemption-second-submit", || {
+            server_progress.submits.load(Ordering::SeqCst) >= 2
+        })
+        .await;
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -1315,6 +1358,7 @@ async fn spatial_reanchor_is_deferred_until_latest_gpu_ready_frame_after_preempt
     let logger = test_logger("spatial-preemption").await;
     let mut runtime = OverlayRuntime::new(snapshot);
     let mut submitter = RecordingSubmitter::default();
+    submitter.progress = Some(submit_progress);
 
     runtime
         .submit_initial_frame_message_aware(&renderer, &mut submitter, &mut bridge, &logger)
@@ -1342,6 +1386,8 @@ async fn spatial_reanchor_is_deferred_until_latest_gpu_ready_frame_after_preempt
 #[tokio::test]
 async fn event_loop_cancels_stale_readiness_submits_latest_then_handles_shutdown() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let submit_progress = Arc::new(SharedSubmitProgress::default());
+    let server_progress = submit_progress.clone();
     let address = listener.local_addr().unwrap();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
@@ -1371,18 +1417,17 @@ async fn event_loop_cancels_stale_readiness_submits_latest_then_handles_shutdown
             ))
             .await
             .unwrap();
-            if revision == 0 {
-                tokio::time::sleep(Duration::from_millis(10)).await;
-            }
         }
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        wait_for_test_progress("stale-readiness-latest-submit", || {
+            server_progress.submits.load(Ordering::SeqCst) >= 1
+        })
+        .await;
+        consume_overlay_ready("stale-readiness-latest-submit", &mut ws).await;
         ws.send(Message::Text(
             json!({"type": "shutdown"}).to_string().into(),
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -1392,6 +1437,7 @@ async fn event_loop_cancels_stale_readiness_submits_latest_then_handles_shutdown
     let logger = test_logger("readiness-shutdown-preemption").await;
     let mut runtime = OverlayRuntime::new(initial_snapshot);
     let mut submitter = RecordingSubmitter::default();
+    submitter.progress = Some(submit_progress);
 
     tokio::time::timeout(
         Duration::from_secs(1),
@@ -2937,6 +2983,7 @@ async fn run_production_presenter_trace_through_native_owner(trace_name: &str) -
             }
         }
         consume_submission_permit(&server_state, &server_trace_name, 0).await;
+        let mut expected_submits = 1;
         for (snapshot_index, (snapshot, expects_submission)) in snapshots
             .iter()
             .skip(1)
@@ -2953,8 +3000,24 @@ async fn run_production_presenter_trace_through_native_owner(trace_name: &str) -
             if *expects_submission {
                 consume_submission_permit(&server_state, &server_trace_name, snapshot_index + 1)
                     .await;
+                expected_submits += 1;
+                assert_eq!(
+                    server_state
+                        .operations
+                        .lock()
+                        .unwrap()
+                        .iter()
+                        .filter(|operation| operation.starts_with("submit"))
+                        .count(),
+                    expected_submits,
+                    "unexpected submission count trace={server_trace_name} snapshot_index={snapshot_index}"
+                );
             } else {
-                tokio::time::sleep(Duration::from_millis(20)).await;
+                tokio::task::yield_now().await;
+                assert!(
+                    server_state.submissions.try_acquire().is_err(),
+                    "unexpected submission trace={server_trace_name} snapshot_index={snapshot_index}"
+                );
             }
         }
         ws.send(Message::Text(
@@ -3440,12 +3503,12 @@ async fn production_owner_coalesces_retry_and_releases_resources_on_shutdown() {
         .await
         .unwrap();
         tokio::time::sleep(Duration::from_millis(500)).await;
+        consume_overlay_ready("production-owner-shutdown", &mut ws).await;
         ws.send(Message::Text(
             json!({"type": "shutdown"}).to_string().into(),
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(50)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -3496,13 +3559,26 @@ async fn diagnostic_profiles_execute_exact_delayed_physical_and_logical_attempts
     ] {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let address = listener.local_addr().unwrap();
+        let state = Arc::new(OwnedSubmitterState::default());
+        let server_state = state.clone();
         let server = tokio::spawn(async move {
             let (stream, _) = listener.accept().await.unwrap();
             let mut ws = accept_async(stream).await.unwrap();
             let _auth = ws.next().await.unwrap().unwrap();
             for (revision, text) in [(1, "one"), (2, "two")] {
                 if revision == 2 {
-                    tokio::time::sleep(Duration::from_millis(50)).await;
+                    wait_for_test_progress("diagnostic-first-submit", || {
+                        server_state
+                            .operations
+                            .lock()
+                            .unwrap()
+                            .iter()
+                            .filter(|operation| operation.starts_with("submit"))
+                            .count()
+                            >= 1
+                    })
+                    .await;
+                    consume_overlay_ready("diagnostic-first-submit", &mut ws).await;
                 }
                 ws.send(Message::Text(
                     json!({"type":"snapshot","payload":{
@@ -3522,12 +3598,10 @@ async fn diagnostic_profiles_execute_exact_delayed_physical_and_logical_attempts
             ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
                 .await
                 .unwrap();
-            tokio::time::sleep(Duration::from_millis(20)).await;
         });
         let mut manifest = test_manifest();
         manifest.bridge_url = format!("ws://{address}");
         let (mut bridge, snapshot) = BridgeClient::connect(&manifest).await.unwrap();
-        let state = Arc::new(OwnedSubmitterState::default());
         let mut owner = NativePresentationOwner::new_with_profile(
             snapshot,
             CaptionRenderer::new_for_test().unwrap(),
@@ -3602,12 +3676,12 @@ async fn production_owner_runs_independent_self_and_peer_fresh_schedules_to_exac
         .await
         .unwrap();
         tokio::time::sleep(Duration::from_millis(500)).await;
+        consume_overlay_ready("automatic-channel-retries", &mut ws).await;
         ws.send(Message::Text(
             json!({"type": "shutdown"}).to_string().into(),
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -3727,7 +3801,17 @@ async fn production_owner_stale_scene_cannot_satisfy_newer_schedule() {
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
+        wait_for_test_progress("stale-scene-first-submit", || {
+            server_state
+                .operations
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|op| op.starts_with("submit"))
+                .count()
+                >= 1
+        })
+        .await;
         assert_eq!(
             server_state
                 .operations
@@ -3738,17 +3822,17 @@ async fn production_owner_stale_scene_cannot_satisfy_newer_schedule() {
                 .count(),
             1
         );
-        while server_state
-            .operations
-            .lock()
-            .unwrap()
-            .iter()
-            .filter(|op| op.starts_with("submit"))
-            .count()
-            < 2
-        {
-            tokio::time::sleep(Duration::from_millis(1)).await;
-        }
+        wait_for_test_progress("stale-scene-second-submit", || {
+            server_state
+                .operations
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|op| op.starts_with("submit"))
+                .count()
+                >= 2
+        })
+        .await;
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
@@ -3830,6 +3914,8 @@ async fn production_owner_stale_scene_cannot_satisfy_newer_schedule() {
 async fn production_owner_self_cancellation_leaves_peer_schedule_completing() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
+    let state = Arc::new(OwnedSubmitterState::default());
+    let server_state = state.clone();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
         let mut ws = accept_async(stream).await.unwrap();
@@ -3852,7 +3938,17 @@ async fn production_owner_self_cancellation_leaves_peer_schedule_completing() {
         }
         ws.send(Message::Text(json!({"type":"snapshot","payload":{"revision":2,
             "native_fresh_render_generations":{"self":1,"peer":2},"blocks":[block("peer:continue","peer","peer","",true)]}}).to_string().into())).await.unwrap();
-        tokio::time::sleep(Duration::from_millis(30)).await;
+        wait_for_test_progress("independent-cancel-peer-completes", || {
+            server_state
+                .operations
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|operation| operation.starts_with("submit"))
+                .count()
+                >= 3
+        })
+        .await;
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
@@ -3860,7 +3956,6 @@ async fn production_owner_self_cancellation_leaves_peer_schedule_completing() {
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
     let (mut bridge, snapshot) = BridgeClient::connect(&manifest).await.unwrap();
-    let state = Arc::new(OwnedSubmitterState::default());
     let mut owner = NativePresentationOwner::new_with_retry_policy_for_test(
         snapshot,
         CaptionRenderer::new_for_test().unwrap(),
@@ -4051,6 +4146,8 @@ async fn production_owner_coalesced_two_channel_shutdown_tears_down_both() {
 async fn production_owner_replaces_channel_token_and_empty_snapshot_cancels_schedule() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
+    let state = Arc::new(OwnedSubmitterState::default());
+    let server_state = state.clone();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
         let mut ws = accept_async(stream).await.unwrap();
@@ -4090,7 +4187,17 @@ async fn production_owner_replaces_channel_token_and_empty_snapshot_cancels_sche
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(30)).await;
+        wait_for_test_progress("replacement-second-submit", || {
+            server_state
+                .operations
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|operation| operation.starts_with("submit"))
+                .count()
+                >= 2
+        })
+        .await;
         ws.send(Message::Text(
             json!({"type":"snapshot","payload":{
                 "revision":3,
@@ -4102,16 +4209,24 @@ async fn production_owner_replaces_channel_token_and_empty_snapshot_cancels_sche
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(50)).await;
+        wait_for_test_progress("replacement-empty-submit", || {
+            server_state
+                .operations
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|operation| operation.starts_with("submit"))
+                .count()
+                >= 3
+        })
+        .await;
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
     let (mut bridge, snapshot) = BridgeClient::connect(&manifest).await.unwrap();
-    let state = Arc::new(OwnedSubmitterState::default());
     let retry_submitter = OwnedSubmitterProbe {
         state: state.clone(),
         fail_submit: false,
@@ -4165,6 +4280,8 @@ async fn production_owner_replaces_channel_token_and_empty_snapshot_cancels_sche
 async fn production_owner_preemption_preserves_due_and_completes_on_pending_snapshot() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
+    let state = Arc::new(OwnedSubmitterState::default());
+    let server_state = state.clone();
     let readiness_started = Arc::new(tokio::sync::Notify::new());
     let server_readiness_started = readiness_started.clone();
     let server = tokio::spawn(async move {
@@ -4204,11 +4321,20 @@ async fn production_owner_preemption_preserves_due_and_completes_on_pending_snap
         ))
         .await
         .unwrap();
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        wait_for_test_progress("preemption-due-submit", || {
+            server_state
+                .operations
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|operation| operation.starts_with("submit"))
+                .count()
+                >= 2
+        })
+        .await;
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -4216,7 +4342,6 @@ async fn production_owner_preemption_preserves_due_and_completes_on_pending_snap
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields_on_call(2, usize::MAX);
     renderer.set_test_readiness_started_notify_on_call(2, readiness_started);
-    let state = Arc::new(OwnedSubmitterState::default());
     let mut owner = NativePresentationOwner::new_with_retry_policy_for_test(
         snapshot,
         renderer,
@@ -4462,7 +4587,6 @@ async fn production_owner_single_readiness_timeout_retries_without_submit_or_exi
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -4555,7 +4679,7 @@ async fn production_owner_openvr_event_flood_does_not_starve_snapshot_submit() {
                 if submits >= 2 {
                     break;
                 }
-                tokio::time::sleep(Duration::from_millis(10)).await;
+                tokio::task::yield_now().await;
             }
         })
         .await;
@@ -4566,7 +4690,6 @@ async fn production_owner_openvr_event_flood_does_not_starve_snapshot_submit() {
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -4644,7 +4767,7 @@ async fn production_owner_overlay_hidden_reasserts_show_when_desired_visible() {
                 if shows >= 2 {
                     break;
                 }
-                tokio::time::sleep(Duration::from_millis(10)).await;
+                tokio::task::yield_now().await;
             }
         })
         .await;
@@ -4652,7 +4775,6 @@ async fn production_owner_overlay_hidden_reasserts_show_when_desired_visible() {
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -4734,7 +4856,7 @@ async fn production_owner_event_pump_preserves_idle_hide_tail() {
                 {
                     break;
                 }
-                tokio::time::sleep(Duration::from_millis(10)).await;
+                tokio::task::yield_now().await;
             }
         })
         .await
@@ -4754,7 +4876,6 @@ async fn production_owner_event_pump_preserves_idle_hide_tail() {
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -4913,7 +5034,6 @@ async fn production_owner_shutdown_records_active_schedule_teardown() {
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -5045,10 +5165,10 @@ async fn production_owner_slow_submission_has_no_catch_up_and_expires_cleanly() 
         .await
         .unwrap();
         tokio::time::sleep(Duration::from_millis(800)).await;
+        consume_overlay_ready("slow-no-catch-up", &mut ws).await;
         ws.send(Message::Text(json!({"type":"shutdown"}).to_string().into()))
             .await
             .unwrap();
-        tokio::time::sleep(Duration::from_millis(20)).await;
     });
     let mut manifest = test_manifest();
     manifest.bridge_url = format!("ws://{address}");
@@ -5295,6 +5415,8 @@ async fn runtime_cancels_pending_idle_hide_when_new_text_arrives() {
 async fn runtime_shows_overlay_again_when_text_returns_after_idle_hide() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
+    let submit_progress = Arc::new(SharedSubmitProgress::default());
+    let server_progress = submit_progress.clone();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
         let mut ws = accept_async(stream).await.unwrap();
@@ -5349,7 +5471,10 @@ async fn runtime_shows_overlay_again_when_text_returns_after_idle_hide() {
         .await
         .unwrap();
 
-        tokio::time::sleep(Duration::from_millis(50)).await;
+        wait_for_test_progress("idle-restore-text-submit", || {
+            server_progress.text_submits.load(Ordering::SeqCst) >= 2
+        })
+        .await;
 
         ws.send(Message::Text(
             json!({"type": "shutdown"}).to_string().into(),
@@ -5366,6 +5491,7 @@ async fn runtime_shows_overlay_again_when_text_returns_after_idle_hide() {
     let renderer = CaptionRenderer::new_for_test().unwrap();
     let mut runtime = OverlayRuntime::new(snapshot);
     let mut submitter = RecordingSubmitter::default();
+    submitter.progress = Some(submit_progress);
 
     runtime
         .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)
@@ -5388,6 +5514,8 @@ async fn runtime_shows_overlay_again_when_text_returns_after_idle_hide() {
 async fn runtime_submits_text_frame_before_revealing_overlay_after_idle_hide() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
+    let submit_progress = Arc::new(SharedSubmitProgress::default());
+    let server_progress = submit_progress.clone();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
         let mut ws = accept_async(stream).await.unwrap();
@@ -5442,7 +5570,10 @@ async fn runtime_submits_text_frame_before_revealing_overlay_after_idle_hide() {
         .await
         .unwrap();
 
-        tokio::time::sleep(Duration::from_millis(50)).await;
+        wait_for_test_progress("reveal-order-text-submit", || {
+            server_progress.text_submits.load(Ordering::SeqCst) >= 2
+        })
+        .await;
 
         ws.send(Message::Text(
             json!({"type": "shutdown"}).to_string().into(),
@@ -5459,6 +5590,7 @@ async fn runtime_submits_text_frame_before_revealing_overlay_after_idle_hide() {
     let renderer = CaptionRenderer::new_for_test().unwrap();
     let mut runtime = OverlayRuntime::new(snapshot);
     let mut submitter = RecordingSubmitter::default();
+    submitter.progress = Some(submit_progress);
 
     runtime
         .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)

@@ -536,7 +536,8 @@ async def test_overlay_process_manager_latches_ack_consumed_by_connected_monitor
     assert manager._shutdown_acknowledged is True
 
     async def exit_after_stop_begins() -> None:
-        await asyncio.sleep(0.01)
+        while manager.state != "stopping" and manager._active_process_exit_task is None:
+            await asyncio.sleep(0)
         process._exit_future.set_result(0)
 
     exit_task = asyncio.create_task(exit_after_stop_begins())
@@ -606,7 +607,8 @@ async def test_overlay_process_manager_reconciles_ack_read_during_monitor_cancel
     assert manager._shutdown_acknowledged is False
 
     async def exit_after_stop_begins() -> None:
-        await asyncio.sleep(0.01)
+        while manager.state != "stopping" and manager._active_process_exit_task is None:
+            await asyncio.sleep(0)
         process._exit_future.set_result(0)
 
     exit_task = asyncio.create_task(exit_after_stop_begins())
@@ -1771,11 +1773,19 @@ async def test_overlay_process_manager_renderer_events_ignores_invalid_messages_
         bridge_messages=bridge_messages,  # type: ignore[arg-type]
         renderer_events=renderer_events,
     )
+    diagnostics = manager.diagnostics
+    assert diagnostics is not None
+
+    async def _wait_until_renderer_message_ignored() -> None:
+        while not any(
+            event["event"] == "renderer_message_ignored" for event in diagnostics.process_events
+        ):
+            await asyncio.sleep(0)
 
     try:
         await manager.start()
         await bridge_messages.put(invalid_message)
-        await asyncio.sleep(0.05)
+        await asyncio.wait_for(_wait_until_renderer_message_ignored(), timeout=0.5)
 
         assert renderer_events.empty()
         assert manager.state == "connected"
@@ -1795,6 +1805,15 @@ async def test_overlay_process_manager_renderer_events_without_queue_are_diagnos
         process_runner=FakeProcessRunner(ready_event_delay_ms=0),
         bridge_messages=bridge_messages,
     )
+    diagnostics = manager.diagnostics
+    assert diagnostics is not None
+
+    async def _wait_until_renderer_event_diagnostic_only() -> None:
+        while not any(
+            event["event"] == "renderer_event_diagnostic_only"
+            for event in diagnostics.process_events
+        ):
+            await asyncio.sleep(0)
 
     try:
         await manager.start()
@@ -1808,7 +1827,7 @@ async def test_overlay_process_manager_renderer_events_without_queue_are_diagnos
                     },
                 }
             )
-            await asyncio.sleep(0.05)
+            await asyncio.wait_for(_wait_until_renderer_event_diagnostic_only(), timeout=0.5)
 
         assert manager.state == "connected"
         assert manager.failure_reason is None
@@ -1851,11 +1870,14 @@ async def test_overlay_process_manager_writes_runtime_crash_dump_with_recent_chi
         diagnostics_dir=tmp_path,
     )
 
+    async def _wait_until_manager_failed() -> None:
+        while manager.state != "failed":
+            await asyncio.sleep(0)
+
     await manager.start()
-    for _ in range(50):
-        if manager.state == "failed":
-            break
-        await asyncio.sleep(0.01)
+    await asyncio.wait_for(
+        _wait_until_manager_failed(), timeout=manager.startup_timeout_ms / 1000.0
+    )
 
     assert manager.state == "failed"
     assert manager.failure_reason == "runtime_crashed"
