@@ -53,6 +53,8 @@ async def test_replace_provider_propagates_updated_config_by_capture_activity(
                 provider_status=SelfCaptureProviderStatus.READY,
                 failure_reason=None,
                 runtime_signature=capture_config.runtime_signature,
+                desired_active=desired_active,
+                effective_active=desired_active,
             )
 
         async def apply_intent(self, config: object, **kwargs: object) -> object:
@@ -61,6 +63,8 @@ async def test_replace_provider_propagates_updated_config_by_capture_activity(
                 provider_status=SelfCaptureProviderStatus.READY,
                 failure_reason=None,
                 runtime_signature=capture_config.runtime_signature,
+                desired_active=desired_active,
+                effective_active=desired_active,
             )
 
     capture_owner = CaptureOwner()

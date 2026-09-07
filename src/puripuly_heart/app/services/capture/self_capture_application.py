@@ -145,11 +145,18 @@ class SelfCaptureApplicationOwner:
             and snapshot.failure_reason is None
             and snapshot.runtime_signature == config.runtime_signature
         ):
-            self.log_detailed(
-                "[STT][Runtime] provider handoff committed: "
-                f"provider={getattr(snapshot, 'provider_id', config.provider_id)}",
-                logging.INFO,
-            )
+            if snapshot.desired_active and snapshot.effective_active:
+                self.log_detailed(
+                    "[STT][Runtime] provider handoff committed: "
+                    f"provider={getattr(snapshot, 'provider_id', config.provider_id)}",
+                    logging.INFO,
+                )
+            else:
+                self.log_detailed(
+                    "[STT][Runtime] provider prepared: "
+                    f"provider={getattr(snapshot, 'provider_id', config.provider_id)}",
+                    logging.INFO,
+                )
         elif snapshot.provider_status is SelfCaptureProviderStatus.PENDING:
             self.log_detailed(
                 "[STT][Runtime] provider handoff pending: "

@@ -7,6 +7,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
 
+import numpy as np
 import pytest
 from puripuly_heart.app.services.settings_transaction_result import SettingsTransactionResultOwner
 from puripuly_heart.core.local_asr_provider_runtime import (
@@ -20,13 +21,16 @@ from puripuly_heart.app.adapters.ui_runtime import (
     UiProviderRuntimeAdapter,
     UiSettingsRuntimeAdapter,
 )
-from puripuly_heart.app.ports.settings_view import ProviderApplyIntent, SelfSttProviderEdit
+from puripuly_heart.app.ports.settings_view import ProviderApplyIntent
 from puripuly_heart.app.services.canonical_settings_persistence import compose_settings_owner
 from puripuly_heart.app.services.capture.self_capture_application import (
     SelfCaptureApplicationOwner,
     SelfCaptureApplicationSettings,
 )
 from puripuly_heart.app.services.provider.provider_settings import ProviderApplicationOwner
+from puripuly_heart.app.services.settings.settings_application import (
+    settings_view_surface_snapshots,
+)
 from puripuly_heart.app.services.ui_application import UiApplicationBoundary
 from puripuly_heart.app.wiring.wiring_provider_runtime import compose_provider_runtime
 from puripuly_heart.app.wiring.wiring_stt_factory import (
@@ -36,6 +40,9 @@ from puripuly_heart.app.wiring.wiring_stt_factory import (
 from puripuly_heart.config.provider_values import STTProviderName
 from puripuly_heart.config.settings_vnext.schema import AppSettingsVNext
 from puripuly_heart.core.clock import SystemClock
+from puripuly_heart.core.messages import (
+    TRANSACTION_STATUS_SETTINGS_COMMIT_SUCCESS_RUNTIME_DEGRADED,
+)
 from puripuly_heart.core.runtime.local_asr_provider_runtime import (
     LocalASRProviderRuntimeOwner,
 )
@@ -48,7 +55,8 @@ from puripuly_heart.core.self_capture import (
 from puripuly_heart.core.stt.backend import STTBackendTranscriptEvent
 from puripuly_heart.core.stt.controller import ManagedSTTProvider
 from puripuly_heart.core.stt.rolling import RollingProviderDefinition, RollingSTTBackend
-from puripuly_heart.core.vad.gating import SpeechEnd
+from puripuly_heart.core.vad.gating import SpeechChunk, SpeechEnd, SpeechStart
+from puripuly_heart.ui.views.settings import SettingsView
 from tests.core.runtime.test_local_asr_provider_runtime import (
     FakeGpuRuntimeFactory,
     FakeProvisioningPort,
@@ -207,6 +215,7 @@ def _settings(provider: str) -> AppSettingsVNext:
 @pytest.mark.asyncio
 async def test_provider_apply_intent_full_vertical_rolling_gemini_soniox_reverse_and_speech_end(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     settings_owner = compose_settings_owner(tmp_path / "settings.json")
     settings_owner.start()
@@ -374,9 +383,53 @@ async def test_provider_apply_intent_full_vertical_rolling_gemini_soniox_reverse
         osc_state_publisher=lambda: None,
     )
 
-    soniox_intent = ProviderApplyIntent((SelfSttProviderEdit(STTProviderName.SONIOX),))
+    monkeypatch.setattr(SettingsView, "_populate_host_apis", lambda self: None)
+    monkeypatch.setattr(SettingsView, "_refresh_microphones", lambda self: None)
+    monkeypatch.setattr(SettingsView, "update", lambda self: None)
+    monkeypatch.setattr(SettingsView, "_load_secrets", lambda self, *_args: None)
+    settings_view = SettingsView()
+    baseline_settings = settings_owner.canonical
+    assert baseline_settings is not None
+    (
+        provider_snapshot,
+        general_snapshot,
+        prompt_snapshot,
+        overlay_snapshot,
+    ) = settings_view_surface_snapshots(baseline_settings)
+    settings_view.load_from_settings(
+        provider=provider_snapshot,
+        general=general_snapshot,
+        prompt=prompt_snapshot,
+        overlay=overlay_snapshot,
+        config_path=tmp_path / "settings.json",
+    )
+    settings_view._on_stt_selected(STTProviderName.SONIOX.value)
+    assert settings_view._provider_draft is not None
+    assert settings_view._provider_draft.stt_provider is STTProviderName.SONIOX
+    assert settings_owner.canonical.intent.stt.provider == STTProviderName.ROLLING_FREE.value
+    assert runtime.current_provider("self") is initial_provider
+    assert runtime.snapshot.channel_for("self").provider_id == STTProviderName.ROLLING_FREE.value
+    assert capture_owner.snapshot.provider_id == STTProviderName.ROLLING_FREE.value
+    soniox_intent = settings_view.build_provider_apply_settings()
+    assert isinstance(soniox_intent, ProviderApplyIntent)
+
+    original_refresh_self_stt = components.runtime.refresh_self_stt
+    original_self_runtime_convergence = components.runtime.self_runtime_convergence
+    components.runtime.refresh_self_stt = _noop
+    components.runtime.self_runtime_convergence = lambda _settings: False
     await boundary.apply_provider_intent(soniox_intent)
-    assert settings_owner.canonical is not None
+    stale_result = results.current
+    assert stale_result is not None
+    assert stale_result.status == TRANSACTION_STATUS_SETTINGS_COMMIT_SUCCESS_RUNTIME_DEGRADED
+    assert stale_result.diagnostics is not None
+    assert stale_result.diagnostics.code == "stt_runtime_apply_not_converged"
+    assert settings_owner.canonical.intent.stt.provider == STTProviderName.SONIOX.value
+    assert runtime.current_provider("self") is initial_provider
+    assert capture_owner.snapshot.provider_id == STTProviderName.ROLLING_FREE.value
+    assert runtime.snapshot.channel_for("self").provider_id == STTProviderName.ROLLING_FREE.value
+    components.runtime.refresh_self_stt = original_refresh_self_stt
+    components.runtime.self_runtime_convergence = original_self_runtime_convergence
+    await boundary.apply_provider_intent(soniox_intent)
     assert settings_owner.canonical.intent.stt.provider == STTProviderName.SONIOX.value
     soniox_provider = runtime.current_provider("self")
     assert soniox_provider is not None
@@ -389,8 +442,15 @@ async def test_provider_apply_intent_full_vertical_rolling_gemini_soniox_reverse
     assert capture_owner.source is source
     assert capture_owner.loop_task is loop_task
 
-    rolling_intent = ProviderApplyIntent((SelfSttProviderEdit(STTProviderName.ROLLING_FREE),))
-    soniox_provider._active_utterance_id = uuid4()
+    settings_view._on_stt_selected(STTProviderName.ROLLING_FREE.value)
+    rolling_intent = settings_view.build_provider_apply_settings()
+    assert isinstance(rolling_intent, ProviderApplyIntent)
+    utterance_id = uuid4()
+    frame = np.zeros(512, dtype=np.float32)
+    await harness.self_owner.handle_vad_event(SpeechStart(utterance_id, frame, frame))
+    await harness.self_owner.handle_vad_event(SpeechChunk(utterance_id, frame))
+    old_transport = harness_factory.provider_factory.backends[-1]
+    assert isinstance(old_transport, _TransportBackend)
     apply_rolling = asyncio.create_task(boundary.apply_provider_intent(rolling_intent))
     for _ in range(1000):
         await asyncio.sleep(0.001)
@@ -400,8 +460,10 @@ async def test_provider_apply_intent_full_vertical_rolling_gemini_soniox_reverse
     assert runtime.snapshot.channel_for("self").pending_handoff is True
     assert runtime.snapshot.channel_for("self").provider_id == STTProviderName.SONIOX.value
     assert capture_owner.snapshot.provider_id == STTProviderName.SONIOX.value
-    await harness.self_owner.handle_vad_event(SpeechEnd(uuid4()))
+    await harness.self_owner.handle_vad_event(SpeechEnd(utterance_id))
     await apply_rolling
+    assert old_transport.sessions
+    assert old_transport.sessions[-1].speech_ends
 
     restored = runtime.current_provider("self")
     assert restored is not None
@@ -417,8 +479,38 @@ async def test_provider_apply_intent_full_vertical_rolling_gemini_soniox_reverse
     assert capture_owner.snapshot.effective_active is True
     assert capture_owner.source is source
     assert capture_owner.loop_task is loop_task
+    provider_count_before_disable = len(harness_factory.provider_factory.providers)
+    await capture_owner.apply_intent(
+        expected,
+        enabled=False,
+        explicit_toggle_off=True,
+    )
+    assert capture_owner.snapshot.desired_active is False
+    detached_channel = runtime.snapshot.channel_for("self")
+    unrelated_settings = replace(
+        settings_owner.canonical,
+        intent=replace(
+            settings_owner.canonical.intent,
+            translation=replace(
+                settings_owner.canonical.intent.translation,
+                concurrency_limit=(
+                    settings_owner.canonical.intent.translation.concurrency_limit + 1
+                ),
+            ),
+        ),
+    )
+    unrelated_plan = components.runtime.build_plan(
+        unrelated_settings,
+        force_rebuild_llm=False,
+    )
+    assert unrelated_plan.should_refresh_self_stt is False
+    await components.runtime.apply(unrelated_settings, unrelated_plan)
+    assert len(harness_factory.provider_factory.providers) == provider_count_before_disable
+    assert runtime.snapshot.channel_for("self").provider_id == detached_channel.provider_id
+    assert capture_owner.snapshot.desired_active is False
 
     await capture_owner.close()
+
     await runtime.close()
 
 

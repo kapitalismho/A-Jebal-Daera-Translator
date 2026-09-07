@@ -224,10 +224,10 @@ class ProviderRuntimeEffects:
     def self_runtime_convergence(self, settings: object) -> bool | None:
         runtime = self.local_asr_runtime_provider()
         owner = self.self_capture_provider()
-        if owner is None:
+        if owner is None or not owner.snapshot.desired_active:
             return None
         if runtime is None:
-            return False if owner.snapshot.desired_active else None
+            return False
         expected = build_self_capture_session_config_from_vnext(
             self.canonical_settings(settings),
         )
