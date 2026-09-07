@@ -312,6 +312,13 @@ Translation owners retain:
 
 Destination adapters must not bypass routing policy.
 
+### Overlay peer presentation
+
+- The translation runtime enabled state flows into `OverlayPresenter` as `translation_enabled`, distinct from the `show_translation` / `show_peer_original` display preferences.
+- `OverlayPresentationState` consumes that flag when deciding peer primary/secondary roles: Trans OFF promotes peer source to primary with secondary empty and disabled; Trans ON keeps the pending source-secondary and translated translation-primary / source-secondary behavior.
+- The app owner syncs runtime toggle changes into the presenter immediately and republishes the visible snapshot without waiting for new speech; cached translations are preserved for OFF-to-ON restore.
+- Renderers consume the resulting primary/secondary blocks and do not reinterpret Trans state; the existing primary-visible refresh contract and cadence are reused unchanged.
+
 ## Lifecycle
 
 Every owner of a task, process, source, or provider session must define:

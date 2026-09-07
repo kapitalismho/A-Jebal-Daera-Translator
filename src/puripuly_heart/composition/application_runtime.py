@@ -695,6 +695,11 @@ def compose_application_runtime(
                     level=level,
                     exception=exception,
                 ),
+                translation_enabled_provider=lambda: (
+                    pipeline.translation_runtime_configuration.snapshot().value.translation_enabled
+                    if pipeline.translation_runtime_configuration is not None
+                    else True
+                ),
             )
         return overlay
 
@@ -1787,6 +1792,12 @@ def compose_application_runtime(
         with contextlib.suppress(Exception):
             presentation.show_founder_letter_dialog()
 
+    def on_translation_runtime_state_changed() -> None:
+        require_vrc_mic_sync().publish_delta()
+        current_overlay = overlay
+        if current_overlay is not None:
+            current_overlay.notify_translation_runtime_state_changed()
+
     managed_account = compose_managed_account(
         config_path=config_path,
         settings=settings,
@@ -1807,7 +1818,7 @@ def compose_application_runtime(
         usage_view_sink=apply_managed_usage_view,
         dashboard_sink=presentation.set_dashboard_translation_enabled,
         starting_sink=presentation.set_dashboard_translation_starting,
-        runtime_state_changed=lambda: require_vrc_mic_sync().publish_delta(),
+        runtime_state_changed=on_translation_runtime_state_changed,
         message_sink=lambda key, values: show_short_message(
             key,
             **dict(values),

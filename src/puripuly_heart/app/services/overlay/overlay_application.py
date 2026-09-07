@@ -127,6 +127,7 @@ OverlayRendererEventConsumer = Callable[
     [asyncio.Queue[dict[str, object]], str],
     Awaitable[None],
 ]
+OverlayTranslationEnabledProvider = Callable[[], bool]
 
 
 @dataclass(slots=True)
@@ -157,6 +158,7 @@ class OverlayApplicationOwner:
     clock: Clock
     log_basic: OverlayBasicLogSink = field(repr=False)
     log_detailed: OverlayDetailedLogSink = field(repr=False)
+    translation_enabled_provider: OverlayTranslationEnabledProvider = field(repr=False)
     _runtime: OverlayRuntimeHandle | None = field(init=False, default=None, repr=False)
     _state: str = field(init=False, default="off", repr=False)
     _failure_reason: str | None = field(init=False, default=None, repr=False)
@@ -165,6 +167,7 @@ class OverlayApplicationOwner:
     _recovering_from_crash: bool = field(init=False, default=False, repr=False)
     _active_target: str | None = field(init=False, default=None, repr=False)
     _ingress_stopped: bool = field(init=False, default=False, repr=False)
+    _translation_sync_generation: int = field(init=False, default=0, repr=False)
     _transition_owner: OverlaySessionTransitionOwner = field(init=False, repr=False)
     _generation_owner: OverlayGenerationStartOwner = field(init=False, repr=False)
     _fallback_owner: OverlaySessionFallbackOwner = field(init=False, repr=False)
@@ -380,6 +383,51 @@ class OverlayApplicationOwner:
             return None
         return cast(OverlayPresenter | None, runtime.current_presenter_for_ingress())
 
+    def notify_translation_runtime_state_changed(self) -> None:
+        if self._ingress_stopped:
+            return
+        runtime = self._runtime
+        if runtime is None:
+            return
+        presenter = self.current_presenter()
+        if presenter is None:
+            return
+        enabled = bool(self.translation_enabled_provider())
+        self._translation_sync_generation += 1
+        generation = self._translation_sync_generation
+        overlay_instance_id = runtime.overlay_instance_id
+        runtime.create_child_task(
+            self._apply_translation_enabled_to_presenter(
+                generation=generation,
+                runtime=runtime,
+                presenter=presenter,
+                overlay_instance_id=overlay_instance_id,
+                enabled=enabled,
+            ),
+            task_name="overlay-translation-sync",
+        )
+
+    async def _apply_translation_enabled_to_presenter(
+        self,
+        *,
+        generation: int,
+        runtime: OverlayRuntimeHandle,
+        presenter: OverlayPresenter,
+        overlay_instance_id: str | None,
+        enabled: bool,
+    ) -> None:
+        if generation != self._translation_sync_generation:
+            return
+        if self._ingress_stopped:
+            return
+        if self._runtime is not runtime:
+            return
+        if not self.runtime_is_current(runtime, overlay_instance_id=overlay_instance_id):
+            return
+        if self.current_presenter() is not presenter:
+            return
+        await presenter.update_translation_enabled(enabled)
+
     def current_bridge(self) -> OverlayBridge | None:
         runtime = self._runtime
         if runtime is None:
@@ -546,6 +594,7 @@ class OverlayApplicationOwner:
             startup_timeout_ms=OVERLAY_STARTUP_TIMEOUT_MS,
             fallback_reason=self._fallback_owner.reason if self._fallback_owner.active else None,
             recovering_from_crash=self._recovering_from_crash,
+            translation_enabled=bool(self.translation_enabled_provider()),
         )
 
     def record_lifecycle_trace(self, event: str, **fields: object) -> None:
