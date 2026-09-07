@@ -745,6 +745,73 @@ async fn connect_test_bridge() -> (
     (client, server)
 }
 
+struct WriteGate {
+    armed: std::sync::atomic::AtomicBool,
+    entered: tokio::sync::Notify,
+    acked: std::sync::atomic::AtomicBool,
+}
+impl WriteGate {
+    fn new() -> Self {
+        Self {
+            armed: std::sync::atomic::AtomicBool::new(false),
+            entered: tokio::sync::Notify::new(),
+            acked: std::sync::atomic::AtomicBool::new(false),
+        }
+    }
+}
+struct BlockedStream {
+    inner: tokio::net::TcpStream,
+    block: Option<Arc<WriteGate>>,
+}
+impl tokio::io::AsyncRead for BlockedStream {
+    fn poll_read(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+        buf: &mut tokio::io::ReadBuf<'_>,
+    ) -> std::task::Poll<std::io::Result<()>> {
+        std::pin::Pin::new(&mut self.get_mut().inner).poll_read(cx, buf)
+    }
+}
+impl tokio::io::AsyncWrite for BlockedStream {
+    fn poll_write(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+        buf: &[u8],
+    ) -> std::task::Poll<std::io::Result<usize>> {
+        let this = self.get_mut();
+        if let Some(block) = &this.block {
+            if block.armed.load(std::sync::atomic::Ordering::SeqCst)
+                && !block.acked.load(std::sync::atomic::Ordering::SeqCst)
+                && !buf.is_empty()
+            {
+                block.entered.notify_one();
+                return std::task::Poll::Pending;
+            }
+        }
+        std::pin::Pin::new(&mut this.inner).poll_write(cx, buf)
+    }
+    fn poll_flush(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<std::io::Result<()>> {
+        let this = self.get_mut();
+        if let Some(block) = &this.block {
+            if block.armed.load(std::sync::atomic::Ordering::SeqCst)
+                && !block.acked.load(std::sync::atomic::Ordering::SeqCst)
+            {
+                block.entered.notify_one();
+                return std::task::Poll::Pending;
+            }
+        }
+        std::pin::Pin::new(&mut this.inner).poll_flush(cx)
+    }
+    fn poll_shutdown(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<std::io::Result<()>> {
+        std::pin::Pin::new(&mut self.get_mut().inner).poll_shutdown(cx)
+    }
+}
 struct FollowupServer {
     stop: Option<tokio::sync::oneshot::Sender<()>>,
     send_exited: Option<tokio::sync::oneshot::Receiver<()>>,
@@ -798,6 +865,7 @@ impl FollowupServer {
 async fn connect_test_bridge_with_followups(
     followups: Vec<serde_json::Value>,
     gate: Option<Arc<tokio::sync::Notify>>,
+    transport: Option<Arc<WriteGate>>,
 ) -> (BridgeClient, OverlayPresentationSnapshot, FollowupServer) {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
@@ -805,6 +873,10 @@ async fn connect_test_bridge_with_followups(
     let (exited_tx, exited_rx) = tokio::sync::oneshot::channel::<()>();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
+        let stream = BlockedStream {
+            inner: stream,
+            block: transport.clone(),
+        };
         let mut ws = accept_async(stream).await.unwrap();
         let _auth = ws.next().await.unwrap().unwrap();
         ws.send(Message::Text(
@@ -821,6 +893,9 @@ async fn connect_test_bridge_with_followups(
         ))
         .await
         .unwrap();
+        if let Some(g) = &transport {
+            g.armed.store(true, std::sync::atomic::Ordering::SeqCst);
+        }
         let mut stopped = false;
         if let Some(gate) = gate {
             tokio::select! {
@@ -851,6 +926,9 @@ async fn connect_test_bridge_with_followups(
             None,
         )
         .await;
+        if let Some(g) = &transport {
+            g.acked.store(true, std::sync::atomic::Ordering::SeqCst);
+        }
         let _ = exited_tx.send(());
         drop(stop_rx);
         let mut messages = Vec::new();
@@ -1430,7 +1508,7 @@ async fn initial_readiness_processes_new_snapshot_before_submit_and_ready() {
         }
     });
     let (mut bridge, snapshot, mut server) =
-        connect_test_bridge_with_followups(vec![followup], None).await;
+        connect_test_bridge_with_followups(vec![followup], None, None).await;
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields(10_000);
     let logger = test_logger("initial-readiness-snapshot-preemption").await;
@@ -1460,7 +1538,7 @@ async fn initial_readiness_processes_new_snapshot_before_submit_and_ready() {
 #[tokio::test]
 async fn initial_shutdown_preempts_readiness_without_submit_or_ready() {
     let (mut bridge, snapshot, mut server) =
-        connect_test_bridge_with_followups(vec![json!({"type": "shutdown"})], None).await;
+        connect_test_bridge_with_followups(vec![json!({"type": "shutdown"})], None, None).await;
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields(10_000);
     let logger = test_logger("initial-readiness-shutdown-tie").await;
@@ -1491,7 +1569,7 @@ async fn heartbeat_and_noop_control_do_not_cancel_initial_readiness() {
         json!({"type": "runtime_control", "payload": {"logging_mode": "detailed"}}),
     ];
     let (mut bridge, snapshot, mut server) =
-        connect_test_bridge_with_followups(followups, None).await;
+        connect_test_bridge_with_followups(followups, None, None).await;
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields(100);
     let logger = test_logger("readiness-heartbeat-noop-control").await;
@@ -1525,7 +1603,7 @@ async fn ignored_message_flood_polls_readiness_and_reaches_ready() {
         });
     }
     let (mut bridge, snapshot, mut server) =
-        connect_test_bridge_with_followups(followups, None).await;
+        connect_test_bridge_with_followups(followups, None, None).await;
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields(3);
     let logger = test_logger("readiness-ignored-flood-ready").await;
@@ -1564,7 +1642,7 @@ async fn continuous_ignored_messages_hit_owner_timeout_without_submission() {
         })
         .collect();
     let (mut bridge, snapshot, mut server) =
-        connect_test_bridge_with_followups(followups, None).await;
+        connect_test_bridge_with_followups(followups, None, None).await;
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields(1_000_000);
     let logger = test_logger("readiness-ignored-flood-timeout").await;
@@ -1601,7 +1679,7 @@ async fn shutdown_after_ignored_flood_preempts_before_submission() {
         .collect::<Vec<_>>();
     followups.push(json!({"type": "shutdown"}));
     let (mut bridge, snapshot, mut server) =
-        connect_test_bridge_with_followups(followups, None).await;
+        connect_test_bridge_with_followups(followups, None, None).await;
     let renderer = CaptionRenderer::new_for_test().unwrap();
     renderer.set_test_readiness_pending_yields(1_000_000);
     let logger = test_logger("readiness-ignored-flood-shutdown").await;
@@ -1622,14 +1700,25 @@ async fn shutdown_after_ignored_flood_preempts_before_submission() {
 }
 #[tokio::test]
 async fn followup_send_phase_stop_ack_precedes_client_drop() {
-    let gate = Arc::new(tokio::sync::Notify::new());
+    let block = Arc::new(WriteGate::new());
     let followups = vec![
         json!({"type": "heartbeat"}),
         json!({"type": "runtime_control", "payload": {"logging_mode": "detailed"}}),
     ];
-    let (bridge, _snapshot, mut server) =
-        connect_test_bridge_with_followups(followups, Some(gate.clone())).await;
+    let (mut bridge, _snapshot, mut server) =
+        connect_test_bridge_with_followups(followups, None, Some(block.clone())).await;
+    tokio::time::timeout(Duration::from_secs(5), block.entered.notified())
+        .await
+        .unwrap();
     server.stop_send_phase().await;
+    tokio::time::timeout(Duration::from_secs(5), bridge.close())
+        .await
+        .unwrap()
+        .unwrap();
+    let outcome = tokio::time::timeout(Duration::from_secs(5), bridge.next_message())
+        .await
+        .unwrap();
+    assert!(outcome.is_err());
     drop(bridge);
     let messages = server.join_messages().await;
     assert!(messages.is_empty());
@@ -1647,7 +1736,7 @@ async fn followup_send_error_before_stop_propagates() {
         })
         .collect();
     let (bridge, _snapshot, mut server) =
-        connect_test_bridge_with_followups(followups, Some(gate.clone())).await;
+        connect_test_bridge_with_followups(followups, Some(gate.clone()), None).await;
     drop(bridge);
     gate.notify_one();
     let joined = tokio::time::timeout(Duration::from_secs(5), &mut server.server)
