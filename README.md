@@ -100,43 +100,43 @@ It works in many environments, including VRChat and Discord.
 
 #### Recommended Models
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 E4B (Local)** | Unlimited | 5,000 | 3,660 | 1,290 |
-| **Gemma 4 26B A4B + 31B** | 13,940 | 3,680 | 2,900 | 1,180 |
-| **DeepSeek V4 Flash** | 11,620 | 3,500 | 2,780 | 1,160 |
+| **Gemma 4 E4B (Local)** | Unlimited | Unlimited | 5,000 | 3,660 |
+| **Gemma 4 26B A4B + 31B** | 13,940 | 13,940 | 3,680 | 2,900 |
+| **DeepSeek V4 Flash** | 11,620 | 11,620 | 3,500 | 2,780 |
 
 #### Other Models
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 12B (Local)** | Unlimited | 5,000 | 3,660 | 1,290 |
-| **Gemma 4 26B A4B** | 14,380 | 3,710 | 2,920 | 1,180 |
-| **Gemma 4 31B (OpenRouter)** | 10,940 | 3,430 | 2,740 | 1,150 |
-| **Gemma 4 31B (Cerebras)** | 920 | 770 | 730 | 540 |
-| **Gemini 3.7 Flash** | 1,160 | 940 | 880 | 610 |
-| **Qwen 3.8 Flash** | 7,460 | — | 2,460 | — |
+| **Gemma 4 12B (Local)** | Unlimited | Unlimited | 5,000 | 3,660 |
+| **Gemma 4 26B A4B** | 14,380 | 14,380 | 3,710 | 2,920 |
+| **Gemma 4 31B (OpenRouter)** | 10,940 | 10,940 | 3,430 | 2,740 |
+| **Gemma 4 31B (Cerebras)** | 920 | 920 | 770 | 730 |
+| **Gemini 3.7 Flash** | 1,160 | 1,160 | 940 | 880 |
+| **Qwen 3.8 Flash** | 7,460 | 7,460 | 2,990 | 2,460 |
 
 ### Cost per Utterance
 
 #### Recommended Models
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 E4B (Local)** | $0 | ~$0.0002 | ~$0.0003 | ~$0.0008 |
-| **Gemma 4 26B A4B + 31B** | ~$0.00007 | ~$0.0003 | ~$0.0003 | ~$0.0008 |
-| **DeepSeek V4 Flash** | ~$0.00009 | ~$0.0003 | ~$0.0003 | ~$0.0008 |
+| **Gemma 4 E4B (Local)** | $0 | $0 | ~$0.0002 | ~$0.0003 |
+| **Gemma 4 26B A4B + 31B** | ~$0.00007 | ~$0.00007 | ~$0.0003 | ~$0.0003 |
+| **DeepSeek V4 Flash** | ~$0.00009 | ~$0.00009 | ~$0.0003 | ~$0.0003 |
 
 #### Other Models
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 12B (Local)** | $0 | ~$0.0002 | ~$0.0003 | ~$0.0008 |
-| **Gemma 4 26B A4B** | ~$0.00007 | ~$0.0003 | ~$0.0003 | ~$0.0008 |
-| **Gemma 4 31B (OpenRouter)** | ~$0.00009 | ~$0.0003 | ~$0.0003 | ~$0.0009 |
-| **Gemma 4 31B (Cerebras)** | ~$0.0011 | ~$0.0013 | ~$0.0014 | ~$0.0019 |
-| **Gemini 3.7 Flash** | ~$0.0009 | ~$0.0011 | ~$0.0011 | ~$0.0016 |
-| **Qwen 3.8 Flash** | ~$0.0001 | — | ~$0.0004 | — |
+| **Gemma 4 12B (Local)** | $0 | $0 | ~$0.0002 | ~$0.0003 |
+| **Gemma 4 26B A4B** | ~$0.00007 | ~$0.00007 | ~$0.0003 | ~$0.0003 |
+| **Gemma 4 31B (OpenRouter)** | ~$0.00009 | ~$0.00009 | ~$0.0003 | ~$0.0003 |
+| **Gemma 4 31B (Cerebras)** | ~$0.0011 | ~$0.0011 | ~$0.0013 | ~$0.0014 |
+| **Gemini 3.7 Flash** | ~$0.0009 | ~$0.0009 | ~$0.0011 | ~$0.0011 |
+| **Qwen 3.8 Flash** | ~$0.0001 | ~$0.0001 | ~$0.0003 | ~$0.0004 |
 
 *   *Based on (Input 900 tokens + Output 12 tokens) × 1.2 avg LLM calls per utterance.*
 *   *Uses per Dollar is derived from the un-rounded values in the Cost per Utterance table.*
@@ -149,7 +149,9 @@ It works in many environments, including VRChat and Discord.
 
 | Service | Free Credit | Duration | Note |
 |--------|------------|------|------|
-| **Deepgram** | $200 | None | - |
+| **Deepgram** | $200 | None | No card required |
+| **ElevenLabs** | 10,000 credits | Monthly reset | No card required |
+| **Gemini 3.5 Transcribe** | Free tier | None | Practically unlimited on the free tier |
 | **Alibaba Cloud** | 1M tokens per model | 90 days | Singapore region |
 | **Alibaba Cloud** | ¥300 | 1 year | Students in China |
 
@@ -210,7 +212,7 @@ If audio capture does not work, open **Settings > General** and follow these ste
 
 If Soniox/Gemini/Deepgram are blocked in your region, please use the following combination:
 
-- STT: **Qwen ASR**
+- STT: **Qwen Audio**
 - LLM: **DeepSeek V4 Flash**
 
    > You can authenticate through QQ instead of Discord.
