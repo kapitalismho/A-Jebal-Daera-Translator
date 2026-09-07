@@ -531,7 +531,7 @@
   "provider.qwen_asr": "Qwen3 ASR Flash Realtime",
   "provider.qwen_asr.description": "",
   "provider.qwen_audio": "Qwen Audio 3.0 ASR Flash Streaming",
-  "provider.qwen_audio.description": "아마도 Qwen3 ASR보다 좋을 거에요",
+  "provider.qwen_audio.description": "",
   "provider.custom": "Custom ASR",
   "provider.custom.description": "Connect your own offline or realtime ASR endpoint",
   "provider.custom_offline": "Custom ASR (Offline)",
