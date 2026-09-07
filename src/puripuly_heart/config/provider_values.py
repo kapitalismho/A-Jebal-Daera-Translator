@@ -66,8 +66,8 @@ class STTProviderName(str, Enum):
 
 
 CLOUD_FREE_TIER_STT_PROVIDERS: tuple[STTProviderName, ...] = (
-    STTProviderName.GEMINI_TRANSCRIBE,
     STTProviderName.ELEVENLABS_SCRIBE,
+    STTProviderName.GEMINI_TRANSCRIBE,
     STTProviderName.DEEPGRAM,
 )
 DEFAULT_CLOUD_FREE_TIER_STT_PROVIDERS: tuple[STTProviderName, ...] = (

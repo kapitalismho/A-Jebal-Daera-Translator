@@ -2,7 +2,7 @@
 
 Priority-based failover across configured free cloud ASR providers:
 
-    gemini_transcribe -> elevenlabs_scribe -> deepgram
+    elevenlabs_scribe -> gemini_transcribe -> deepgram
 
 The rolling backend is a normal STTBackend: it opens one provider session per
 attempt, falls through to the next provider on transient failures for that
@@ -48,8 +48,8 @@ _PERSISTENT_EXHAUSTION_STATES = frozenset(
 )
 
 _ROLLING_PRIORITY_ORDER: tuple[STTProviderName, ...] = (
-    STTProviderName.GEMINI_TRANSCRIBE,
     STTProviderName.ELEVENLABS_SCRIBE,
+    STTProviderName.GEMINI_TRANSCRIBE,
     STTProviderName.DEEPGRAM,
 )
 
@@ -300,7 +300,7 @@ class RollingSTTBackend(STTBackend):
                 "see statuses() for per-provider state"
             )
         raise RuntimeError(
-            "No rolling ASR provider is configured; configure a Gemini, ElevenLabs, "
+            "No rolling ASR provider is configured; configure an ElevenLabs, Gemini, "
             "or Deepgram API key"
         )
 

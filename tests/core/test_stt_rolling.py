@@ -96,36 +96,36 @@ async def test_open_session_selects_first_configured_provider() -> None:
     rolling = _make(gemini, scribe)
 
     session = await rolling.open_session()
-    assert gemini_backend.open_count == 1
-    assert scribe_backend.open_count == 0
-    assert session.provider_name is STTProviderName.GEMINI_TRANSCRIBE
+    assert scribe_backend.open_count == 1
+    assert gemini_backend.open_count == 0
+    assert session.provider_name is STTProviderName.ELEVENLABS_SCRIBE
     await session.close()
 
 
 @pytest.mark.asyncio
 async def test_transient_open_failure_falls_through_for_attempt_only() -> None:
-    gemini_session = _ScriptedSession()
-    gemini, gemini_backend = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
-        gemini_session,
+    scribe_session = _ScriptedSession()
+    scribe, scribe_backend = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
+        scribe_session,
         fail_times=1,
         classifier=lambda exc: "transient",
     )
-    scribe_session = _ScriptedSession()
-    scribe, scribe_backend = _definition(
-        STTProviderName.ELEVENLABS_SCRIBE, scribe_session, classifier=lambda exc: "transient"
+    gemini_session = _ScriptedSession()
+    gemini, gemini_backend = _definition(
+        STTProviderName.GEMINI_TRANSCRIBE, gemini_session, classifier=lambda exc: "transient"
     )
     rolling = _make(gemini, scribe)
 
     session = await rolling.open_session()
-    assert gemini_backend.open_count == 1
     assert scribe_backend.open_count == 1
-    assert session.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert gemini_backend.open_count == 1
+    assert session.provider_name is STTProviderName.GEMINI_TRANSCRIBE
     await session.close()
 
     second = await rolling.open_session()
-    assert gemini_backend.open_count == 2
-    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
+    assert scribe_backend.open_count == 2
+    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
     await second.close()
 
 
@@ -138,116 +138,116 @@ async def test_gemini_rpm_429_is_transient_not_daily_exhaustion() -> None:
 
 @pytest.mark.asyncio
 async def test_auth_failure_persists_until_credential_change() -> None:
-    gemini_session = _ScriptedSession()
-    gemini, gemini_backend = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
-        gemini_session,
+    scribe_session = _ScriptedSession()
+    scribe, scribe_backend = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
+        scribe_session,
         fail_times=99,
         classifier=lambda exc: "auth",
     )
-    scribe_session = _ScriptedSession()
-    scribe, _ = _definition(STTProviderName.ELEVENLABS_SCRIBE, scribe_session)
+    gemini_session = _ScriptedSession()
+    gemini, _ = _definition(STTProviderName.GEMINI_TRANSCRIBE, gemini_session)
     rolling = _make(gemini, scribe)
 
     first = await rolling.open_session()
-    assert first.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert first.provider_name is STTProviderName.GEMINI_TRANSCRIBE
     await first.close()
 
     second = await rolling.open_session()
-    assert gemini_backend.open_count == 1
-    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert scribe_backend.open_count == 1
+    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
     await second.close()
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AUTH_FAILED
     )
 
 
 @pytest.mark.asyncio
 async def test_rebind_member_clears_only_that_member_exclusion() -> None:
-    gemini_failed = _ScriptedBackend(
+    scribe_failed = _ScriptedBackend(
         _ScriptedSession(error=RuntimeError("401")),
         fail_times=99,
     )
-    gemini_ready = _ScriptedBackend(_ScriptedSession())
-    gemini_backend: _ScriptedBackend | None = gemini_failed
-    gemini_configured = True
+    scribe_ready = _ScriptedBackend(_ScriptedSession())
+    scribe_backend: _ScriptedBackend | None = scribe_failed
+    scribe_configured = True
 
-    def gemini_is_configured() -> bool:
-        return gemini_configured
+    def scribe_is_configured() -> bool:
+        return scribe_configured
 
-    def gemini_build_backend() -> _ScriptedBackend:
-        assert gemini_backend is not None
-        return gemini_backend
+    def scribe_build_backend() -> _ScriptedBackend:
+        assert scribe_backend is not None
+        return scribe_backend
 
-    def gemini_rebind(api_key: str) -> None:
-        nonlocal gemini_backend, gemini_configured
-        gemini_configured = bool((api_key or "").strip())
-        gemini_backend = gemini_ready if gemini_configured else None
+    def scribe_rebind(api_key: str) -> None:
+        nonlocal scribe_backend, scribe_configured
+        scribe_configured = bool((api_key or "").strip())
+        scribe_backend = scribe_ready if scribe_configured else None
 
-    scribe_session = _ScriptedSession(error=RuntimeError("quota_exceeded"))
-    scribe, scribe_backend = _definition(
-        STTProviderName.ELEVENLABS_SCRIBE,
-        scribe_session,
+    gemini_session = _ScriptedSession(error=RuntimeError("quota_exceeded"))
+    gemini, gemini_backend = _definition(
+        STTProviderName.GEMINI_TRANSCRIBE,
+        gemini_session,
         fail_times=99,
         classifier=lambda exc: "quota",
     )
-    gemini = RollingProviderDefinition(
-        name=STTProviderName.GEMINI_TRANSCRIBE,
-        build_backend=gemini_build_backend,
-        is_configured=gemini_is_configured,
+    scribe = RollingProviderDefinition(
+        name=STTProviderName.ELEVENLABS_SCRIBE,
+        build_backend=scribe_build_backend,
+        is_configured=scribe_is_configured,
         classify_error=lambda exc: "auth",
-        rebind=gemini_rebind,
+        rebind=scribe_rebind,
     )
     rolling = _make(gemini, scribe)
 
     with pytest.raises(RuntimeError, match="quota_exceeded"):
         await rolling.open_session()
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AUTH_FAILED
     )
-    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
+    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
         RollingProviderState.FREE_QUOTA_EXHAUSTED
     )
-    assert scribe_backend.open_count == 1
+    assert gemini_backend.open_count == 1
 
-    assert rolling.rebind_member(STTProviderName.GEMINI_TRANSCRIBE, "rotated-key")
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.rebind_member(STTProviderName.ELEVENLABS_SCRIBE, "rotated-key")
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AVAILABLE
     )
-    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
+    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
         RollingProviderState.FREE_QUOTA_EXHAUSTED
     )
 
     session = await rolling.open_session()
-    assert session.provider_name is STTProviderName.GEMINI_TRANSCRIBE
-    assert gemini_ready.open_count == 1
-    assert scribe_backend.open_count == 1
+    assert session.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert scribe_ready.open_count == 1
+    assert gemini_backend.open_count == 1
     await session.close()
 
 
 @pytest.mark.asyncio
 async def test_daily_quota_exhaustion_persists_but_rpm_does_not() -> None:
-    gemini_session = _ScriptedSession()
-    gemini, gemini_backend = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
-        gemini_session,
+    scribe_session = _ScriptedSession()
+    scribe, scribe_backend = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
+        scribe_session,
         fail_times=99,
         classifier=lambda exc: "quota_day",
     )
-    scribe_session = _ScriptedSession()
-    scribe, _ = _definition(STTProviderName.ELEVENLABS_SCRIBE, scribe_session)
+    gemini_session = _ScriptedSession()
+    gemini, _ = _definition(STTProviderName.GEMINI_TRANSCRIBE, gemini_session)
     rolling = _make(gemini, scribe)
 
     first = await rolling.open_session()
     await first.close()
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.FREE_QUOTA_EXHAUSTED
     )
-    assert gemini_backend.open_count == 1
+    assert scribe_backend.open_count == 1
 
     second = await rolling.open_session()
-    assert gemini_backend.open_count == 1
-    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert scribe_backend.open_count == 1
+    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
     await second.close()
 
 
@@ -275,7 +275,7 @@ async def test_no_provider_configured_fails_closed() -> None:
 
 
 @pytest.mark.asyncio
-async def test_gemini_has_no_local_session_cap() -> None:
+async def test_scribe_has_no_local_session_cap() -> None:
     gemini_session = _ScriptedSession()
     gemini, gemini_backend = _definition(STTProviderName.GEMINI_TRANSCRIBE, gemini_session)
     scribe_session = _ScriptedSession()
@@ -284,18 +284,18 @@ async def test_gemini_has_no_local_session_cap() -> None:
 
     for _ in range(30):
         session = await rolling.open_session()
-        assert session.provider_name is STTProviderName.GEMINI_TRANSCRIBE
+        assert session.provider_name is STTProviderName.ELEVENLABS_SCRIBE
         await session.close()
 
-    assert gemini_backend.open_count == 30
-    assert scribe_backend.open_count == 0
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert scribe_backend.open_count == 30
+    assert gemini_backend.open_count == 0
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AVAILABLE
     )
 
 
 @pytest.mark.asyncio
-async def test_gemini_without_override_uses_controller_deadline() -> None:
+async def test_scribe_without_override_uses_controller_deadline() -> None:
     gemini_session = _ScriptedSession()
     gemini, gemini_backend = _definition(STTProviderName.GEMINI_TRANSCRIBE, gemini_session)
     scribe, scribe_backend = _definition(STTProviderName.ELEVENLABS_SCRIBE, _ScriptedSession())
@@ -307,9 +307,9 @@ async def test_gemini_without_override_uses_controller_deadline() -> None:
     await first.close()
 
     second = await rolling.open_session()
-    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
-    assert scribe_backend.open_count == 0
-    assert gemini_backend.open_count == 2
+    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert gemini_backend.open_count == 0
+    assert scribe_backend.open_count == 2
     await second.close()
 
 
@@ -341,21 +341,21 @@ async def test_healthy_rollover_does_not_descend_on_deadline() -> None:
             yield STTBackendTranscriptEvent(text="late", is_final=True)
 
     session = _DeadlineSession()
-    gemini, gemini_backend = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
+    scribe, scribe_backend = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
         session,
         session_deadline_s=0.05,
     )
-    scribe, scribe_backend = _definition(STTProviderName.ELEVENLABS_SCRIBE, _ScriptedSession())
+    gemini, gemini_backend = _definition(STTProviderName.GEMINI_TRANSCRIBE, _ScriptedSession())
     rolling = _make(gemini, scribe)
 
     active = await rolling.open_session()
     await asyncio.sleep(0.1)
     deadline_hit.set()
     again = await rolling.open_session()
-    assert again.provider_name is STTProviderName.GEMINI_TRANSCRIBE
-    assert scribe_backend.open_count == 0
-    assert gemini_backend.open_count == 2
+    assert again.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert gemini_backend.open_count == 0
+    assert scribe_backend.open_count == 2
     await active.close()
     await again.close()
 
@@ -393,14 +393,14 @@ def test_priority_order_is_enforced_regardless_of_definition_order() -> None:
     rolling = _make(deepgram, gemini, scribe)
 
     session = asyncio.run(rolling.open_session())
-    assert session.provider_name is STTProviderName.GEMINI_TRANSCRIBE
-    assert gemini_backend.open_count == 1
-    assert scribe_backend.open_count == 0
+    assert session.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert scribe_backend.open_count == 1
+    assert gemini_backend.open_count == 0
     assert deepgram_backend.open_count == 0
     asyncio.run(session.close())
     assert [status.name for status in rolling.statuses()] == [
-        STTProviderName.GEMINI_TRANSCRIBE,
         STTProviderName.ELEVENLABS_SCRIBE,
+        STTProviderName.GEMINI_TRANSCRIBE,
         STTProviderName.DEEPGRAM,
     ]
 
@@ -445,56 +445,56 @@ def test_scribe_and_deepgram_quota_kind_is_account_quota_not_daily() -> None:
 
 
 def test_explicit_daily_quota_signal_persists_without_day_reset() -> None:
-    gemini_session = _ScriptedSession()
-    gemini, gemini_backend = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
-        gemini_session,
+    scribe_session = _ScriptedSession()
+    scribe, scribe_backend = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
+        scribe_session,
         fail_times=99,
         classifier=lambda exc: "quota_day",
     )
-    scribe, _ = _definition(STTProviderName.ELEVENLABS_SCRIBE, _ScriptedSession())
+    gemini, _ = _definition(STTProviderName.GEMINI_TRANSCRIBE, _ScriptedSession())
     rolling = _make(gemini, scribe)
 
     first = asyncio.run(rolling.open_session())
     asyncio.run(first.close())
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.FREE_QUOTA_EXHAUSTED
     )
-    assert gemini_backend.open_count == 1
+    assert scribe_backend.open_count == 1
 
     second = asyncio.run(rolling.open_session())
-    assert gemini_backend.open_count == 1
-    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert scribe_backend.open_count == 1
+    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
     asyncio.run(second.close())
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.FREE_QUOTA_EXHAUSTED
     )
 
 
 def test_configuration_loss_hides_but_persists_exclusion_state() -> None:
-    gemini_session = _ScriptedSession()
-    gemini, _ = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
-        gemini_session,
+    scribe_session = _ScriptedSession()
+    scribe, _ = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
+        scribe_session,
         fail_times=99,
         classifier=lambda exc: "auth",
     )
-    scribe, _ = _definition(STTProviderName.ELEVENLABS_SCRIBE, _ScriptedSession())
+    gemini, _ = _definition(STTProviderName.GEMINI_TRANSCRIBE, _ScriptedSession())
     rolling = _make(gemini, scribe)
 
     first = asyncio.run(rolling.open_session())
     asyncio.run(first.close())
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AUTH_FAILED
     )
 
-    definition = rolling._definition(STTProviderName.GEMINI_TRANSCRIBE)
+    definition = rolling._definition(STTProviderName.ELEVENLABS_SCRIBE)
     object.__setattr__(definition, "is_configured", lambda: False)
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.NOT_CONFIGURED
     )
     object.__setattr__(definition, "is_configured", lambda: True)
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AUTH_FAILED
     )
 
@@ -525,15 +525,15 @@ async def test_scribe_quota_falls_through_to_deepgram() -> None:
 
 
 @pytest.mark.asyncio
-async def test_three_provider_chain_gemini_transient_then_scribe_quota_to_deepgram() -> None:
-    gemini, gemini_backend = _definition(
-        STTProviderName.GEMINI_TRANSCRIBE,
+async def test_three_provider_chain_scribe_transient_then_gemini_quota_to_deepgram() -> None:
+    scribe, scribe_backend = _definition(
+        STTProviderName.ELEVENLABS_SCRIBE,
         _ScriptedSession(),
         fail_times=1,
         classifier=lambda exc: "transient",
     )
-    scribe, scribe_backend = _definition(
-        STTProviderName.ELEVENLABS_SCRIBE,
+    gemini, gemini_backend = _definition(
+        STTProviderName.GEMINI_TRANSCRIBE,
         _ScriptedSession(),
         fail_times=99,
         classifier=lambda exc: "quota",
@@ -543,14 +543,14 @@ async def test_three_provider_chain_gemini_transient_then_scribe_quota_to_deepgr
 
     first = await rolling.open_session()
     assert first.provider_name is STTProviderName.DEEPGRAM
-    assert gemini_backend.open_count == 1
     assert scribe_backend.open_count == 1
+    assert gemini_backend.open_count == 1
     assert deepgram_backend.open_count == 1
     await first.close()
 
     second = await rolling.open_session()
-    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
-    assert gemini_backend.open_count == 2
+    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
+    assert scribe_backend.open_count == 2
     await second.close()
 
 
@@ -604,8 +604,8 @@ async def test_healthy_rollover_keeps_provider_available() -> None:
     first = await rolling.open_session()
     await first.close()
     second = await rolling.open_session()
-    assert second.provider_name is STTProviderName.GEMINI_TRANSCRIBE
+    assert second.provider_name is STTProviderName.ELEVENLABS_SCRIBE
     await second.close()
-    assert rolling.status(STTProviderName.GEMINI_TRANSCRIBE).state is (
+    assert rolling.status(STTProviderName.ELEVENLABS_SCRIBE).state is (
         RollingProviderState.AVAILABLE
     )
