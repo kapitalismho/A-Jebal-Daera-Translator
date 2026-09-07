@@ -5735,3 +5735,81 @@ async def test_desktop_overlay_startup_failure_closes_parent_monitor_once() -> N
     await renderer.shutdown()
 
     assert parent_monitor.close_calls == 1
+
+
+@pytest.mark.asyncio
+async def test_desktop_renderer_off_live_peer_source_uses_primary_typography() -> None:
+    from uuid import uuid4
+
+    from puripuly_heart.core.clock import FakeClock
+    from puripuly_heart.core.overlay.presenter import OverlayPresenter
+    from puripuly_heart.core.overlay.sink import OverlayEventAdapter
+    from puripuly_heart.ui.overlay_calibration import OverlayCalibration
+
+    clock = FakeClock(_now=10.0)
+    presenter = OverlayPresenter(
+        calibration=OverlayCalibration(),
+        clock=clock,
+        translation_enabled=False,
+        peer_presentation_refresh_burst=False,
+        self_presentation_refresh_burst=False,
+    )
+    adapter = OverlayEventAdapter(clock=clock)
+    peer_turn_id = uuid4()
+    await presenter.emit(
+        adapter.peer_active_update(
+            text="live peer source",
+            utterance_id=peer_turn_id,
+            occupant_key=f"peer:{peer_turn_id}",
+            source_language="en",
+            target_language="ko",
+            created_at=10.0,
+        )
+    )
+    snapshot = presenter.snapshot()
+    assert len(snapshot.blocks) == 1
+    assert snapshot.blocks[0].primary_text == "live peer source"
+    assert snapshot.blocks[0].secondary_text == ""
+    plan = desktop_overlay.build_desktop_caption_plan(snapshot)
+    assert len(plan.lines) == 1
+    line = plan.lines[0]
+    assert line.text == "live peer source"
+    assert line.role == "active_peer_source"
+    assert line.slot == "primary"
+    assert line.promoted is False
+    assert line.font_size == plan.primary_font_size
+    surface = desktop_overlay.build_desktop_caption_surface(plan)
+    texts = [
+        item
+        for control in surface.content.controls
+        for item in _walk_control_tree(control)
+        if isinstance(item, ft.Text)
+    ]
+    assert [text.value for text in texts] == ["live peer source"]
+    assert {text.size for text in texts} == {plan.primary_font_size}
+
+
+def test_desktop_renderer_on_legacy_active_peer_source_stays_promoted_primary() -> None:
+    plan = desktop_overlay.build_desktop_caption_plan(
+        OverlayPresentationSnapshot(
+            revision=1,
+            blocks=[
+                _block(
+                    "peer-active-legacy",
+                    channel="peer",
+                    block_variant="active_peer",
+                    appearance_seq=1,
+                    primary_text="",
+                    secondary_text="typing live source",
+                    secondary_enabled=True,
+                )
+            ],
+        )
+    )
+    assert len(plan.lines) == 1
+    line = plan.lines[0]
+    assert line.text == "typing live source"
+    assert line.role == "active_peer_source"
+    assert line.slot == "primary"
+    assert line.promoted is True
+    assert line.font_size == plan.primary_font_size

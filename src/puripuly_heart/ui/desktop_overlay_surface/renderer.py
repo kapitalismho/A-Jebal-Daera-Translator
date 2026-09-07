@@ -773,24 +773,37 @@ def _peer_active_lines(
     primary_font_size: int,
     secondary_font_size: int,
 ) -> tuple[DesktopCaptionLine, ...]:
-    readable_text = primary_text or (secondary_text if block.secondary_enabled else "")
-    if not readable_text:
-        return ()
-    promoted = not primary_text and bool(secondary_text) and block.secondary_enabled
-    return (
-        _caption_line(
-            block,
-            text=readable_text,
-            role="active_peer_source",
-            slot="primary" if not promoted else "primary",
-            priority=95,
-            max_lines=_DESKTOP_CAPTION_PRIMARY_MAX_LINES,
-            font_size=primary_font_size if promoted else secondary_font_size,
-            language=block.secondary_language if promoted else block.primary_language,
-            promoted=promoted,
-            active=True,
-        ),
-    )
+    if primary_text:
+        return (
+            _caption_line(
+                block,
+                text=primary_text,
+                role="active_peer_source",
+                slot="primary",
+                priority=95,
+                max_lines=_DESKTOP_CAPTION_PRIMARY_MAX_LINES,
+                font_size=primary_font_size,
+                language=block.primary_language,
+                promoted=False,
+                active=True,
+            ),
+        )
+    if secondary_text and block.secondary_enabled:
+        return (
+            _caption_line(
+                block,
+                text=secondary_text,
+                role="active_peer_source",
+                slot="primary",
+                priority=95,
+                max_lines=_DESKTOP_CAPTION_PRIMARY_MAX_LINES,
+                font_size=primary_font_size,
+                language=block.secondary_language,
+                promoted=True,
+                active=True,
+            ),
+        )
+    return ()
 
 
 def _peer_finalized_lines(
