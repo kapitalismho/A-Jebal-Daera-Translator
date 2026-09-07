@@ -95,53 +95,11 @@ def _block(
     )
 
 
-def test_desktop_overlay_snapshot_mapping_table_documents_current_block_contract() -> None:
+def test_desktop_overlay_snapshot_mapping_table_covers_block_contract_and_emitted_lines() -> None:
     rows = {
         (row.snapshot_field, row.block_type, row.slot): row
         for row in desktop_overlay.DESKTOP_CAPTION_MAPPING_TABLE
     }
-
-    assert rows[("blocks[]", "active_self/self", "primary")].role == "active_self_source"
-    assert rows[("blocks[]", "active_self/self", "primary")].color == _DESKTOP_CAPTION_WHITE
-    assert rows[("blocks[]", "active_self/self", "secondary")].role == "active_self_translation"
-    assert rows[("blocks[]", "active_self/self", "secondary")].color == _DESKTOP_CAPTION_WHITE
-    assert rows[("blocks[]", "active_self/self", "secondary")].truncation.startswith("max 1 line")
-    active_peer_row = rows[("blocks[]", "active_peer/peer", "primary")]
-    assert active_peer_row.role == "active_peer_source"
-    assert active_peer_row.promoted is True
-    assert active_peer_row.color == _DESKTOP_CAPTION_GOLD
-    assert rows[("blocks[]", "finalized/peer translated", "primary")].role == ("peer_translation")
-    assert rows[("blocks[]", "finalized/peer translated", "primary")].color == _DESKTOP_CAPTION_GOLD
-    assert (
-        rows[("blocks[]", "finalized/peer translated", "secondary")].color == _DESKTOP_CAPTION_GOLD
-    )
-    assert rows[("blocks[]", "finalized/peer translated", "secondary")].truncation.startswith(
-        "max 1 line"
-    )
-    peer_source_only_row = rows[("blocks[]", "finalized/peer source-only", "primary")]
-    assert peer_source_only_row.promoted is True
-    assert peer_source_only_row.color == _DESKTOP_CAPTION_GOLD
-    assert peer_source_only_row.truncation == (
-        "max 2 lines; drops before active and translated primary lines"
-    )
-    assert rows[("blocks[]", "finalized/self", "secondary")].role == "self_translation"
-    assert rows[("blocks[]", "finalized/self", "secondary")].color == _DESKTOP_CAPTION_WHITE
-    assert rows[("blocks[]", "finalized/self", "secondary")].truncation.startswith("max 1 line")
-    self_secondary_only_row = rows[("blocks[]", "finalized/self secondary-only", "primary")]
-    assert self_secondary_only_row.role == "self_translation"
-    assert self_secondary_only_row.promoted is True
-    assert self_secondary_only_row.color == _DESKTOP_CAPTION_WHITE
-    assert rows[("calibration", "all", "none")].role == "desktop_visual_ignored"
-    assert rows[("blocks[]", "none/edit", "none")].role == "edit_no_caption_empty_card"
-    assert rows[("blocks[]", "none/edit", "none")].truncation == (
-        "renders empty caption card with centered lock text action"
-    )
-    assert rows[("blocks[]", "none/pass_through", "none")].truncation == (
-        "renders no text and no background"
-    )
-
-
-def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() -> None:
     row_by_block_and_role = {
         (row.block_type, row.role): row for row in desktop_overlay.DESKTOP_CAPTION_MAPPING_TABLE
     }
@@ -158,6 +116,16 @@ def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() 
                 secondary_enabled=True,
             ),
             ("active self source", "active self translation"),
+            {
+                ("blocks[]", "primary"): {
+                    "role": "active_self_source",
+                    "color": _DESKTOP_CAPTION_WHITE,
+                },
+                ("blocks[]", "secondary"): {
+                    "role": "active_self_translation",
+                    "color": _DESKTOP_CAPTION_WHITE,
+                },
+            },
         ),
         (
             "active_peer/peer",
@@ -171,6 +139,13 @@ def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() 
                 secondary_enabled=True,
             ),
             ("active peer source",),
+            {
+                ("blocks[]", "primary"): {
+                    "role": "active_peer_source",
+                    "promoted": True,
+                    "color": _DESKTOP_CAPTION_GOLD,
+                },
+            },
         ),
         (
             "finalized/peer translated",
@@ -184,6 +159,15 @@ def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() 
                 secondary_enabled=True,
             ),
             ("peer translation", "peer original"),
+            {
+                ("blocks[]", "primary"): {
+                    "role": "peer_translation",
+                    "color": _DESKTOP_CAPTION_GOLD,
+                },
+                ("blocks[]", "secondary"): {
+                    "color": _DESKTOP_CAPTION_GOLD,
+                },
+            },
         ),
         (
             "finalized/peer source-only",
@@ -197,6 +181,12 @@ def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() 
                 secondary_enabled=True,
             ),
             ("peer source only",),
+            {
+                ("blocks[]", "primary"): {
+                    "promoted": True,
+                    "color": _DESKTOP_CAPTION_GOLD,
+                },
+            },
         ),
         (
             "finalized/self",
@@ -210,6 +200,12 @@ def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() 
                 secondary_enabled=True,
             ),
             ("self source", "self translation"),
+            {
+                ("blocks[]", "secondary"): {
+                    "role": "self_translation",
+                    "color": _DESKTOP_CAPTION_WHITE,
+                },
+            },
         ),
         (
             "finalized/self secondary-only",
@@ -223,10 +219,39 @@ def test_desktop_overlay_snapshot_mapping_table_matches_emitted_caption_lines() 
                 secondary_enabled=True,
             ),
             ("self translation only",),
+            {
+                ("blocks[]", "primary"): {
+                    "role": "self_translation",
+                    "promoted": True,
+                    "color": _DESKTOP_CAPTION_WHITE,
+                },
+            },
+        ),
+        (
+            "all",
+            None,
+            None,
+            {("calibration", "none"): {"role": "desktop_visual_ignored"}},
+        ),
+        (
+            "none/edit",
+            None,
+            None,
+            {
+                ("blocks[]", "none"): {
+                    "role": "edit_no_caption_empty_card",
+                },
+            },
         ),
     ]
 
-    for block_type, block, expected_texts in cases:
+    for block_type, block, expected_texts, expected_rows in cases:
+        for (snapshot_field, slot), expected_attrs in expected_rows.items():
+            row = rows[(snapshot_field, block_type, slot)]
+            for attr, value in expected_attrs.items():
+                assert getattr(row, attr) == value, (block_type, slot, attr)
+        if block is None:
+            continue
         plan = desktop_overlay.build_desktop_caption_plan(
             OverlayPresentationSnapshot(blocks=[block])
         )

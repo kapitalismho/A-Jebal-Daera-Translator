@@ -41,11 +41,24 @@ def test_flet_desktop_private_hook_inventory_is_exact_and_explicit() -> None:
         "open_flet_view_async",
     )
 
-    source = ADAPTER_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(ADAPTER_PATH.read_text(encoding="utf-8"), filename=str(ADAPTER_PATH))
+    referenced: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            referenced.add(node.attr)
+        elif isinstance(node, ast.ImportFrom) and node.names is not None:
+            referenced.update(alias.name.split(".")[0] for alias in node.names)
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "getattr"
+            and len(node.args) >= 2
+            and isinstance(node.args[1], ast.Constant)
+            and isinstance(node.args[1].value, str)
+        ):
+            referenced.add(node.args[1].value)
     for hook in REQUIRED_FLET_DESKTOP_HOOKS:
-        assert hook in source
-    assert "patch_hidden_view_launcher" in source
-    assert "open_hidden_view" in source
+        assert hook in referenced, f"{hook} must be referenced by real code in flet_desktop_runtime"
 
 
 def test_the_private_hooks_the_adapter_depends_on_exist_in_the_installed_runtime() -> None:

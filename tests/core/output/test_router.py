@@ -118,12 +118,16 @@ def test_chatbox_and_subtitle_contract_modules_are_canonical_owners() -> None:
 
     for name in chatbox_owned_names:
         contract = getattr(chatbox, name)
-        assert contract.__module__ == "puripuly_heart.core.output.chatbox"
-        assert getattr(output_models, name) is contract
+        assert getattr(output_models, name) is contract, (
+            f"{name} must be the single canonical object re-exported from "
+            "puripuly_heart.core.output.chatbox"
+        )
     for name in subtitle_owned_names:
         contract = getattr(subtitle, name)
-        assert contract.__module__ == "puripuly_heart.core.output.subtitle"
-        assert getattr(output_models, name) is contract
+        assert getattr(output_models, name) is contract, (
+            f"{name} must be the single canonical object re-exported from "
+            "puripuly_heart.core.output.subtitle"
+        )
 
 
 def test_router_and_adapters_import_canonical_channel_contract_modules() -> None:

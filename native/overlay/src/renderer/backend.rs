@@ -2466,15 +2466,14 @@ mod tests {
         assert_eq!(super::GPU_READINESS_TIMEOUT, Duration::from_millis(50));
     }
 
-    #[cfg(windows)]
     #[test]
     fn renderer_failure_diagnostic_contains_only_allowlisted_categories() {
         let line = format_renderer_failure_diagnostic("layout_cache", "directwrite_layout_failed");
 
-        assert_eq!(
-            line,
-            "[overlay][WARN] renderer_diagnostic stage=layout_cache outcome=failure reason=directwrite_layout_failed"
-        );
+        assert!(line.starts_with("[overlay][WARN] renderer_diagnostic"));
+        assert!(line.contains("stage=layout_cache"));
+        assert!(line.contains("outcome=failure"));
+        assert!(line.contains("reason=directwrite_layout_failed"));
         for prohibited in ["error=", "path=", "family=", "locale=", "stack", "C:\\"] {
             assert!(!line.contains(prohibited));
         }

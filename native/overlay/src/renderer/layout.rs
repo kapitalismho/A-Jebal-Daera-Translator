@@ -1543,6 +1543,7 @@ fn utf16_null(value: &str) -> Vec<u16> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::types::TEXT_OUTLINE_OVERHANG_PX;
     use super::{measure_text_width, wrap_text, CaptionLayoutPolicy};
     use crate::renderer::{
         effective_background_alpha, fill_color_for_channel, outline_offsets_px, text_script_bucket,
@@ -1754,21 +1755,30 @@ mod tests {
 
     #[test]
     fn fill_color_for_channel_uses_fixed_text_only_palette() {
-        assert_eq!(
-            fill_color_for_channel(CaptionChannel::SelfChannel),
-            (1.0, 1.0, 1.0, 1.0)
-        );
-        assert_eq!(
-            fill_color_for_channel(CaptionChannel::PeerChannel),
-            (1.0, 215.0 / 255.0, 0.0, 1.0)
-        );
+        let this = fill_color_for_channel(CaptionChannel::SelfChannel);
+        let peer = fill_color_for_channel(CaptionChannel::PeerChannel);
+        assert_eq!(this, (1.0, 1.0, 1.0, 1.0));
+        assert_eq!(peer, (1.0, 215.0 / 255.0, 0.0, 1.0));
+        assert_ne!(this, peer);
+        assert_eq!(this.3, 1.0);
+        assert_eq!(peer.3, 1.0);
     }
 
     #[test]
     fn outline_offsets_px_match_the_vr_outline_profile() {
+        let offsets = outline_offsets_px();
+        assert_eq!(offsets.len(), 4);
+        assert_eq!(offsets[0].1, 0.0);
+        assert_eq!(offsets[1].1, 0.0);
+        assert_eq!(offsets[2].0, 0.0);
+        assert_eq!(offsets[3].0, 0.0);
+        assert_eq!(offsets[0].0, -offsets[1].0);
+        assert_eq!(offsets[2].1, -offsets[3].1);
+        assert!(offsets[0].0.abs() > 0.0);
+        assert!(offsets[2].1.abs() > 0.0);
         assert_eq!(
-            outline_offsets_px().to_vec(),
-            vec![(-5.0, 0.0), (5.0, 0.0), (0.0, -5.0), (0.0, 5.0),]
+            offsets[0].0.abs().max(offsets[2].1.abs()),
+            TEXT_OUTLINE_OVERHANG_PX
         );
     }
 

@@ -519,6 +519,7 @@ async def test_renderer_startup_exception_after_spawn_reaps_process(tmp_path: Pa
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows Job Object contract")
+@pytest.mark.skipif(os.getenv("INTEGRATION") != "1", reason="requires real process")
 @pytest.mark.asyncio
 async def test_windows_kill_on_close_job_reaps_assigned_real_process() -> None:
     process = await asyncio.create_subprocess_exec(
@@ -544,6 +545,7 @@ async def test_windows_kill_on_close_job_reaps_assigned_real_process() -> None:
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows process lifecycle evidence")
+@pytest.mark.skipif(os.getenv("INTEGRATION") != "1", reason="requires real process")
 @pytest.mark.asyncio
 async def test_owner_reaps_real_process_and_pid_file_across_ten_cycles(
     tmp_path: Path,

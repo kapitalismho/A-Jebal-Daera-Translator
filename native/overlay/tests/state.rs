@@ -115,11 +115,8 @@ fn overlay_state_deserializes_active_peer_variant() {
     assert_eq!(snapshot.blocks[0].primary_text, "");
     assert_eq!(snapshot.blocks[0].secondary_text, "Can you hear me?");
     assert!(snapshot.blocks[0].secondary_enabled);
-}
 
-#[test]
-fn overlay_state_deserializes_missing_language_fields_as_none() {
-    let snapshot: OverlayPresentationSnapshot = serde_json::from_value(json!({
+    let legacy: OverlayPresentationSnapshot = serde_json::from_value(json!({
         "revision": 1,
         "calibration": OverlayPresentationCalibration::default(),
         "blocks": [{
@@ -135,8 +132,8 @@ fn overlay_state_deserializes_missing_language_fields_as_none() {
     }))
     .unwrap();
 
-    assert_eq!(snapshot.blocks[0].primary_language, None);
-    assert_eq!(snapshot.blocks[0].secondary_language, None);
+    assert_eq!(legacy.blocks[0].primary_language, None);
+    assert_eq!(legacy.blocks[0].secondary_language, None);
 }
 
 #[test]

@@ -84,6 +84,7 @@ async def _natural_trace(channel: str, anchor: str) -> dict[str, object]:
                     target_language="ko",
                     applied_context_mode=None,
                     created_at=10.1,
+                    update_id=f"trace-{channel}-{anchor}-translation-final",
                 )
             )
         task_name = f"_{channel}_presentation_refresh_burst_task"
@@ -218,6 +219,7 @@ async def _ownership_trace() -> dict[str, object]:
                 target_language="ko",
                 applied_context_mode=None,
                 created_at=30.1,
+                update_id="trace-spatial-ownership-translation-final",
             )
         )
         await _wait_for(lambda: len(sleep_events) == 1)

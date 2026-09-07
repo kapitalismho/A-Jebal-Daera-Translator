@@ -37,4 +37,4 @@ windows = { version = "0.62", features = [
 ] }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "sync", "time", "test-util"] }

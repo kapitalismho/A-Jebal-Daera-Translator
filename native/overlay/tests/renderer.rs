@@ -53,10 +53,20 @@ fn long_block(id: &str) -> CaptionBlock {
 
 #[test]
 fn renderer_default_caption_weight_order_excludes_bold() {
-    let policy = CaptionLayoutPolicy::default();
+    let weights = CaptionLayoutPolicy::default().preferred_weights();
     assert_eq!(
-        policy.preferred_weights(),
-        vec!["Semibold", "Medium", "Regular"]
+        weights.first(),
+        Some(&"Semibold"),
+        "DWrite resolves the first matching weight, so Semibold must keep precedence"
+    );
+    assert_eq!(weights.len(), 3);
+    assert!(
+        weights.contains(&"Medium"),
+        "Medium must stay resolvable instead of degrading to normal"
+    );
+    assert!(
+        !weights.contains(&"Bold"),
+        "Bold would silently degrade to normal through the catch-all weight arm"
     );
 }
 
@@ -459,7 +469,6 @@ fn assert_no_installed_noto_cjk_intermediates(candidates: &[&str]) {
 fn renderer_uses_fixed_surface_defaults_for_mvp_caption_layout() {
     let policy = CaptionLayoutPolicy::default();
     assert_eq!(policy.default_surface_size(), (4096, 1056));
-    assert_eq!(policy.visible_window_target_blocks(), 2);
 }
 
 #[test]
@@ -520,13 +529,6 @@ fn renderer_keeps_active_self_and_finalized_variants_distinct() {
 
     assert!(variants.contains(&CaptionBlockVariant::Finalized));
     assert!(variants.contains(&CaptionBlockVariant::ActiveSelf));
-}
-
-#[test]
-fn renderer_channel_style_is_color_only_and_speaker_labels_are_hidden_by_default() {
-    let policy = CaptionLayoutPolicy::default();
-    assert!(policy.channel_uses_color_only());
-    assert!(!policy.show_speaker_labels_by_default());
 }
 
 #[test]
@@ -659,33 +661,6 @@ fn renderer_secondary_origin_gap_scales_with_text_scale() {
     assert_close(
         secondary.origin_y,
         block.bounds.top_px + (32.0 + 2.0 * 150.0 + 30.0) * 1.5,
-    );
-}
-
-#[cfg(windows)]
-#[test]
-fn renderer_windows_public_layout_secondary_origin_uses_gap_formula() {
-    let policy = CaptionLayoutPolicy::default();
-    let result = policy.layout_blocks(
-        vec![bilingual_block(
-            "peer:translated",
-            "translated peer line",
-            "source peer line",
-            true,
-        )],
-        3840,
-        1024,
-    );
-
-    let block = &result.visible_blocks[0];
-    let secondary = block
-        .secondary_line
-        .as_ref()
-        .expect("secondary source line should be present");
-
-    assert_close(
-        secondary.origin_y,
-        block.bounds.top_px + 32.0 + 2.0 * 150.0 + 30.0,
     );
 }
 

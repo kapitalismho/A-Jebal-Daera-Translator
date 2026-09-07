@@ -369,21 +369,93 @@ async def test_order21_path_validator_accepts_only_translation_provider_paths() 
 
 
 @pytest.mark.asyncio
-async def test_order21_path_validator_rejects_out_of_scope_paths_without_secret_values() -> None:
+@pytest.mark.parametrize(
+    (
+        "allowed_paths",
+        "operation",
+        "reason",
+        "values",
+        "first_bad_path",
+        "hidden_values",
+    ),
+    [
+        pytest.param(
+            ORDER21_TRANSLATION_PROVIDER_SETTINGS_PATHS,
+            "validate_translation_provider_patch",
+            settings_mutation.SETTINGS_MUTATION_SURFACE_TRANSLATION_PROVIDER,
+            {
+                "stt.low_latency_mode": False,
+                "audio.input_device": "default microphone",
+                "overlay.target": "desktop",
+                "secrets.openrouter_api_key": "secret-value-must-not-leak",
+            },
+            "audio.input_device",
+            ("secret-value-must-not-leak",),
+            id="order21",
+        ),
+        pytest.param(
+            ORDER22_STT_LANGUAGE_AUDIO_SETTINGS_PATHS,
+            "validate_stt_language_audio_patch",
+            settings_mutation.SETTINGS_MUTATION_SURFACE_STT_LANGUAGE_AUDIO,
+            {
+                "translation.model": "gemma4-secret-ish",
+                "openrouter.selection_alias": "managed-secret-ish",
+                "overlay.target": "desktop-secret-ish",
+                "secrets.deepgram_api_key": "secret-value-must-not-leak",
+            },
+            "openrouter.selection_alias",
+            ("secret-value-must-not-leak", "gemma4-secret-ish"),
+            id="order22",
+        ),
+        pytest.param(
+            ORDER23_OVERLAY_OSC_OUTPUT_SETTINGS_PATHS,
+            "validate_overlay_osc_output_patch",
+            settings_mutation.SETTINGS_MUTATION_SURFACE_OVERLAY_OSC_OUTPUT,
+            {
+                "active_chatbox_channel": "peer-secret-ish",
+                "ui.overlay_enabled": True,
+                "ui.peer_translation_enabled": True,
+                "secrets.openrouter_api_key": "secret-value-must-not-leak",
+            },
+            "active_chatbox_channel",
+            ("secret-value-must-not-leak", "peer-secret-ish"),
+            id="order23",
+        ),
+        pytest.param(
+            ORDER24_UI_PROMPT_CLIPBOARD_STATE_SETTINGS_PATHS,
+            "validate_ui_prompt_clipboard_state_patch",
+            settings_mutation.SETTINGS_MUTATION_SURFACE_UI_PROMPT_CLIPBOARD_STATE,
+            {
+                "api_key_verified.openrouter": True,
+                "managed_identity.installation_id": "device-secret-ish",
+                "system_prompts": {"openrouter": "prompt-secret-ish"},
+                "ui.overlay_enabled": True,
+                "ui.peer_translation_enabled": True,
+                "secrets.openrouter_api_key": "secret-value-must-not-leak",
+            },
+            "api_key_verified.openrouter",
+            ("secret-value-must-not-leak", "device-secret-ish", "prompt-secret-ish"),
+            id="order24",
+        ),
+    ],
+)
+async def test_path_validator_rejects_out_of_scope_paths_without_secret_values(
+    allowed_paths: tuple[str, ...],
+    operation: str,
+    reason: str,
+    values: dict[str, object],
+    first_bad_path: str,
+    hidden_values: tuple[str, ...],
+) -> None:
     validator = SettingsPathMutationValidator(
-        allowed_paths=ORDER21_TRANSLATION_PROVIDER_SETTINGS_PATHS,
+        allowed_paths=allowed_paths,
         component="settings_mutation",
-        operation="validate_translation_provider_patch",
+        operation=operation,
     )
     request = settings_mutation.SettingsMutationRequest(
-        values={
-            "stt.low_latency_mode": False,
-            "audio.input_device": "default microphone",
-            "overlay.target": "desktop",
-            "secrets.openrouter_api_key": "secret-value-must-not-leak",
-        },
+        values=values,
         expected_revision=None,
-        reason=settings_mutation.SETTINGS_MUTATION_SURFACE_TRANSLATION_PROVIDER,
+        reason=reason,
         correlation_id="corr-invalid-paths",
     )
 
@@ -393,16 +465,17 @@ async def test_order21_path_validator_rejects_out_of_scope_paths_without_secret_
     assert result.message is None
     assert result.diagnostics == messages.ErrorDiagnostics(
         component="settings_mutation",
-        operation="validate_translation_provider_patch",
+        operation=operation,
         code="settings_path_not_covered",
         category=messages.DIAGNOSTIC_CATEGORY_TRANSACTION,
         visibility=messages.DIAGNOSTIC_VISIBILITY_BASIC,
         content_policy=messages.CONTENT_POLICY_METADATA_ONLY,
         status_code=None,
         retry_after_ms=None,
-        fields={"path": "audio.input_device"},
+        fields={"path": first_bad_path},
     )
-    assert "secret-value-must-not-leak" not in repr(result)
+    for hidden in hidden_values:
+        assert hidden not in repr(result)
 
 
 @pytest.mark.asyncio
@@ -437,46 +510,6 @@ async def test_order22_path_validator_accepts_only_stt_language_audio_paths() ->
 
 
 @pytest.mark.asyncio
-async def test_order22_path_validator_rejects_order21_overlay_and_secret_paths_without_values() -> (
-    None
-):
-    validator = SettingsPathMutationValidator(
-        allowed_paths=ORDER22_STT_LANGUAGE_AUDIO_SETTINGS_PATHS,
-        component="settings_mutation",
-        operation="validate_stt_language_audio_patch",
-    )
-    request = settings_mutation.SettingsMutationRequest(
-        values={
-            "translation.model": "gemma4-secret-ish",
-            "openrouter.selection_alias": "managed-secret-ish",
-            "overlay.target": "desktop-secret-ish",
-            "secrets.deepgram_api_key": "secret-value-must-not-leak",
-        },
-        expected_revision=None,
-        reason=settings_mutation.SETTINGS_MUTATION_SURFACE_STT_LANGUAGE_AUDIO,
-        correlation_id="corr-invalid-order22-paths",
-    )
-
-    result = await validator.validate(request)
-
-    assert result.succeeded is False
-    assert result.message is None
-    assert result.diagnostics == messages.ErrorDiagnostics(
-        component="settings_mutation",
-        operation="validate_stt_language_audio_patch",
-        code="settings_path_not_covered",
-        category=messages.DIAGNOSTIC_CATEGORY_TRANSACTION,
-        visibility=messages.DIAGNOSTIC_VISIBILITY_BASIC,
-        content_policy=messages.CONTENT_POLICY_METADATA_ONLY,
-        status_code=None,
-        retry_after_ms=None,
-        fields={"path": "openrouter.selection_alias"},
-    )
-    assert "secret-value-must-not-leak" not in repr(result)
-    assert "gemma4-secret-ish" not in repr(result)
-
-
-@pytest.mark.asyncio
 async def test_order23_path_validator_accepts_only_overlay_osc_output_paths() -> None:
     validator = SettingsPathMutationValidator(
         allowed_paths=ORDER23_OVERLAY_OSC_OUTPUT_SETTINGS_PATHS,
@@ -506,46 +539,6 @@ async def test_order23_path_validator_accepts_only_overlay_osc_output_paths() ->
         message=None,
         diagnostics=None,
     )
-
-
-@pytest.mark.asyncio
-async def test_order23_path_validator_rejects_runtime_only_peer_and_secret_paths_without_values() -> (
-    None
-):
-    validator = SettingsPathMutationValidator(
-        allowed_paths=ORDER23_OVERLAY_OSC_OUTPUT_SETTINGS_PATHS,
-        component="settings_mutation",
-        operation="validate_overlay_osc_output_patch",
-    )
-    request = settings_mutation.SettingsMutationRequest(
-        values={
-            "active_chatbox_channel": "peer-secret-ish",
-            "ui.overlay_enabled": True,
-            "ui.peer_translation_enabled": True,
-            "secrets.openrouter_api_key": "secret-value-must-not-leak",
-        },
-        expected_revision=None,
-        reason=settings_mutation.SETTINGS_MUTATION_SURFACE_OVERLAY_OSC_OUTPUT,
-        correlation_id="corr-invalid-order23-paths",
-    )
-
-    result = await validator.validate(request)
-
-    assert result.succeeded is False
-    assert result.message is None
-    assert result.diagnostics == messages.ErrorDiagnostics(
-        component="settings_mutation",
-        operation="validate_overlay_osc_output_patch",
-        code="settings_path_not_covered",
-        category=messages.DIAGNOSTIC_CATEGORY_TRANSACTION,
-        visibility=messages.DIAGNOSTIC_VISIBILITY_BASIC,
-        content_policy=messages.CONTENT_POLICY_METADATA_ONLY,
-        status_code=None,
-        retry_after_ms=None,
-        fields={"path": "active_chatbox_channel"},
-    )
-    assert "secret-value-must-not-leak" not in repr(result)
-    assert "peer-secret-ish" not in repr(result)
 
 
 @pytest.mark.asyncio
@@ -624,46 +617,3 @@ async def test_retired_policy_paths_are_rejected(
     assert result.diagnostics is not None
     assert result.diagnostics.code == "settings_path_not_covered"
     assert result.diagnostics.fields == {"path": path}
-
-
-@pytest.mark.asyncio
-async def test_order24_path_validator_rejects_runtime_secret_and_legacy_paths_without_values() -> (
-    None
-):
-    validator = SettingsPathMutationValidator(
-        allowed_paths=ORDER24_UI_PROMPT_CLIPBOARD_STATE_SETTINGS_PATHS,
-        component="settings_mutation",
-        operation="validate_ui_prompt_clipboard_state_patch",
-    )
-    request = settings_mutation.SettingsMutationRequest(
-        values={
-            "api_key_verified.openrouter": True,
-            "managed_identity.installation_id": "device-secret-ish",
-            "system_prompts": {"openrouter": "prompt-secret-ish"},
-            "ui.overlay_enabled": True,
-            "ui.peer_translation_enabled": True,
-            "secrets.openrouter_api_key": "secret-value-must-not-leak",
-        },
-        expected_revision=None,
-        reason=settings_mutation.SETTINGS_MUTATION_SURFACE_UI_PROMPT_CLIPBOARD_STATE,
-        correlation_id="corr-invalid-order24-paths",
-    )
-
-    result = await validator.validate(request)
-
-    assert result.succeeded is False
-    assert result.message is None
-    assert result.diagnostics == messages.ErrorDiagnostics(
-        component="settings_mutation",
-        operation="validate_ui_prompt_clipboard_state_patch",
-        code="settings_path_not_covered",
-        category=messages.DIAGNOSTIC_CATEGORY_TRANSACTION,
-        visibility=messages.DIAGNOSTIC_VISIBILITY_BASIC,
-        content_policy=messages.CONTENT_POLICY_METADATA_ONLY,
-        status_code=None,
-        retry_after_ms=None,
-        fields={"path": "api_key_verified.openrouter"},
-    )
-    assert "secret-value-must-not-leak" not in repr(result)
-    assert "device-secret-ish" not in repr(result)
-    assert "prompt-secret-ish" not in repr(result)
