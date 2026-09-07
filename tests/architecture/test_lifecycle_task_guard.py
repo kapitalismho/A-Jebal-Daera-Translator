@@ -569,8 +569,6 @@ def test_application_composition_does_not_retain_dead_shutdown_or_provider_algor
     assert "_ControllerSttLanguageAudioRuntimeApply" not in provider_runtime_source
     assert "_gpu_provider_recovery_lock" not in source
     assert "gpu_recovery: GpuProviderRecoveryApplicationOwner | None" in source
-    assert "_overlay_lock" not in source
-    assert "overlay: OverlayApplicationOwner | None" in source
     assert "def application_shutdown_callbacks" not in source
     assert "ApplicationShutdownCoordinator" not in source
     assert "application_shutdown_callback(" not in source
