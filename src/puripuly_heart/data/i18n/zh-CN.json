@@ -424,7 +424,7 @@
   "provider.gemini_transcribe": "Gemini 3.5 Transcribe",
   "provider.elevenlabs_scribe": "ElevenLabs Scribe v2",
   "provider.rolling_free": "自动选择\n(云免费档)",
-  "provider.rolling_free.description": "只需登记API密钥即可免费使用",
+  "provider.rolling_free.description": "登记API密钥即可免费使用",
   "provider.soniox": "Soniox",
   "provider.soniox.description": "语音识别性能最好(中文除外)",
   "provider.gemini": "Gemini",

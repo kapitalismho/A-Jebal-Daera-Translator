@@ -424,7 +424,7 @@
   "provider.gemini_transcribe": "Gemini 3.5 Transcribe",
   "provider.elevenlabs_scribe": "ElevenLabs Scribe v2",
   "provider.rolling_free": "Auto Select\n(Cloud Free Tier)",
-  "provider.rolling_free.description": "Free to use — just add your API keys",
+  "provider.rolling_free.description": "Free with registered API keys",
   "provider.soniox": "Soniox",
   "provider.soniox.description": "Best voice recognition performance",
   "provider.gemini": "Gemini",
