@@ -424,7 +424,7 @@
   "provider.gemini_transcribe": "Gemini 3.5 Transcribe",
   "provider.elevenlabs_scribe": "ElevenLabs Scribe v2",
   "provider.rolling_free": "Автовыбор\n(клауд фри тир)",
-  "provider.rolling_free.description": "Просто добавьте API-ключи — использование бесплатно",
+  "provider.rolling_free.description": "Бесплатно после добавления API-ключа",
   "provider.soniox": "Soniox",
   "provider.soniox.description": "Лучшее качество распознавания речи",
   "provider.gemini": "Gemini",

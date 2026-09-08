@@ -4,7 +4,7 @@
 #define MyAppName "PuriPuly <3"
 #define MyAppDirName "PuriPulyHeart"
 #define MyAppGroupName "PuriPulyHeart"
-#define MyAppVersion "2.6.0"
+#define MyAppVersion "2.6.1"
 #define MyAppPublisher "salee"
 #define MyAppURL "https://github.com/kapitalismho/PuriPuly-heart"
 #ifndef MyAppExeName
@@ -101,19 +101,19 @@ japanese.LocalSttDownloadFailed=Hugging Face と ModelScope の両方でASRモ�
 chinesesimplified.LocalSttDownloadFailed=从 Hugging Face 和 ModelScope 下载 ASR 模型均失败。无法完成安装。
 chinesetraditional.LocalSttDownloadFailed=從 Hugging Face 和 ModelScope 下載 ASR 模型均失敗。無法完成安裝。
 english.AsrModelsGroup=ASR Models
-english.RedownloadAsrTask=Re-download all ASR models
+english.RedownloadAsrTask=Re-download ASR models
 english.LocalSttRedownloadSize=Re-downloading ASR models.%nInstallation requires %1 of disk space.
 korean.AsrModelsGroup=ASR 모델
-korean.RedownloadAsrTask=ASR 모델 전체 재다운로드
+korean.RedownloadAsrTask=ASR 모델 재다운로드
 korean.LocalSttRedownloadSize=ASR 모델을 재다운로드합니다.%n설치에 필요한 용량은 %1입니다.
 japanese.AsrModelsGroup=ASRモデル
-japanese.RedownloadAsrTask=ASRモデルをすべて再ダウンロード
+japanese.RedownloadAsrTask=ASRモデルを再ダウンロード
 japanese.LocalSttRedownloadSize=ASRモデルを再ダウンロードします。%nインストールには%1の空き容量が必要です。
 chinesesimplified.AsrModelsGroup=ASR 模型
-chinesesimplified.RedownloadAsrTask=重新下载所有 ASR 模型
+chinesesimplified.RedownloadAsrTask=重新下载 ASR 模型
 chinesesimplified.LocalSttRedownloadSize=重新下载 ASR 模型。%n安装需要 %1 的空间。
 chinesetraditional.AsrModelsGroup=ASR 模型
-chinesetraditional.RedownloadAsrTask=重新下載所有 ASR 模型
+chinesetraditional.RedownloadAsrTask=重新下載 ASR 模型
 chinesetraditional.LocalSttRedownloadSize=重新下載 ASR 模型。%n安裝需要 %1 的空間。
 
 [Files]

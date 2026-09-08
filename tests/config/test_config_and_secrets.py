@@ -22,6 +22,7 @@ from puripuly_heart.config.provider_values import (
     OpenRouterFallbackSelectionAlias,
     OpenRouterLLMModel,
     OpenRouterSelectionAlias,
+    parse_openrouter_llm_model,
 )
 from puripuly_heart.config.translation_values import (
     TranslationConnection,
@@ -296,3 +297,38 @@ def test_encrypted_file_secret_store_rejects_wrong_passphrase(tmp_path):
     wrong = EncryptedFileSecretStore(path, passphrase="wrong")
     with pytest.raises(ValueError):
         wrong.get("k")
+
+
+def test_parse_openrouter_llm_model_accepts_legacy_deepseek_flash() -> None:
+    assert (
+        parse_openrouter_llm_model("deepseek/deepseek-v4-flash")
+        == OpenRouterLLMModel.DEEPSEEK_V4_FLASH
+    )
+    assert (
+        parse_openrouter_llm_model("  deepseek/deepseek-v4-flash  ")
+        == OpenRouterLLMModel.DEEPSEEK_V4_FLASH
+    )
+    assert (
+        parse_openrouter_llm_model("deepseek/deepseek-v4-flash-0731")
+        == OpenRouterLLMModel.DEEPSEEK_V4_FLASH
+    )
+    assert (
+        parse_openrouter_llm_model(OpenRouterLLMModel.DEEPSEEK_V4_FLASH)
+        == OpenRouterLLMModel.DEEPSEEK_V4_FLASH
+    )
+
+
+def test_parse_openrouter_llm_model_accepts_legacy_gemini_flash() -> None:
+    assert (
+        parse_openrouter_llm_model("google/gemini-3-flash-preview")
+        == OpenRouterLLMModel.GEMINI_37_FLASH
+    )
+    assert (
+        parse_openrouter_llm_model("google/gemini-3.1-flash-lite")
+        == OpenRouterLLMModel.GEMINI_37_FLASH
+    )
+
+
+def test_parse_openrouter_llm_model_rejects_unknown_model() -> None:
+    with pytest.raises(ValueError):
+        parse_openrouter_llm_model("deepseek/deepseek-v4-pro")

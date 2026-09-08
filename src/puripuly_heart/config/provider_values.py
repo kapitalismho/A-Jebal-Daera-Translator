@@ -24,6 +24,7 @@ from puripuly_heart.config.llm_profiles import (
     OPENROUTER_SELECTION_ALIAS_GEMMA4_MANAGED,
     OPENROUTER_SELECTION_ALIAS_QWEN35_FLASH_BYOK,
     OPENROUTER_SELECTION_ALIAS_QWEN35_FLASH_MANAGED,
+    normalize_legacy_openrouter_model,
 )
 
 MAX_CUSTOM_VOCAB_TERMS = 100
@@ -193,6 +194,15 @@ class OpenRouterLLMModel(str, Enum):
     GEMINI_37_FLASH = OPENROUTER_MODEL_GEMINI_37_FLASH
 
 
+def parse_openrouter_llm_model(value: object) -> OpenRouterLLMModel:
+    if isinstance(value, OpenRouterLLMModel):
+        return value
+    if isinstance(value, str):
+        normalized = normalize_legacy_openrouter_model(value.strip())
+        return OpenRouterLLMModel(normalized)
+    return OpenRouterLLMModel(value)  # type: ignore[arg-type]
+
+
 class OpenRouterCredentialSource(str, Enum):
     NONE = "none"
     MANAGED = "managed"
@@ -292,6 +302,7 @@ __all__ = [
     "CLOUD_FREE_TIER_STT_PROVIDERS",
     "DEFAULT_CLOUD_FREE_TIER_STT_PROVIDERS",
     "normalize_cloud_free_tier_providers",
+    "parse_openrouter_llm_model",
     "SecretsBackend",
     "STT_INTERNAL_SAMPLE_RATE_HZ",
     "custom_stt_selection_for_provider",
