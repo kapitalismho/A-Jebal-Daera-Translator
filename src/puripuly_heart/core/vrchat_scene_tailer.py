@@ -10,6 +10,7 @@ from pathlib import Path
 
 _READ_CHUNK_BYTES = 65536
 _NAME_SKEW_FUTURE_S = 120.0
+_NAME_BEFORE_START_TOLERANCE_S = 5.0
 _CTIME_TOLERANCE_S = 120.0
 _MTIME_AFTER_START_TOLERANCE_S = 1.0
 _LIVE_FRESHNESS_S = 30.0
@@ -82,7 +83,7 @@ def select_vrchat_log(
         candidate
         for candidate in candidates
         if candidate.name_time <= now + _NAME_SKEW_FUTURE_S
-        and candidate.name_time >= start_second
+        and candidate.name_time >= start_second - _NAME_BEFORE_START_TOLERANCE_S
         and not (
             candidate.name_time == start_second
             and candidate.created < create_time - _CREATION_SKEW_S

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import ntpath
 import time
 from dataclasses import dataclass, field
@@ -29,6 +30,8 @@ from puripuly_heart.core.vrchat_scene_tailer import (
     select_vrchat_log,
 )
 from puripuly_heart.core.vrchat_scene_tracker import VrchatScenePresenceTracker
+
+logger = logging.getLogger(__name__)
 
 _SCOPE_NAME = "VrchatSceneService"
 _MONITOR_TASK = "monitor"
@@ -142,7 +145,7 @@ class VrchatSceneService(SceneSnapshotProvider):
         self._log_candidate = None
         self._tailer = VrchatSceneLogTailer(self.log_directory)
         self._tracker.reset()
-        self._snapshot = UNAVAILABLE_SNAPSHOT
+        self._publish_snapshot(UNAVAILABLE_SNAPSHOT)
 
     async def close(self) -> None:
         self.stop_ingress()
@@ -157,8 +160,8 @@ class VrchatSceneService(SceneSnapshotProvider):
                 await self._poll_once(generation)
             except asyncio.CancelledError:
                 raise
-            except Exception:
-                self._mark_file_failure(self._generation)
+            except Exception as error:
+                self._mark_file_failure(self._generation, type(error).__name__)
             try:
                 await asyncio.sleep(self.poll_interval_s)
             except asyncio.CancelledError:
@@ -241,8 +244,9 @@ class VrchatSceneService(SceneSnapshotProvider):
         self._log_candidate = None
         self._tailer = VrchatSceneLogTailer(self.log_directory)
         self._tracker.reset()
-        self._snapshot = self._tracker.snapshot()
+        self._publish_snapshot(self._tracker.snapshot())
         self._touch()
+        logger.info("[VrchatScene] lifecycle begin pid=%d", identity.pid)
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
@@ -260,7 +264,7 @@ class VrchatSceneService(SceneSnapshotProvider):
     def _end_lifecycle(self) -> None:
         if not self._in_lifecycle:
             if self._snapshot.status != "unavailable":
-                self._snapshot = UNAVAILABLE_SNAPSHOT
+                self._publish_snapshot(UNAVAILABLE_SNAPSHOT)
             return
         self._generation += 1
         self._close_watch()
@@ -270,7 +274,8 @@ class VrchatSceneService(SceneSnapshotProvider):
         self._log_candidate = None
         self._tailer = VrchatSceneLogTailer(self.log_directory)
         self._tracker.reset()
-        self._snapshot = UNAVAILABLE_SNAPSHOT
+        logger.info("[VrchatScene] lifecycle end")
+        self._publish_snapshot(UNAVAILABLE_SNAPSHOT)
 
     def _handle_terminal(self, generation: int, instance_id: str) -> None:
         if generation != self._generation or not self._started:
@@ -292,13 +297,19 @@ class VrchatSceneService(SceneSnapshotProvider):
             return
         try:
             lines = await run_owned_thread_call(lambda: tailer.begin_replay(selected))
-        except Exception:
-            self._mark_file_failure(generation)
+        except Exception as error:
+            self._mark_file_failure(generation, type(error).__name__)
             return
         if not self._fresh(generation) or tailer is not self._tailer:
             return
         self._log_candidate = _by_path(found, selected)
-        self._feed_lines(lines)
+        parsed = self._feed_lines(lines)
+        logger.info(
+            "[VrchatScene] log selected name=%s replayed=%d parsed=%d",
+            selected.name,
+            len(lines),
+            parsed,
+        )
         self._touch()
         self._settle_if_quiet(generation)
 
@@ -326,8 +337,8 @@ class VrchatSceneService(SceneSnapshotProvider):
         except VrchatSceneLogTruncated:
             await self._rebuild_same_file(generation, tailer)
             return
-        except Exception:
-            self._mark_file_failure(generation)
+        except Exception as error:
+            self._mark_file_failure(generation, type(error).__name__)
             return
         if not self._fresh(generation) or tailer is not self._tailer:
             return
@@ -342,30 +353,36 @@ class VrchatSceneService(SceneSnapshotProvider):
         selected: VrchatSceneLogCandidate,
     ) -> None:
         self._tracker.on_transition()
-        self._snapshot = self._tracker.snapshot()
+        self._publish_snapshot(self._tracker.snapshot())
         self._touch()
         try:
             lines = await run_owned_thread_call(lambda: tailer.begin_replay(selected.path))
-        except Exception:
-            self._mark_file_failure(generation)
+        except Exception as error:
+            self._mark_file_failure(generation, type(error).__name__)
             return
         if not self._fresh(generation) or tailer is not self._tailer:
             return
         self._log_candidate = selected
-        self._feed_lines(lines)
+        parsed = self._feed_lines(lines)
+        logger.info(
+            "[VrchatScene] log selected name=%s replayed=%d parsed=%d",
+            selected.path.name,
+            len(lines),
+            parsed,
+        )
         self._touch()
         self._settle_if_quiet(generation)
 
     async def _rebuild_same_file(self, generation: int, tailer: VrchatSceneLogTailer) -> None:
         current = self._log_candidate
         self._tracker.on_transition()
-        self._snapshot = self._tracker.snapshot()
+        self._publish_snapshot(self._tracker.snapshot())
         if current is None:
             return
         try:
             rebuilt = await run_owned_thread_call(lambda: tailer.begin_replay(current.path))
-        except Exception:
-            self._mark_file_failure(generation)
+        except Exception as error:
+            self._mark_file_failure(generation, type(error).__name__)
             return
         if not self._fresh(generation) or tailer is not self._tailer:
             return
@@ -385,23 +402,49 @@ class VrchatSceneService(SceneSnapshotProvider):
         if now - self._last_activity < self.quiescence_s:
             return
         self._tracker.settle_if_quiet()
-        self._snapshot = self._tracker.snapshot()
+        self._publish_snapshot(self._tracker.snapshot())
 
-    def _mark_file_failure(self, generation: int) -> None:
+    def _publish_snapshot(self, snapshot: VrchatSceneSnapshot) -> None:
+        previous = self._snapshot.status
+        self._snapshot = snapshot
+        if snapshot.status == previous:
+            return
+        if snapshot.status == "ready":
+            logger.info(
+                "[VrchatScene] status %s -> ready people=%d",
+                previous,
+                snapshot.participant_count,
+            )
+        else:
+            logger.info("[VrchatScene] status %s -> %s", previous, snapshot.status)
+
+    def _mark_file_failure(self, generation: int, reason: str = "unknown") -> None:
         if generation != self._generation or not self._started or not self._in_lifecycle:
             return
+        previous = self._snapshot.status
         self._tracker.on_file_failure()
         self._snapshot = self._tracker.snapshot()
+        if self._snapshot.status == previous:
+            return
+        candidate = self._log_candidate
+        name = candidate.path.name if candidate is not None else "-"
+        logger.warning(
+            "[VrchatScene] file failure name=%s reason=%s status=%s -> %s",
+            name,
+            reason,
+            previous,
+            self._snapshot.status,
+        )
 
-    def _feed_lines(self, lines: list[str]) -> bool:
-        seen = False
+    def _feed_lines(self, lines: list[str]) -> int:
+        parsed = 0
         for line in lines:
             event = parse_vrchat_scene_line(line)
             if event is not None:
-                seen = True
+                parsed += 1
                 self._tracker.on_event(event)
-        self._snapshot = self._tracker.snapshot()
-        return seen
+        self._publish_snapshot(self._tracker.snapshot())
+        return parsed
 
     def _touch(self) -> None:
         try:

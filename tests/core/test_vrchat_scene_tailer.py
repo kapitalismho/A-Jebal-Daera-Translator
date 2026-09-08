@@ -99,6 +99,22 @@ def test_select_accepts_same_second_name_created_after_process_start() -> None:
     assert select_vrchat_log((current,), create_time=create, now=now) == current.path
 
 
+def test_select_accepts_name_second_before_process_start() -> None:
+    create = 1788875102.39
+    now = create + 1694.0
+    current = _candidate(Path("output_log_live.txt"), 1788875101.0, create, now - 2)
+
+    assert select_vrchat_log((current,), create_time=create, now=now) == current.path
+
+
+def test_select_rejects_name_beyond_start_tolerance() -> None:
+    create = 1788767641.0
+    now = create + 0.2
+    stale = _candidate(Path("output_log_stale.txt"), create - 30, create - 0.05, now)
+
+    assert select_vrchat_log((stale,), create_time=create, now=now) is None
+
+
 def test_select_accepts_delayed_fresh_log_over_stale_previous() -> None:
     now = 1788767641.0
     create = now - 5
