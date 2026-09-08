@@ -1,0 +1,980 @@
+[
+  {
+    "case": "G04",
+    "excerpt_ms": [
+      559000,
+      580000
+    ],
+    "wall_s": 18.42,
+    "finals": [
+      "Anyway. No, I'm too balanced. Prayed not. Afrobeat orchestra? Very cool. Afrobeat orchestra. Yeah. Very cool. They're like 15 members, from Brooklyn. And I'm hoping to go to the concert in Belgium. In Brussels. Wow. Exciting. Yeah. I'm supposed to be in Brussels anyway"
+    ],
+    "final_tokens": [
+      {
+        "text": "A",
+        "end_ms": 4920
+      },
+      {
+        "text": "ny",
+        "end_ms": 4980
+      },
+      {
+        "text": "way",
+        "end_ms": 5160
+      },
+      {
+        "text": ".",
+        "end_ms": 5220
+      },
+      {
+        "text": " N",
+        "end_ms": 5340
+      },
+      {
+        "text": "o,",
+        "end_ms": 5460
+      },
+      {
+        "text": " I",
+        "end_ms": 5580
+      },
+      {
+        "text": "'",
+        "end_ms": 5640
+      },
+      {
+        "text": "m",
+        "end_ms": 5700
+      },
+      {
+        "text": " to",
+        "end_ms": 5760
+      },
+      {
+        "text": "o",
+        "end_ms": 5820
+      },
+      {
+        "text": " bal",
+        "end_ms": 5940
+      },
+      {
+        "text": "anc",
+        "end_ms": 6000
+      },
+      {
+        "text": "ed.",
+        "end_ms": 6060
+      },
+      {
+        "text": " Pra",
+        "end_ms": 6420
+      },
+      {
+        "text": "y",
+        "end_ms": 6480
+      },
+      {
+        "text": "ed",
+        "end_ms": 6540
+      },
+      {
+        "text": " not",
+        "end_ms": 6660
+      },
+      {
+        "text": ".",
+        "end_ms": 6720
+      },
+      {
+        "text": " Af",
+        "end_ms": 6960
+      },
+      {
+        "text": "ro",
+        "end_ms": 7140
+      },
+      {
+        "text": "be",
+        "end_ms": 7260
+      },
+      {
+        "text": "at",
+        "end_ms": 7320
+      },
+      {
+        "text": " or",
+        "end_ms": 7440
+      },
+      {
+        "text": " or",
+        "end_ms": 7440
+      },
+      {
+        "text": "ch",
+        "end_ms": 7560
+      },
+      {
+        "text": "estra",
+        "end_ms": 7740
+      },
+      {
+        "text": "?",
+        "end_ms": 7860
+      },
+      {
+        "text": " Ver",
+        "end_ms": 8040
+      },
+      {
+        "text": "y",
+        "end_ms": 8100
+      },
+      {
+        "text": " co",
+        "end_ms": 8220
+      },
+      {
+        "text": "ol.",
+        "end_ms": 8340
+      },
+      {
+        "text": " Af",
+        "end_ms": 8640
+      },
+      {
+        "text": "ro",
+        "end_ms": 8820
+      },
+      {
+        "text": "be",
+        "end_ms": 8940
+      },
+      {
+        "text": "at",
+        "end_ms": 9000
+      },
+      {
+        "text": " or",
+        "end_ms": 9120
+      },
+      {
+        "text": "ch",
+        "end_ms": 9240
+      },
+      {
+        "text": "est",
+        "end_ms": 9360
+      },
+      {
+        "text": "ra.",
+        "end_ms": 9420
+      },
+      {
+        "text": " Ye",
+        "end_ms": 9720
+      },
+      {
+        "text": "ah.",
+        "end_ms": 9840
+      },
+      {
+        "text": " Ver",
+        "end_ms": 10080
+      },
+      {
+        "text": "y",
+        "end_ms": 10140
+      },
+      {
+        "text": " co",
+        "end_ms": 10260
+      },
+      {
+        "text": "ol.",
+        "end_ms": 10380
+      },
+      {
+        "text": " They",
+        "end_ms": 11340
+      },
+      {
+        "text": "'",
+        "end_ms": 11400
+      },
+      {
+        "text": "re",
+        "end_ms": 11460
+      },
+      {
+        "text": " l",
+        "end_ms": 11520
+      },
+      {
+        "text": "ike",
+        "end_ms": 11580
+      },
+      {
+        "text": " 1",
+        "end_ms": 11700
+      },
+      {
+        "text": "5",
+        "end_ms": 11820
+      },
+      {
+        "text": " memb",
+        "end_ms": 12000
+      },
+      {
+        "text": "ers,",
+        "end_ms": 12300
+      },
+      {
+        "text": " from",
+        "end_ms": 12480
+      },
+      {
+        "text": " Bro",
+        "end_ms": 12840
+      },
+      {
+        "text": "ok",
+        "end_ms": 12960
+      },
+      {
+        "text": "ly",
+        "end_ms": 13080
+      },
+      {
+        "text": "n.",
+        "end_ms": 13260
+      },
+      {
+        "text": " And",
+        "end_ms": 14340
+      },
+      {
+        "text": " I",
+        "end_ms": 14520
+      },
+      {
+        "text": "'",
+        "end_ms": 14580
+      },
+      {
+        "text": "m",
+        "end_ms": 14640
+      },
+      {
+        "text": " h",
+        "end_ms": 14700
+      },
+      {
+        "text": "op",
+        "end_ms": 14760
+      },
+      {
+        "text": "ing",
+        "end_ms": 14820
+      },
+      {
+        "text": " to",
+        "end_ms": 14880
+      },
+      {
+        "text": " go",
+        "end_ms": 15000
+      },
+      {
+        "text": " to",
+        "end_ms": 15120
+      },
+      {
+        "text": " the",
+        "end_ms": 15240
+      },
+      {
+        "text": " conc",
+        "end_ms": 15480
+      },
+      {
+        "text": "ert",
+        "end_ms": 15600
+      },
+      {
+        "text": " in",
+        "end_ms": 15840
+      },
+      {
+        "text": " Belgi",
+        "end_ms": 16200
+      },
+      {
+        "text": "um.",
+        "end_ms": 16500
+      },
+      {
+        "text": " In",
+        "end_ms": 16980
+      },
+      {
+        "text": " Br",
+        "end_ms": 17160
+      },
+      {
+        "text": "uss",
+        "end_ms": 17280
+      },
+      {
+        "text": "el",
+        "end_ms": 17400
+      },
+      {
+        "text": "s.",
+        "end_ms": 17460
+      },
+      {
+        "text": " W",
+        "end_ms": 17760
+      },
+      {
+        "text": "ow",
+        "end_ms": 17820
+      },
+      {
+        "text": ".",
+        "end_ms": 17940
+      },
+      {
+        "text": " Ex",
+        "end_ms": 18120
+      },
+      {
+        "text": "c",
+        "end_ms": 18240
+      },
+      {
+        "text": "it",
+        "end_ms": 18300
+      },
+      {
+        "text": "ing.",
+        "end_ms": 18480
+      },
+      {
+        "text": " Ye",
+        "end_ms": 19200
+      },
+      {
+        "text": "ah.",
+        "end_ms": 19320
+      },
+      {
+        "text": " I",
+        "end_ms": 19440
+      },
+      {
+        "text": "'",
+        "end_ms": 19500
+      },
+      {
+        "text": "m",
+        "end_ms": 19560
+      },
+      {
+        "text": " sup",
+        "end_ms": 19620
+      },
+      {
+        "text": "pos",
+        "end_ms": 19680
+      },
+      {
+        "text": "ed",
+        "end_ms": 19740
+      },
+      {
+        "text": " to",
+        "end_ms": 19800
+      },
+      {
+        "text": " be",
+        "end_ms": 19860
+      },
+      {
+        "text": " in",
+        "end_ms": 19980
+      },
+      {
+        "text": " Br",
+        "end_ms": 20100
+      },
+      {
+        "text": "uss",
+        "end_ms": 20220
+      },
+      {
+        "text": "els",
+        "end_ms": 20340
+      },
+      {
+        "text": " any",
+        "end_ms": 20580
+      },
+      {
+        "text": "way",
+        "end_ms": 20640
+      },
+      {
+        "text": "s.",
+        "end_ms": 20640
+      },
+      {
+        "text": "<fin>",
+        "end_ms": 0
+      }
+    ]
+  },
+  {
+    "case": "G05",
+    "excerpt_ms": [
+      372000,
+      393000
+    ],
+    "wall_s": 18.38,
+    "finals": [
+      "And whether it would have that sort of tiered effect, so you could see the overlap of where one person was looking compared to the other, and their mouse movements and things. Yeah. That should— Because all you want to know is whether they were looking at the same object in the period after. But because it's also in the— based on the time course of the procedure, you'll be able to basically get the scan path or the pattern of"
+    ],
+    "final_tokens": [
+      {
+        "text": "And",
+        "end_ms": 300
+      },
+      {
+        "text": " wh",
+        "end_ms": 480
+      },
+      {
+        "text": "ether",
+        "end_ms": 540
+      },
+      {
+        "text": " it",
+        "end_ms": 660
+      },
+      {
+        "text": " would",
+        "end_ms": 720
+      },
+      {
+        "text": " have",
+        "end_ms": 900
+      },
+      {
+        "text": " that",
+        "end_ms": 1080
+      },
+      {
+        "text": " sort",
+        "end_ms": 1200
+      },
+      {
+        "text": " of",
+        "end_ms": 1380
+      },
+      {
+        "text": " t",
+        "end_ms": 1800
+      },
+      {
+        "text": "ier",
+        "end_ms": 1920
+      },
+      {
+        "text": "ed",
+        "end_ms": 2040
+      },
+      {
+        "text": " eff",
+        "end_ms": 2280
+      },
+      {
+        "text": "ec",
+        "end_ms": 2400
+      },
+      {
+        "text": "t,",
+        "end_ms": 2520
+      },
+      {
+        "text": " so",
+        "end_ms": 2580
+      },
+      {
+        "text": " y",
+        "end_ms": 2700
+      },
+      {
+        "text": "ou",
+        "end_ms": 2760
+      },
+      {
+        "text": " co",
+        "end_ms": 2820
+      },
+      {
+        "text": "uld",
+        "end_ms": 2880
+      },
+      {
+        "text": " se",
+        "end_ms": 2940
+      },
+      {
+        "text": "e",
+        "end_ms": 3000
+      },
+      {
+        "text": " the",
+        "end_ms": 3060
+      },
+      {
+        "text": " over",
+        "end_ms": 3120
+      },
+      {
+        "text": "lap",
+        "end_ms": 3420
+      },
+      {
+        "text": " of",
+        "end_ms": 3540
+      },
+      {
+        "text": " where",
+        "end_ms": 4020
+      },
+      {
+        "text": " one",
+        "end_ms": 4260
+      },
+      {
+        "text": " person",
+        "end_ms": 4380
+      },
+      {
+        "text": " was",
+        "end_ms": 4680
+      },
+      {
+        "text": " lo",
+        "end_ms": 4800
+      },
+      {
+        "text": "ok",
+        "end_ms": 4860
+      },
+      {
+        "text": "ing",
+        "end_ms": 4980
+      },
+      {
+        "text": " comp",
+        "end_ms": 5160
+      },
+      {
+        "text": "ar",
+        "end_ms": 5280
+      },
+      {
+        "text": "ed",
+        "end_ms": 5340
+      },
+      {
+        "text": " to",
+        "end_ms": 5400
+      },
+      {
+        "text": " the",
+        "end_ms": 5460
+      },
+      {
+        "text": " o",
+        "end_ms": 5640
+      },
+      {
+        "text": "th",
+        "end_ms": 5760
+      },
+      {
+        "text": "er,",
+        "end_ms": 5820
+      },
+      {
+        "text": " and",
+        "end_ms": 5880
+      },
+      {
+        "text": " their",
+        "end_ms": 6000
+      },
+      {
+        "text": " mo",
+        "end_ms": 6180
+      },
+      {
+        "text": "use",
+        "end_ms": 6300
+      },
+      {
+        "text": " mov",
+        "end_ms": 6420
+      },
+      {
+        "text": "ements",
+        "end_ms": 6600
+      },
+      {
+        "text": " and",
+        "end_ms": 6840
+      },
+      {
+        "text": " th",
+        "end_ms": 6900
+      },
+      {
+        "text": "ing",
+        "end_ms": 7080
+      },
+      {
+        "text": "s.",
+        "end_ms": 7260
+      },
+      {
+        "text": " Ye",
+        "end_ms": 7860
+      },
+      {
+        "text": "ah.",
+        "end_ms": 7980
+      },
+      {
+        "text": " That",
+        "end_ms": 8340
+      },
+      {
+        "text": " sho",
+        "end_ms": 8580
+      },
+      {
+        "text": "uld",
+        "end_ms": 8760
+      },
+      {
+        "text": "—",
+        "end_ms": 9900
+      },
+      {
+        "text": " B",
+        "end_ms": 9960
+      },
+      {
+        "text": "eca",
+        "end_ms": 10020
+      },
+      {
+        "text": "use",
+        "end_ms": 10140
+      },
+      {
+        "text": " all",
+        "end_ms": 10200
+      },
+      {
+        "text": " y",
+        "end_ms": 10320
+      },
+      {
+        "text": "ou",
+        "end_ms": 10380
+      },
+      {
+        "text": " w",
+        "end_ms": 10500
+      },
+      {
+        "text": "ant",
+        "end_ms": 10560
+      },
+      {
+        "text": " to",
+        "end_ms": 10620
+      },
+      {
+        "text": " kn",
+        "end_ms": 10680
+      },
+      {
+        "text": "ow",
+        "end_ms": 10740
+      },
+      {
+        "text": " is",
+        "end_ms": 10800
+      },
+      {
+        "text": " wh",
+        "end_ms": 10980
+      },
+      {
+        "text": "ether",
+        "end_ms": 11040
+      },
+      {
+        "text": " they",
+        "end_ms": 11160
+      },
+      {
+        "text": " were",
+        "end_ms": 11220
+      },
+      {
+        "text": " lo",
+        "end_ms": 11340
+      },
+      {
+        "text": "ok",
+        "end_ms": 11400
+      },
+      {
+        "text": "ing",
+        "end_ms": 11460
+      },
+      {
+        "text": " at",
+        "end_ms": 11580
+      },
+      {
+        "text": " the",
+        "end_ms": 11640
+      },
+      {
+        "text": " same",
+        "end_ms": 11760
+      },
+      {
+        "text": " obj",
+        "end_ms": 12060
+      },
+      {
+        "text": "ect",
+        "end_ms": 12360
+      },
+      {
+        "text": " in",
+        "end_ms": 12540
+      },
+      {
+        "text": " the",
+        "end_ms": 12600
+      },
+      {
+        "text": " period",
+        "end_ms": 12780
+      },
+      {
+        "text": " after",
+        "end_ms": 13140
+      },
+      {
+        "text": ".",
+        "end_ms": 13440
+      },
+      {
+        "text": " But",
+        "end_ms": 13800
+      },
+      {
+        "text": " bec",
+        "end_ms": 13920
+      },
+      {
+        "text": "a",
+        "end_ms": 13980
+      },
+      {
+        "text": "use",
+        "end_ms": 14040
+      },
+      {
+        "text": " it",
+        "end_ms": 14100
+      },
+      {
+        "text": "'s",
+        "end_ms": 14160
+      },
+      {
+        "text": " also",
+        "end_ms": 14280
+      },
+      {
+        "text": " in",
+        "end_ms": 14520
+      },
+      {
+        "text": " the",
+        "end_ms": 14700
+      },
+      {
+        "text": "—",
+        "end_ms": 14880
+      },
+      {
+        "text": " based",
+        "end_ms": 15120
+      },
+      {
+        "text": " on",
+        "end_ms": 15240
+      },
+      {
+        "text": " the",
+        "end_ms": 15720
+      },
+      {
+        "text": " time",
+        "end_ms": 16020
+      },
+      {
+        "text": " cour",
+        "end_ms": 16260
+      },
+      {
+        "text": "se",
+        "end_ms": 16380
+      },
+      {
+        "text": " of",
+        "end_ms": 16500
+      },
+      {
+        "text": " the",
+        "end_ms": 16860
+      },
+      {
+        "text": " pro",
+        "end_ms": 17520
+      },
+      {
+        "text": "ced",
+        "end_ms": 17580
+      },
+      {
+        "text": "ure",
+        "end_ms": 17760
+      },
+      {
+        "text": ",",
+        "end_ms": 17880
+      },
+      {
+        "text": " y",
+        "end_ms": 17940
+      },
+      {
+        "text": "ou",
+        "end_ms": 18000
+      },
+      {
+        "text": "'",
+        "end_ms": 18060
+      },
+      {
+        "text": "ll",
+        "end_ms": 18120
+      },
+      {
+        "text": " be",
+        "end_ms": 18180
+      },
+      {
+        "text": " ab",
+        "end_ms": 18300
+      },
+      {
+        "text": "le",
+        "end_ms": 18360
+      },
+      {
+        "text": " to",
+        "end_ms": 18420
+      },
+      {
+        "text": " bas",
+        "end_ms": 18600
+      },
+      {
+        "text": "ic",
+        "end_ms": 18720
+      },
+      {
+        "text": "ally",
+        "end_ms": 18780
+      },
+      {
+        "text": " get",
+        "end_ms": 18960
+      },
+      {
+        "text": " the",
+        "end_ms": 19320
+      },
+      {
+        "text": " sc",
+        "end_ms": 19440
+      },
+      {
+        "text": "an",
+        "end_ms": 19560
+      },
+      {
+        "text": " p",
+        "end_ms": 19680
+      },
+      {
+        "text": "ath",
+        "end_ms": 19800
+      },
+      {
+        "text": " or",
+        "end_ms": 19980
+      },
+      {
+        "text": " the",
+        "end_ms": 20160
+      },
+      {
+        "text": " pat",
+        "end_ms": 20220
+      },
+      {
+        "text": "tern",
+        "end_ms": 20340
+      },
+      {
+        "text": " of",
+        "end_ms": 20640
+      },
+      {
+        "text": ".",
+        "end_ms": 20640
+      },
+      {
+        "text": "<fin>",
+        "end_ms": 0
+      }
+    ]
+  }
+]

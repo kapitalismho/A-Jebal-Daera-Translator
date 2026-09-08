@@ -1,0 +1,109 @@
+{
+ "run_utc": "2026-09-08T12:54:02+00:00",
+ "freeze_id": "psem.preroll_probe.freeze.v1",
+ "stt_model": "stt-rt-v5",
+ "stt_endpoint": "wss://stt-rt.soniox.com/transcribe-websocket",
+ "hold_samples": 24000,
+ "arms": {
+  "C0": [
+   52156984,
+   52246656
+  ],
+  "C1": [
+   52148984,
+   52246656
+  ]
+ },
+ "translations": 0,
+ "results": [
+  {
+   "arm": "C0",
+   "arm_utc": "2026-09-08T12:54:02+00:00",
+   "bounds": [
+    52156984,
+    52246656
+   ],
+   "segments": [
+    {
+     "utterance_id": "2c613dca-2490-4c6a-8293-d78074f6870b",
+     "src_start": 52156984,
+     "src_end": 52246656,
+     "session_open_s": 0.782,
+     "finalize_wall": 7.891,
+     "final_text": "You have to hope that there's language in one of them say something. But that's a human coding. Right. So they'",
+     "final_wall": 8.204,
+     "final_latency_s": 0.313,
+     "final_status": "ok",
+     "received_finals": [
+      {
+       "text": "You have to hope that there's language in one of them say something. But that's a human coding. Right. So they'",
+       "rel_wall": 8.204,
+       "after_finalize": true
+      }
+     ],
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    }
+   ],
+   "forward_accounting": {
+    "target_samples": 89672,
+    "forwarded_samples": 89672,
+    "gap_dup_ok": true
+   },
+   "queue": {
+    "max_depth": 48,
+    "stall_threshold": 128,
+    "stalls": 0,
+    "input_chunks": 176
+   },
+   "provider_sessions": 1,
+   "collection_elapsed_s": 3.328,
+   "wall_s": 12.454
+  },
+  {
+   "arm": "C1",
+   "arm_utc": "2026-09-08T12:54:15+00:00",
+   "bounds": [
+    52148984,
+    52246656
+   ],
+   "segments": [
+    {
+     "utterance_id": "fe5d118d-67a1-4c3e-8261-a85537393f05",
+     "src_start": 52148984,
+     "src_end": 52246656,
+     "session_open_s": 0.703,
+     "finalize_wall": 8.296,
+     "final_text": "We do that. You have to hope that there's language in one of them say something. But that's a human coding. Right. Yep, so they'",
+     "final_wall": 8.593,
+     "final_latency_s": 0.297,
+     "final_status": "ok",
+     "received_finals": [
+      {
+       "text": "We do that. You have to hope that there's language in one of them say something. But that's a human coding. Right. Yep, so they'",
+       "rel_wall": 8.593,
+       "after_finalize": true
+      }
+     ],
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    }
+   ],
+   "forward_accounting": {
+    "target_samples": 97672,
+    "forwarded_samples": 97672,
+    "gap_dup_ok": true
+   },
+   "queue": {
+    "max_depth": 48,
+    "stall_threshold": 128,
+    "stalls": 0,
+    "input_chunks": 191
+   },
+   "provider_sessions": 1,
+   "collection_elapsed_s": 3.344,
+   "wall_s": 12.89
+  }
+ ],
+ "errors": 0
+}

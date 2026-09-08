@@ -1,0 +1,104 @@
+{
+  "allowed_use_summary": "diagnostic attribution + single next-branch selection only; no prevalence, generalization, training, or production claims. Correction: same-threshold O/C read supports LOCAL similarity only; headline-gap cause unresolved; missing-receiver gap proves no earliest loss.",
+  "artifacts": [
+    {
+      "artifact": "experiments/psem_state_corrected_adaptation_gate/results/issue-121-h7301-persistence-v1/canonical/dev_frontier.json.gz",
+      "claim": "H100 jointly useful on declared equal-corpus macro C/M; H300 not jointly useful; H500 worse; disposition STOP/retain-F0 unchanged",
+      "denominator": "equal-corpus macro over 10 DEV meetings; global shared threshold per envelope; 500 ms product-event tolerance",
+      "metric_semantics": "contamination s/active-speech-h, miss rate, false cuts/hour (event-level, NOT frame AP)",
+      "reference_regime": "frozen GT-derived reference events; single scope; no lifecycle generations; oracle-mapping by construction",
+      "revision": "#121 close-out + durable bundle becb359a",
+      "validity_caveat": "DEV-only; horizons differ in threshold AND false-cut budget, so horizon is not the sole varying factor"
+    },
+    {
+      "allowed_use_in_this_child": "F0/H disagreement selection + case enrichment; unmatched runs NOT acoustic FPs",
+      "artifact": "experiments/psem_state_corrected_adaptation_gate/results/issue-121-h7301-persistence-v1/export/gpu_export/dev_*.npz (10 files)",
+      "claim": "per-frame cand_raw/f0_raw logits, target, valid, mapped; DEV valid=1.0 everywhere, mapped|valid=1.0",
+      "denominator": "frame populations per source (e.g. ES2015d 15875, EN2009d 46348); 100 ms frame hop (1600 samples @16 kHz)",
+      "metric_semantics": "source-frame labels, not events; sigmoid() maps logits to prob space where H100-C=0.58878, H100-M=0.36310, F0=0.5 apply",
+      "reference_regime": "same frozen reference as frontier",
+      "validity_caveat": "npz carries no episode/speech/mask/sample-span structure; session join via load_validated_export required (done in probe)"
+    },
+    {
+      "allowed_use_in_this_child": "observation-carries-signal premise (NOT sufficiency, NOT delivered value) + horizon/threshold-coupling premise only",
+      "artifact": "experiments/psem_state_corrected_adaptation_gate/results/issue-121-h7301-persistence-v1/PERSISTENCE_ANALYSIS.md",
+      "claim": "posthoc DEV AP pooled H 0.48768 vs F0 0.15060; held-threshold unmatched-run growth with horizon (median 300/400/892 ms)",
+      "denominator": "195375 valid+mapped DEV frames (AP); selected-point runs (H100 599 matched/663 unmatched, H300 655/545, H500 344/196)",
+      "metric_semantics": "frame AP diagnostic/posthoc (NOT acceptance gate); run-shape descriptive (NOT causal)",
+      "reference_regime": "same frozen reference",
+      "validity_caveat": "posthoc; CIs are paired source/meeting-mean, not pooled-rate"
+    },
+    {
+      "allowed_use_in_this_child": "stratum denominators + O/C threshold-confound check only",
+      "artifact": "experiments/psem_small_model_probe/manifest/manifest_rev3.jsonl",
+      "claim": "MAIN48 = 48 rows, C1..C6 = 8 each (KEEP 24 / CUT 16 / OTHER 8); CAL\u2194MAIN\u2194EXT session-disjoint",
+      "denominator": "48 episodes",
+      "reference_regime": "O = generous reference; C = causal 1 s enrollment",
+      "revision": "rev3 (close-out 45956c69)",
+      "validity_caveat": "C6 diagnostic-only; zero A-to-A+B-to-A rows; dev-only per program approval"
+    },
+    {
+      "allowed_use_in_this_child": "local-similarity diagnostic only; VAD-replay integration-clean cited as layer-local result, not an E-branch verdict",
+      "artifact": "experiments/psem_small_model_probe/main/results_repaired_v3/firered_O|C_calibration.jsonl",
+      "claim": "selected points O@0.85: 13/16 CUT at 22/24 false; C@0.05: 4/16 CUT at 14/24 false; SAME-threshold @0.05: O 15 false/13 missed vs C 14 false/12 missed, contam 746 vs 749",
+      "denominator": "24 KEEP / 16 CUT, same rows both regimes",
+      "reference_regime": "O-vs-C threshold-matched diagnostic (traces/rev3_same_threshold.json, no rescore)",
+      "validity_caveat": "CORRECTED: same-tau read supports LOCAL O/C similarity only; headline-gap cause UNRESOLVED (threshold-confound noted; lifecycle cause neither proven nor rejected)"
+    },
+    {
+      "allowed_use_in_this_child": "minimum-comparator role only; supports no-oracle-lifecycle rule used in ideal-intervention bounds",
+      "artifact": "experiments/psem_ontology_simplification_gate/results/eval/PATH_DECISION.md",
+      "claim": "Simple Anchor minimum comparator; frozen min() proxy not better than Simple Anchor; S2 counterfactual is not a native lifecycle result",
+      "denominator": "DEV 10 / EVAL 19 sources (recovery-qualified, development-known)",
+      "reference_regime": "oracle-anchor mapping (2992/3068 DEV episodes)",
+      "validity_caveat": "development-known EVAL; not production readiness"
+    },
+    {
+      "allowed_use_in_this_child": "lexical sensitivity probes + measured VAD spans (both boundaries inside single VAD spans). Whole/halves runs are NOT baseline/ideal/intervention evidence; exact diffs in traces/text_diff.json with UNKNOWN attribution.",
+      "artifact": "experiments/psem_training_strategy_gate/data/v2/ (24 files) + C:/Users/salee/.psem-corpus (ami audio incl. EN2009d/ES2002b/ES2009a-d, alimeeting far_ch0 incl. R1019/R1021)",
+      "claim": "source-time fixtures and raw audio exist for all 16 predeclared cases; 2-clip real-provider measurement executed in P1 (6 soniox passes, deepseek 0/4 on 402, cerebras 2/4)",
+      "denominator": "2 clips (G04/G05); whole + 2 halves each",
+      "reference_regime": "frozen inside-span reference boundary as split point; independent forward passes only",
+      "validity_caveat": "text layer measured; attribution layer UNKNOWN (no owner labels); G04 translation leg unmeasured (deepseek 402 + cerebras truncation)"
+    },
+    {
+      "allowed_use_in_this_child": "CORRECTED: gap description only. A missing receiver is NOT evidence of earliest material recoverable loss and authorizes NO repair scope.",
+      "artifact": "src/puripuly_heart/core/vad/gating.py + stt/backend.py + orchestrator/{peer_translation_channel,translation_request,translation_output_projection}.py + runtime/{peer_channel,output}.py @45956c69",
+      "claim": "ordinary peer path VAD SpeechStart/End \u2192 STT finals (text+is_final, no source-time span) \u2192 translation turn (utterance_id) \u2192 projection; NO source-time applied-boundary receiver, NO commit/ack record, NO speaker-boundary input anywhere",
+      "denominator": "code inspection (grep-verified, 7 files)",
+      "reference_regime": "n/a (no reference concept in delivery path)",
+      "validity_caveat": "static inspection; provider commit behavior unstated in code (unknown, not assumed)"
+    },
+    {
+      "allowed_use_in_this_child": "token->owner alignment on G04/G05",
+      "artifact": "experiments/psem_evidence_delivery_gap/traces/annotations_reuse/ (8 AMI segments.xml)",
+      "claim": "pinned files retrieved from public mirror (ami_public_manual_1.6.2.zip), each sha256+size verified against V2 annotation_manifest; 358605 bytes total; words/*.words.xml NOT pinned, NOT retrieved",
+      "denominator": "8 files (ES2009a/EN2009d x A-D)",
+      "reference_regime": "AMI transcriber segment timelines per speaker-letter",
+      "validity_caveat": "segment-level owner intervals, not word timings; reuse, not new corpus"
+    },
+    {
+      "allowed_use_in_this_child": "owner labeling of whole-pass tokens",
+      "artifact": "experiments/psem_evidence_delivery_gap/traces/token_timing.json (analysis/token_timing.py)",
+      "claim": "whole-excerpt Soniox passes (G04 106, G05 132 final tokens) with provider token end_ms retained via experiment-local payload tee; zero adapter edits; bare text in earlier trace was harness discard Retained translation path in realcheck.py cut over to OpenRouter google/gemma-4-26b-a4b-it (no fallback); historical trace routes unchanged.",
+      "denominator": "2 clips, 2 passes",
+      "reference_regime": "end_ms session-relative; mapped to source via excerpt offset; trust limited to relative ordering",
+      "validity_caveat": "only whole passes timed; halves untimed; no translation reruns"
+    },
+    {
+      "allowed_use_in_this_child": "attribution-stability framing; discard-mechanism confirmation",
+      "artifact": "experiments/psem_evidence_delivery_gap/traces/owner_alignment.json + emission_bounds.json",
+      "claim": "G04/G05 whole-pass tokens cross NO annotation owner change (single-owner tokens C-only both sides; 47/33 mixed-overlap tokens unassigned); reference boundary is anchor-relative, not an AMI turn. Canonical simulate_episode first-event emission bounds: G02 H 88300->89362.5ms; G04 H/F0 first-emit 9097600->9109800 before the case span (no emission covers it); G05 H first-emit 6075200 before span. Commit UNKNOWN, no latency credit.",
+      "denominator": "2 clips (alignment); G02/G04/G05 episodes (bounds)",
+      "reference_regime": "AMI segments + frozen reference + canonical frontier code",
+      "validity_caveat": "mixed tokens unassigned; provider timestamp trust relative-only"
+    }
+  ],
+  "excluded_as_superseded": [
+    "#117 rev1/rev2 headlines (anchor-only gate; C2 mis-scoring; NeoVAD no-warmup)",
+    "#117 old F0 head-to-head (predates rev3; no rescore: branch decision does not hinge on FireRed-vs-F0)",
+    "#121 DEV AP as acceptance gate (posthoc diagnostic)",
+    "episode-any-false-cut vs events/hour in one leaderboard (incompatible denominators)"
+  ],
+  "manifest_version": "psem.evidence_delivery_gap.authority.v1"
+}

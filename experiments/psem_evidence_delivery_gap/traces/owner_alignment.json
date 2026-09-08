@@ -1,0 +1,1780 @@
+{
+  "G04": {
+    "mixed_owner_tokens": 47,
+    "owners_after_split": [
+      "C"
+    ],
+    "owners_before_split": [
+      "C"
+    ],
+    "split_source_ms": 569794.0,
+    "tokens": [
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 563920.0,
+        "text": "A"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 563980.0,
+        "text": "ny"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 564160.0,
+        "text": "way"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 564220.0,
+        "text": "."
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 564340.0,
+        "text": " N"
+      },
+      {
+        "owners": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source_ms": 564460.0,
+        "text": "o,"
+      },
+      {
+        "owners": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source_ms": 564580.0,
+        "text": " I"
+      },
+      {
+        "owners": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source_ms": 564640.0,
+        "text": "'"
+      },
+      {
+        "owners": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source_ms": 564700.0,
+        "text": "m"
+      },
+      {
+        "owners": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source_ms": 564760.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source_ms": 564820.0,
+        "text": "o"
+      },
+      {
+        "owners": [
+          "B",
+          "C",
+          "D"
+        ],
+        "source_ms": 564940.0,
+        "text": " bal"
+      },
+      {
+        "owners": [
+          "B",
+          "C",
+          "D"
+        ],
+        "source_ms": 565000.0,
+        "text": "anc"
+      },
+      {
+        "owners": [
+          "B",
+          "C",
+          "D"
+        ],
+        "source_ms": 565060.0,
+        "text": "ed."
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 565420.0,
+        "text": " Pra"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 565480.0,
+        "text": "y"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 565540.0,
+        "text": "ed"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 565660.0,
+        "text": " not"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 565720.0,
+        "text": "."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 565960.0,
+        "text": " Af"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566140.0,
+        "text": "ro"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566260.0,
+        "text": "be"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566320.0,
+        "text": "at"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566440.0,
+        "text": " or"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566440.0,
+        "text": " or"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566560.0,
+        "text": "ch"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566740.0,
+        "text": "estra"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 566860.0,
+        "text": "?"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 567040.0,
+        "text": " Ver"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 567100.0,
+        "text": "y"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 567220.0,
+        "text": " co"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 567340.0,
+        "text": "ol."
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 567640.0,
+        "text": " Af"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 567820.0,
+        "text": "ro"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 567940.0,
+        "text": "be"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568000.0,
+        "text": "at"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568120.0,
+        "text": " or"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568240.0,
+        "text": "ch"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568360.0,
+        "text": "est"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568420.0,
+        "text": "ra."
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568720.0,
+        "text": " Ye"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 568840.0,
+        "text": "ah."
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 569080.0,
+        "text": " Ver"
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 569140.0,
+        "text": "y"
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 569260.0,
+        "text": " co"
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 569380.0,
+        "text": "ol."
+      },
+      {
+        "owners": [
+          "B",
+          "C"
+        ],
+        "source_ms": 570340.0,
+        "text": " They"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 570400.0,
+        "text": "'"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 570460.0,
+        "text": "re"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 570520.0,
+        "text": " l"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 570580.0,
+        "text": "ike"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 570700.0,
+        "text": " 1"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 570820.0,
+        "text": "5"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 571000.0,
+        "text": " memb"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 571300.0,
+        "text": "ers,"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 571480.0,
+        "text": " from"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 571840.0,
+        "text": " Bro"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 571960.0,
+        "text": "ok"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 572080.0,
+        "text": "ly"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 572260.0,
+        "text": "n."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573340.0,
+        "text": " And"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573520.0,
+        "text": " I"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573580.0,
+        "text": "'"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573640.0,
+        "text": "m"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573700.0,
+        "text": " h"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573760.0,
+        "text": "op"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573820.0,
+        "text": "ing"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 573880.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 574000.0,
+        "text": " go"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 574120.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 574240.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 574480.0,
+        "text": " conc"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 574600.0,
+        "text": "ert"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 574840.0,
+        "text": " in"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 575200.0,
+        "text": " Belgi"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 575500.0,
+        "text": "um."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 575980.0,
+        "text": " In"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 576160.0,
+        "text": " Br"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 576280.0,
+        "text": "uss"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 576400.0,
+        "text": "el"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 576460.0,
+        "text": "s."
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 576760.0,
+        "text": " W"
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 576820.0,
+        "text": "ow"
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 576940.0,
+        "text": "."
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 577120.0,
+        "text": " Ex"
+      },
+      {
+        "owners": [
+          "A",
+          "C",
+          "D"
+        ],
+        "source_ms": 577240.0,
+        "text": "c"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 577300.0,
+        "text": "it"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 577480.0,
+        "text": "ing."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 578200.0,
+        "text": " Ye"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 578320.0,
+        "text": "ah."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 578440.0,
+        "text": " I"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 578500.0,
+        "text": "'"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578560.0,
+        "text": "m"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578620.0,
+        "text": " sup"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578680.0,
+        "text": "pos"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578740.0,
+        "text": "ed"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578800.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578860.0,
+        "text": " be"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 578980.0,
+        "text": " in"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 579100.0,
+        "text": " Br"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 579220.0,
+        "text": "uss"
+      },
+      {
+        "owners": [
+          "C",
+          "D"
+        ],
+        "source_ms": 579340.0,
+        "text": "els"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 579580.0,
+        "text": " any"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 579640.0,
+        "text": "way"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 579640.0,
+        "text": "s."
+      }
+    ],
+    "tokens_labeled": 105,
+    "unlabeled_tokens": 0
+  },
+  "G05": {
+    "mixed_owner_tokens": 33,
+    "owners_after_split": [
+      "C"
+    ],
+    "owners_before_split": [
+      "C"
+    ],
+    "split_source_ms": 383194.0,
+    "tokens": [
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 372300.0,
+        "text": "And"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 372480.0,
+        "text": " wh"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 372540.0,
+        "text": "ether"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 372660.0,
+        "text": " it"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 372720.0,
+        "text": " would"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 372900.0,
+        "text": " have"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 373080.0,
+        "text": " that"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 373200.0,
+        "text": " sort"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 373380.0,
+        "text": " of"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 373800.0,
+        "text": " t"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 373920.0,
+        "text": "ier"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374040.0,
+        "text": "ed"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374280.0,
+        "text": " eff"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374400.0,
+        "text": "ec"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374520.0,
+        "text": "t,"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374580.0,
+        "text": " so"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374700.0,
+        "text": " y"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374760.0,
+        "text": "ou"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374820.0,
+        "text": " co"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374880.0,
+        "text": "uld"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 374940.0,
+        "text": " se"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 375000.0,
+        "text": "e"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 375060.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 375120.0,
+        "text": " over"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 375420.0,
+        "text": "lap"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 375540.0,
+        "text": " of"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376020.0,
+        "text": " where"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376260.0,
+        "text": " one"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376380.0,
+        "text": " person"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376680.0,
+        "text": " was"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376800.0,
+        "text": " lo"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376860.0,
+        "text": "ok"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 376980.0,
+        "text": "ing"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377160.0,
+        "text": " comp"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377280.0,
+        "text": "ar"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377340.0,
+        "text": "ed"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377400.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377460.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377640.0,
+        "text": " o"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377760.0,
+        "text": "th"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377820.0,
+        "text": "er,"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 377880.0,
+        "text": " and"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378000.0,
+        "text": " their"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378180.0,
+        "text": " mo"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378300.0,
+        "text": "use"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378420.0,
+        "text": " mov"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378600.0,
+        "text": "ements"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378840.0,
+        "text": " and"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 378900.0,
+        "text": " th"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 379080.0,
+        "text": "ing"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 379260.0,
+        "text": "s."
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 379860.0,
+        "text": " Ye"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 379980.0,
+        "text": "ah."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 380340.0,
+        "text": " That"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 380580.0,
+        "text": " sho"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 380760.0,
+        "text": "uld"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 381900.0,
+        "text": "\u2014"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 381960.0,
+        "text": " B"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382020.0,
+        "text": "eca"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382140.0,
+        "text": "use"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382200.0,
+        "text": " all"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382320.0,
+        "text": " y"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382380.0,
+        "text": "ou"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382500.0,
+        "text": " w"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382560.0,
+        "text": "ant"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382620.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382680.0,
+        "text": " kn"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382740.0,
+        "text": "ow"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382800.0,
+        "text": " is"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 382980.0,
+        "text": " wh"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383040.0,
+        "text": "ether"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383160.0,
+        "text": " they"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383220.0,
+        "text": " were"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383340.0,
+        "text": " lo"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383400.0,
+        "text": "ok"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383460.0,
+        "text": "ing"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383580.0,
+        "text": " at"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383640.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 383760.0,
+        "text": " same"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 384060.0,
+        "text": " obj"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 384360.0,
+        "text": "ect"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 384540.0,
+        "text": " in"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 384600.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 384780.0,
+        "text": " period"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 385140.0,
+        "text": " after"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 385440.0,
+        "text": "."
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 385800.0,
+        "text": " But"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 385920.0,
+        "text": " bec"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 385980.0,
+        "text": "a"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386040.0,
+        "text": "use"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386100.0,
+        "text": " it"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386160.0,
+        "text": "'s"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386280.0,
+        "text": " also"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386520.0,
+        "text": " in"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386700.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 386880.0,
+        "text": "\u2014"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 387120.0,
+        "text": " based"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 387240.0,
+        "text": " on"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 387720.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 388020.0,
+        "text": " time"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 388260.0,
+        "text": " cour"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 388380.0,
+        "text": "se"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 388500.0,
+        "text": " of"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 388860.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 389520.0,
+        "text": " pro"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 389580.0,
+        "text": "ced"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 389760.0,
+        "text": "ure"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 389880.0,
+        "text": ","
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 389940.0,
+        "text": " y"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390000.0,
+        "text": "ou"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390060.0,
+        "text": "'"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390120.0,
+        "text": "ll"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390180.0,
+        "text": " be"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390300.0,
+        "text": " ab"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390360.0,
+        "text": "le"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390420.0,
+        "text": " to"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390600.0,
+        "text": " bas"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390720.0,
+        "text": "ic"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390780.0,
+        "text": "ally"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 390960.0,
+        "text": " get"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 391320.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "A",
+          "C"
+        ],
+        "source_ms": 391440.0,
+        "text": " sc"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 391560.0,
+        "text": "an"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 391680.0,
+        "text": " p"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 391800.0,
+        "text": "ath"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 391980.0,
+        "text": " or"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 392160.0,
+        "text": " the"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 392220.0,
+        "text": " pat"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 392340.0,
+        "text": "tern"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 392640.0,
+        "text": " of"
+      },
+      {
+        "owners": [
+          "C"
+        ],
+        "source_ms": 392640.0,
+        "text": "."
+      }
+    ],
+    "tokens_labeled": 131,
+    "unlabeled_tokens": 0
+  }
+}

@@ -1,0 +1,326 @@
+{
+ "accuracy_note": "Sample-exact PCM accounting throughout. ms values are sample/16 informational only.",
+ "arms": {
+  "baseline": {
+   "applicability": "No request. Single segment [span_start, span_end).",
+   "segments": 1
+  },
+  "f0": {
+   "request_s": [
+    52139200,
+    52203200
+   ],
+   "request_te": [
+    52156200,
+    52217640
+   ],
+   "segments": 3
+  },
+  "h": {
+   "request_s": [
+    52158400,
+    52203200
+   ],
+   "request_te": [
+    52171560,
+    52217640
+   ],
+   "segments": 3
+  },
+  "ideal": {
+   "request_s": [
+    52156984
+   ],
+   "request_te": [
+    52175224
+   ],
+   "segments": 2
+  }
+ },
+ "audio": {
+  "channels": 1,
+  "excerpt_ms": [
+   3248200,
+   3272600
+  ],
+  "excerpt_samples": [
+   51971200,
+   52361600
+  ],
+  "excerpt_sha256": "513c9b2958fd16c3f0827964696ddbf42062b02f0adcf6f6f1d2a3094863542f",
+  "nframes": 85189974,
+  "path": "C:/Users/salee/.psem-corpus/ami/audio/EN2009d/EN2009d.Mix-Headset.wav",
+  "sample_rate_hz": 16000
+ },
+ "authority": {
+  "baseline_commit": "45956c69895aa3e33c60e9c516fc40ba7d60b954",
+  "branch": "experiment-v2-speaker-change-turn-boundaries-ls",
+  "freeze_id": "psem.revised_phase_d.freeze.v1",
+  "frozen_at_utc": "2026-09-08T12:30:17Z",
+  "governs": "#133 revised Phase D engineering probe only. No production edits, no git mutations, no training, no sweeps."
+ },
+ "budgets": {
+  "conditional": "At most 2 OpenRouter google/gemma-4-26b-a4b-it translations ONLY if STT finals are lexically complete but attribution-ambiguous in a way translation would resolve AND that resolution could change the decision. Otherwise zero.",
+  "provider_sessions": 9,
+  "source_clips": 1,
+  "translations_default": 0
+ },
+ "canonical": {
+  "confirmation_samples": 1600,
+  "disclosed_outside_target": [
+   {
+    "b": 52017600,
+    "b_ms": 3251100.0,
+    "emit": 52033320,
+    "ep": "ami_EN2009d:A00341",
+    "label": "H"
+   },
+   {
+    "b": 52080000,
+    "b_ms": 3255000.0,
+    "emit": 52094760,
+    "ep": "ami_EN2009d:A00342",
+    "label": "H"
+   },
+   {
+    "b": 52080000,
+    "b_ms": 3255000.0,
+    "emit": 52094760,
+    "ep": "ami_EN2009d:A00342",
+    "label": "F0"
+   }
+  ],
+  "export": "experiments/psem_state_corrected_adaptation_gate/results/issue-121-h7301-persistence-v1/export/gpu_export",
+  "in_target": {
+   "F0": [
+    {
+     "b": 52139200,
+     "b_ms": 3258700.0,
+     "emit": 52156200,
+     "emit_ms": 3259762.5,
+     "ep": "ami_EN2009d:A00343",
+     "frontier": 52156200
+    },
+    {
+     "b": 52203200,
+     "b_ms": 3262700.0,
+     "emit": 52217640,
+     "emit_ms": 3263602.5,
+     "ep": "ami_EN2009d:A00344",
+     "frontier": 52217640
+    }
+   ],
+   "H": [
+    {
+     "b": 52158400,
+     "b_ms": 3259900.0,
+     "emit": 52171560,
+     "emit_ms": 3260722.5,
+     "ep": "ami_EN2009d:A00343",
+     "frontier": 52171560
+    },
+    {
+     "b": 52203200,
+     "b_ms": 3262700.0,
+     "emit": 52217640,
+     "emit_ms": 3263602.5,
+     "ep": "ami_EN2009d:A00344",
+     "frontier": 52217640
+    }
+   ]
+  },
+  "limitation": "Fixed GT-derived reference trajectory preserved; no native rebind when splits applied. Explicit diagnostic limitation, carried from P1.",
+  "method": "frontier_sweep.simulate_episode first-event per episode over full EN2009d session; sigmoid cand_raw with H C tau, sigmoid f0_raw with F0 tau; filter requested boundary in target span. Recomputed, never regenerated.",
+  "taus": {
+   "F0": 0.5,
+   "H_C": 0.5887844788775033
+  }
+ },
+ "decision_rule": {
+  "options": "One next decision only. Neither broad product acceptance nor hidden positive signal.",
+  "questions": [
+   "Does the buffered baseline merge disjoint A-owned and C-owned phrases in ONE final?",
+   "Does the ideal split recover them into associated finals with no omitted/dup words?",
+   "Do F0/H splits improve over baseline toward ideal, with what fragmentation cost?",
+   "What delay/compute conditions (hold + drain) did each arm incur?",
+   "Is there an earliest supported diagnostic loss, or continued bounded ambiguity?"
+  ]
+ },
+ "gt": {
+  "a_end_ms": 3259815.0,
+  "a_in_span_words": [
+   {
+    "e": 3258.78,
+    "s": 3258.26,
+    "w": "right"
+   },
+   {
+    "e": 3258.89,
+    "s": 3258.78,
+    "w": "How"
+   },
+   {
+    "e": 3258.99,
+    "s": 3258.89,
+    "w": "could"
+   },
+   {
+    "e": 3259.07,
+    "s": 3258.99,
+    "w": "you"
+   },
+   {
+    "e": 3259.45,
+    "s": 3259.07,
+    "w": "possibly"
+   },
+   {
+    "e": 3259.57,
+    "s": 3259.45,
+    "w": "do"
+   },
+   {
+    "e": 3259.77,
+    "s": 3259.57,
+    "w": "that"
+   }
+  ],
+  "a_tail_full": "Yeah, but there's there'd be no way of coding that automatically, right. How could you possibly do that?",
+  "c_head_full": "You have to hope that there's language and one of them says something.",
+  "c_in_span_head": [
+   {
+    "e": 3259.97,
+    "s": 3259.83,
+    "w": "You"
+   },
+   {
+    "e": 3260.13,
+    "s": 3259.97,
+    "w": "have"
+   },
+   {
+    "e": 3260.47,
+    "s": 3260.13,
+    "w": "to"
+   },
+   {
+    "e": 3260.74,
+    "s": 3260.47,
+    "w": "hope"
+   }
+  ],
+  "c_start_ms": 3259808.0,
+  "later_overlap_unresolved": "B enters 3262688 (Mm-hmm 3262.71-3263.05) overlapping A 'But that's a human coding, right' from 3262.87 and C 'something. You c mm-hmm'. Exposed, never erased, never scored.",
+  "mapping": "EN2009d A=FEE083 C=MEE094 D=MEE095 B=FEE096 per corpusResources/meetings.xml",
+  "overlap_excluded_ms": [
+   3259808.0,
+   3259815.0
+  ],
+  "overlap_note": "7ms overlap holds no word interiors: last A word ends 3259.77, first C word starts 3259.83. Excluded from scoring, not from audio.",
+  "provenance": {
+   "annotation_sha256": "fb77a0de47996db4a4fd8cffb6de5237b3cd44ed88525579752211957b891e11",
+   "annotation_source_url": "https://groups.inf.ed.ac.uk/ami/AMICorpusAnnotations/ami_public_manual_1.6.2.zip",
+   "segments_pinned_local": "experiments/psem_evidence_delivery_gap/traces/annotations_reuse/EN2009d.*.segments.xml",
+   "words_files": [
+    {
+     "ref": "words/EN2009d.A.words.xml",
+     "sha256": "332665c43d5b956cb0ce1f06f6949e94faf6ddabffa132fc92424f241d0c5644",
+     "size_bytes": 595975
+    },
+    {
+     "ref": "words/EN2009d.B.words.xml",
+     "sha256": "bc28cf56f5963ddcc58f3d623ef9b35d82f2a7d4c0dc7e119314a45f10496ae1",
+     "size_bytes": 739841
+    },
+    {
+     "ref": "words/EN2009d.C.words.xml",
+     "sha256": "0d5a53a8340736b4024a81e1d1f645566efbd368913267db78ab9c25838c8292",
+     "size_bytes": 282574
+    }
+   ],
+   "words_location": "OS temp only, never committed"
+  },
+  "true_midpoint_ms": 3259811.5,
+  "true_midpoint_sample": 52156984
+ },
+ "hold": {
+  "applicability": "For requested S received at Te: apply S iff still unsent, i.e. S in (watermark_sent, Te]. Else record named reason, never rewind sent bytes.",
+  "b_ms": 1500,
+  "b_samples": 24000,
+  "scope": "Uniform experiment-local BEFORE-SEND hold on ALL arms including buffered baseline."
+ },
+ "ideal": {
+  "S": 52156984,
+  "S_ms": 3259811.5,
+  "Te": 52175224,
+  "Te_ms": 3260951.5,
+  "derivation": "T + 100ms confirmation (1600 samples) + 1040ms context (16640 samples), compute 0 assumed explicit",
+  "status": "Declared synthetic correct evidence under causal timing assumption, not measured model execution."
+ },
+ "prohibitions": [
+  "Cerebras strictly forbidden",
+  "Default zero translation",
+  "No V2 handoff [3260300,3260538] as acoustic GT (rejected prior mistake, 489ms lag disclosed)",
+  "No full UI/translation path claims; scoped logical STT utterance delivery only",
+  "No offline pre-sliced independent sessions; chronological feed, forward once",
+  "No fake acks; experiment-level applied ack from forwarding coordinates only",
+  "Original unbuffered baseline NOT rerun; buffered baseline shifts same schedule by hold"
+ ],
+ "scope": "Scoped logical STT utterance delivery sufficient for probe. No output UI exercised. Simulated acquisition in controlled buffered adapter probe, not native runtime proof.",
+ "timing_semantics": "Source simulation time and actual runtime wallclock recorded separately. Source time never reported as end-to-end latency. Drain/provider wait uses finite timeout; induced waits recorded as stall bound, never hidden buffer.",
+ "vad": {
+  "context_rule": "Pre-roll is contextual single-segment ownership, never double-counted against neighbors.",
+  "payload_samples": [
+   52126528,
+   52246656
+  ],
+  "payload_span_ms": [
+   3257908.0,
+   3265416.0
+  ],
+  "pre_roll_samples": 8000,
+  "profile": {
+   "chunk": 512,
+   "commit_chunks": 3,
+   "debounce_chunks": 3,
+   "hangover_ms": 500,
+   "max_ms": 7000,
+   "ring_ms": 500,
+   "threshold": 0.5
+  },
+  "reason": "max_duration",
+  "selection": "Target VAD utterance is the max_duration span covering the GT turn, verified by re-running production peer VAD over the full excerpt and rederiving start from actual SpeechStart PCM payload sequence.",
+  "spans_full_excerpt_ms": [
+   [
+    3248200.0,
+    3253960.0,
+    "silence"
+   ],
+   [
+    3254516.0,
+    3257480.0,
+    "silence"
+   ],
+   [
+    3257908.0,
+    3265416.0,
+    "max_duration"
+   ],
+   [
+    3264916.0,
+    3268456.0,
+    "silence"
+   ],
+   [
+    3268884.0,
+    3269832.0,
+    "silence"
+   ],
+   [
+    3270036.0,
+    3272600.0,
+    "eos-flush"
+   ]
+  ]
+ }
+}

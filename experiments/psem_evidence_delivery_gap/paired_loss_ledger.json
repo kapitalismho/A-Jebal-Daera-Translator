@@ -1,0 +1,502 @@
+{
+  "artifact_refs": [
+    "traces/case_enrichment.json",
+    "traces/rev3_same_threshold.json",
+    "traces/realcheck.json",
+    "analysis/probe.py",
+    "analysis/realcheck.py",
+    "traces/text_diff.json",
+    "traces/owner_alignment.json",
+    "traces/emission_bounds.json",
+    "traces/token_timing.json",
+    "traces/annotations_reuse/ (8 pinned AMI segments.xml, sha256-verified vs V2 manifest)",
+    "analysis/token_timing.py"
+  ],
+  "baseline_delivery_common": "DIAGNOSTIC vs DELIVERED rule: ordinary-path separation is UNKNOWN for every case except G04/G05, where production VAD replay measured baseline spans. UNKNOWN is never read as harmless and never as harmful.",
+  "branches_considered": "F (bounded defer, insufficient evidence). A rejected: a missing application receiver is not evidence of earliest material recoverable loss and authorizes no contract/P2 repair scope. B unresolved (lifecycle cause neither proven nor rejected; O/C headline cause open). C not authorized (prime suspect only; temporal repair unmeasurable without attribution-labeled delivery). D rejected as a positive claim (H frame AP 0.488 shows signal but AP/proxy gain proves no delivered value). E not decidable (provider semantics unknown because attribution-labeled delivery was never measured). F is NOT a no-value proof.",
+  "capture_generations": "ami_mix_headset / alimeeting_far_ch0 frozen DEV sessions",
+  "cases": [
+    {
+      "aggregate_context_only": true,
+      "baseline": "UNKNOWN (ordinary separation unmeasured; no applied semantics)",
+      "diagnostic_vs_delivered": "observation/event diagnostic only; delivered consequence UNKNOWN",
+      "earliest_diagnostic_loss": "AGGREGATE CONTEXT, excluded from loss tally: 537 s H-positive firing across 101 episodes against 56 references describes whole-source operating cost, not one loss case. No single-case loss claimed.",
+      "existing": "H100-C and H100-M emit multiple unmatched runs across the span; F0 silent",
+      "f0": "silent throughout (below 0.5)",
+      "gt_context": "101 episodes; 56 frozen reference boundaries inside; speakers per span vary by episode; speech 0.676, mask 0.091, overlap 0.068",
+      "h": "sigmoid(cand) >= 0.58878 over 5371 contiguous frames (~537 s); 632 target-positive frames inside",
+      "id": "G01",
+      "interval": {
+        "frames": [
+          10504,
+          15874
+        ],
+        "source": "ami_ES2015d",
+        "src_span_ms": [
+          1680700.0,
+          2540000.0
+        ]
+      },
+      "recoverable": "n/a (aggregate context)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G01"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured; no applied semantics; no real-call coverage in P1)",
+      "diagnostic_vs_delivered": "matched run is an event-layer diagnostic; delivered value UNKNOWN",
+      "earliest_diagnostic_loss": "none at observation/event layers (matched H run where F0 is silent)",
+      "existing": "H100-C and H100-M emit one matched run (381 ms, episode A00005); F0 emits nothing",
+      "f0": "below threshold through the transition (miss at frame layer)",
+      "gt_context": "single speaker MEE034 in span; no reference inside; nearest reference 119 ms from edge; target 4/4; overlap 0.0",
+      "h": "short H-positive stretch at the reference transition",
+      "id": "G02",
+      "interval": {
+        "frames": [
+          829,
+          832
+        ],
+        "source": "ami_ES2009b",
+        "src_span_ms": [
+          132800.0,
+          133400.0
+        ]
+      },
+      "recoverable": "unknown (applicability + delivered value unmeasured)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G02"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured; no applied semantics; not in real-call subset)",
+      "diagnostic_vs_delivered": "observation/event diagnostic only; delivered consequence UNKNOWN",
+      "earliest_diagnostic_loss": "TRUE_EVIDENCE_FRAGMENTED (14 contiguous high-and-speech frames with a reference inside produce no run under any operating point)",
+      "existing": "no H100-C, no H100-M, no F0 run covers the span",
+      "f0": "silent",
+      "gt_context": "episode A00024; 1 frozen reference inside; target 3/14; overlap 0.786; speech 1.0; no mask",
+      "h": "14 contiguous high-and-speech frames, reference inside span",
+      "id": "G03",
+      "interval": {
+        "frames": [
+          2888,
+          2901
+        ],
+        "source": "ami_ES2002b",
+        "src_span_ms": [
+          412900.0,
+          414300.0
+        ]
+      },
+      "recoverable": "unknown (evidence exists pre-commit; recovery unproven without attribution-labeled delivery)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G03"
+    },
+    {
+      "baseline": "MEASURED via production VAD replay (peer profile thr 0.5/512/pre-roll 500/hangover 500): excerpt spans (ms) [4332-11840 max_duration][11340-13216][13260-13856][14220-21000]; frozen boundary at 10794 ms lies INSIDE the first span \u2014 ordinary delivery does NOT separate this transition",
+      "diagnostic_vs_delivered": "fragmentation is an event-construction diagnostic; delivered consequence MEASURED at text layer, attribution layer still UNKNOWN (STT text carries no owner labels)",
+      "earliest_diagnostic_loss": "TRUE_EVIDENCE_FRAGMENTED (mechanism verified: single-capture-per-episode \u2014 positive_runs breaks episode processing after the first emitted run closes, discarding this later 700 ms stretch; all 7 high frames in episode A00047)",
+      "emission_bounds_canonical": "frontier_sweep.simulate_episode first-event return: H ami_ES2009a:A00047 boundary 568600.0 emit 569362.5; F0 ami_ES2009a:A00047 boundary 568600.0 emit 569362.5; commit UNKNOWN, no latency credit",
+      "existing": "no run of any kind covers the span; episode A00047 run emitted earlier at 9097600 (300 ms)",
+      "f0": "silent",
+      "gt_context": "span speaker MEE033; 1 frozen reference inside (boundary 9116704, anchor MEE033/A00047, 6 ms from span edge); target 2/7; overlap 0.714",
+      "h": "7 contiguous high-and-speech frames (scores 0.61-0.86), reference inside span",
+      "id": "G04",
+      "ideal_test_measured": "WITHDRAWN as ideal test. Retained as lexical sensitivity probe only: retrospective GT split, independent forward passes, no runtime owner/output path exercised. Exact word diffs (traces/text_diff.json:G04, split frame 5023, window speakers MEE033->MEE035 with overlap+targets around split): whole \"They're\" vs halves \"||| Nice. They\"; whole \"anyway\" vs halves \"any\". No GT word-owner comparison exists (STT emits bare text, no timings/owners); loss attribution UNKNOWN; no near-zero or recoverability claim.",
+      "interval": {
+        "frames": [
+          5016,
+          5022
+        ],
+        "source": "ami_ES2009a",
+        "src_span_ms": [
+          569100.0,
+          569800.0
+        ]
+      },
+      "owner_alignment_measured": "AMI pinned segments (sha256-verified reuse): whole-pass tokens owner-labeled via Soniox token end_ms -> segment coverage. G04 tokens_labeled=105, mixed=47, unlabeled=0; single-owner tokens before split ['C'], after split ['C']. Whole-pass transcript crosses NO annotation owner change (mixed tokens overlap-ambiguous, unassigned). Frozen reference boundary is anchor-relative replacement, not an AMI speaker turn: delivery question is attribution-stability under reference change. Provider end_ms trust limited to relative ordering.",
+      "realcheck": "STT soniox stt-rt-v5 whole wall 19.1 s, halves 9.9/9.1 s; translation deepseek-v4-flash FAILED 402 Insufficient Balance (both); cerebras fallback FAILED max_completion_tokens truncation (both). Translation leg unmeasured for G04.",
+      "recoverable": "unknown (loss attribution UNKNOWN; no recoverability claim)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "split applied only as independent inference passes (experiment harness); no production application path exists",
+      "support": "traces/case_enrichment.json:G04 + traces/realcheck.json[0] + traces/text_diff.json:G04 + traces/owner_alignment.json:G04 + traces/emission_bounds.json:G04"
+    },
+    {
+      "baseline": "MEASURED via production VAD replay: excerpt spans (ms) [0-7360 max_duration][6860-9056][9516-17024 max_duration][16524-21000 eos-flush]; frozen boundary at 11194 ms lies INSIDE the third span \u2014 ordinary delivery does NOT separate this transition",
+      "diagnostic_vs_delivered": "same split as G04: text layer measured, attribution layer UNKNOWN",
+      "earliest_diagnostic_loss": "TRUE_EVIDENCE_FRAGMENTED (11 contiguous high-and-speech frames with a reference inside; no run under any operating point)",
+      "emission_bounds_canonical": "frontier_sweep.simulate_episode first-event return: H ami_EN2009d:A00027 boundary 379700.0 emit 380722.5; F0 ami_EN2009d:A00027 boundary 367800.0 emit 368722.5; commit UNKNOWN, no latency credit",
+      "existing": "no H100-C, no H100-M, no F0 run covers the span",
+      "f0": "silent",
+      "gt_context": "span speaker MEE094; 1 frozen reference inside (boundary 6131104, anchor MEE094/A00027); target 1/11; overlap 0.909",
+      "h": "11 contiguous high-and-speech frames, reference inside span",
+      "id": "G05",
+      "ideal_test_measured": "WITHDRAWN as ideal test; lexical sensitivity probe only (same caveats). Exact word diffs (traces/text_diff.json:G05, split frame 3762, window FEE083->MEE094): whole \"whether they were looking\" vs halves \"wh ||| Looking\" (split halves visibly omit \"whether they were\"); whole \"But because\" vs halves \"Because\"; whole \"of\" vs halves \"of.\". Direction and cause UNKNOWN (cold-start edge effect vs speaker effect indistinguishable without word-owner GT); no near-zero claim.",
+      "interval": {
+        "frames": [
+          3752,
+          3762
+        ],
+        "source": "ami_EN2009d",
+        "src_span_ms": [
+          382200.0,
+          383300.0
+        ]
+      },
+      "owner_alignment_measured": "AMI pinned segments (sha256-verified reuse): whole-pass tokens owner-labeled via Soniox token end_ms -> segment coverage. G05 tokens_labeled=131, mixed=33, unlabeled=0; single-owner tokens before split ['C'], after split ['C']. Whole-pass transcript crosses NO annotation owner change (mixed tokens overlap-ambiguous, unassigned). Frozen reference boundary is anchor-relative replacement, not an AMI speaker turn: delivery question is attribution-stability under reference change. Provider end_ms trust limited to relative ordering.",
+      "realcheck": "STT soniox whole wall 19.1 s, halves 10.1/9.0 s; deepseek FAILED 402; cerebras fallback SUCCEEDED (whole + halves).",
+      "recoverable": "unknown (loss attribution UNKNOWN; no recoverability claim)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "split applied only as independent inference passes (experiment harness); no production application path exists",
+      "support": "traces/case_enrichment.json:G05 + traces/realcheck.json[1] + traces/text_diff.json:G05 + traces/owner_alignment.json:G05 + traces/emission_bounds.json:G05"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured; no applied semantics)",
+      "diagnostic_vs_delivered": "no-event is an event-layer outcome; delivered consequence UNKNOWN, not 'harmless'",
+      "earliest_diagnostic_loss": "none (H frame-firing on pure overlap correctly yields no event under any operating point)",
+      "existing": "no runs",
+      "f0": "silent",
+      "gt_context": "single episode; no reference inside; overlap 1.0; target 0/8",
+      "h": "8 H-high frames, all overlapped speech",
+      "id": "G06",
+      "interval": {
+        "frames": [
+          17742,
+          17749
+        ],
+        "source": "ami_EN2009d",
+        "src_span_ms": [
+          2838900.0,
+          2840000.0
+        ]
+      },
+      "recoverable": "n/a at event layer; delivered UNKNOWN",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none",
+      "support": "traces/case_enrichment.json:G06"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured)",
+      "diagnostic_vs_delivered": "unmatched-run emission is an event-layer diagnostic; delivered consequence UNKNOWN. Overlap GT (frac 1.0) is context only \u2014 actual lexical damage NOT proven (no ASR evidence on this clip).",
+      "earliest_diagnostic_loss": "SUSTAINED_ERRONEOUS_EVIDENCE, qualified: unmatched-with-context (nearest reference 6281 ms away admits label-gap/timing explanations; 'erroneous' is not acoustic proof)",
+      "existing": "H100-C unmatched 1000 ms; H100-M unmatched 1100 ms; F0 unmatched 100 ms at a different position",
+      "f0": "one short unmatched run \u2014 smaller event cost than H here",
+      "gt_context": "single episode; no reference inside; overlap 1.0; target 0/9",
+      "h": "9 H-high frames inside a longer high stretch",
+      "id": "G07",
+      "interval": {
+        "frames": [
+          5088,
+          5096
+        ],
+        "source": "ami_ES2009a",
+        "src_span_ms": [
+          922600.0,
+          923300.0
+        ]
+      },
+      "recoverable": "unknown",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G07"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured)",
+      "diagnostic_vs_delivered": "same qualification as G07; lexical damage NOT proven",
+      "earliest_diagnostic_loss": "SUSTAINED_ERRONEOUS_EVIDENCE, qualified as unmatched-with-context (no reference within 1136 ms)",
+      "existing": "H100-C unmatched 1100 ms; H100-M unmatched 1400 ms; F0 unmatched 200 ms",
+      "f0": "short unmatched run \u2014 smaller event cost",
+      "gt_context": "single episode; no reference inside; overlap 1.0; target 0/9",
+      "h": "9 H-high frames inside a longer high stretch",
+      "id": "G08",
+      "interval": {
+        "frames": [
+          5955,
+          5963
+        ],
+        "source": "ami_ES2009d",
+        "src_span_ms": [
+          1067600.0,
+          1068300.0
+        ]
+      },
+      "recoverable": "unknown",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G08"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured; no applied semantics)",
+      "diagnostic_vs_delivered": "CORRECTED: H silence where F0 emits is an observation-layer diagnostic, NOT 'already recovered' product harm. Delivered consequence UNKNOWN.",
+      "earliest_diagnostic_loss": "OBSERVATION_WRONG, qualified to F0 frame layer with context (28 contiguous F0-high frames on speech-0.321/mask-0.357 material, no reference within 1700 ms; H silent). Frame AP/proxy gain proves no delivered value.",
+      "existing": "H100-C/H100-M silent; F0 emits unmatched 460 ms run",
+      "f0": "28 contiguous F0-high frames, target 0",
+      "gt_context": "episodes A00199 + neighbor; speakers FEE083/MEE094 across the wider window; no reference inside; target 0/28",
+      "h": "silent",
+      "id": "G09",
+      "interval": {
+        "frames": [
+          20064,
+          20091
+        ],
+        "source": "ami_EN2009d",
+        "src_span_ms": [
+          3342400.0,
+          3345600.0
+        ]
+      },
+      "recoverable": "unknown (delivered value unmeasured)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none needed at event layer (correct outcome = no event); delivery unmeasured",
+      "support": "traces/case_enrichment.json:G09"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured)",
+      "diagnostic_vs_delivered": "same correction as G09: diagnostic only, delivered UNKNOWN",
+      "earliest_diagnostic_loss": "OBSERVATION_WRONG, qualified to F0 frame layer (23 F0-high frames on near-nonspeech speech-0.13, no reference within 47 s; H silent)",
+      "existing": "H silent; F0 emits unmatched 300 ms run",
+      "f0": "23 contiguous F0-high frames, target 0",
+      "gt_context": "2 episodes; target 0/23",
+      "h": "silent",
+      "id": "G10",
+      "interval": {
+        "frames": [
+          390,
+          412
+        ],
+        "source": "ami_ES2009a",
+        "src_span_ms": [
+          64000.0,
+          68000.0
+        ]
+      },
+      "recoverable": "unknown (delivered value unmeasured)",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none needed at event layer; delivery unmeasured",
+      "support": "traces/case_enrichment.json:G10"
+    },
+    {
+      "baseline": "UNKNOWN at delivery; no event under any operating point at event layer",
+      "diagnostic_vs_delivered": "no-event outcome; delivered consequence UNKNOWN, not 'harmless'",
+      "earliest_diagnostic_loss": "MASK_OR_RESET_BREAK (F0 frame-fires on fully masked frames; run layer correctly emits nothing)",
+      "existing": "no runs of any kind",
+      "f0": "23 F0-high frames, all masked (masked_frac 1.0)",
+      "gt_context": "single episode; no reference inside; speech 0.435; overlap 0.217; target 1/23",
+      "h": "silent",
+      "id": "G11",
+      "interval": {
+        "frames": [
+          10861,
+          10883
+        ],
+        "source": "ami_ES2009d",
+        "src_span_ms": [
+          1737900.0,
+          1741400.0
+        ]
+      },
+      "recoverable": "n/a at event layer (invalid evidence correctly ignored); delivered UNKNOWN",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none needed",
+      "support": "traces/case_enrichment.json:G11"
+    },
+    {
+      "baseline": "UNKNOWN at delivery; no event under any operating point at event layer",
+      "diagnostic_vs_delivered": "same as G11: delivered UNKNOWN, not 'harmless'",
+      "earliest_diagnostic_loss": "MASK_OR_RESET_BREAK (F0 frame-fires on nonspeech/masked frames; correctly no run)",
+      "existing": "no runs of any kind",
+      "f0": "19 F0-high frames, speech 0.0, masked 0.842",
+      "gt_context": "single episode; no reference inside; target 0/19",
+      "h": "silent",
+      "id": "G12",
+      "interval": {
+        "frames": [
+          3706,
+          3724
+        ],
+        "source": "ami_ES2009c",
+        "src_span_ms": [
+          593100.0,
+          595300.0
+        ]
+      },
+      "recoverable": "n/a at event layer; delivered UNKNOWN",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none needed",
+      "support": "traces/case_enrichment.json:G12"
+    },
+    {
+      "baseline": "UNKNOWN at delivery; no event under any operating point at event layer",
+      "diagnostic_vs_delivered": "no-event outcome; delivered UNKNOWN, not 'harmless'",
+      "earliest_diagnostic_loss": "none (sub-confirmation F0 blip correctly discarded by run layer; H silent)",
+      "existing": "no runs of any kind",
+      "f0": "16 F0-high frames, speech 0.562, no mask, no reference within 13.7 s",
+      "gt_context": "single episode; target 0/16",
+      "h": "silent",
+      "id": "G13",
+      "interval": {
+        "frames": [
+          5185,
+          5200
+        ],
+        "source": "alimeeting_R8009_M8019",
+        "src_span_ms": [
+          829800.0,
+          832200.0
+        ]
+      },
+      "recoverable": "n/a at event layer; delivered UNKNOWN",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none needed",
+      "support": "traces/case_enrichment.json:G13"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured)",
+      "diagnostic_vs_delivered": "emission far from reference is an event-layer diagnostic; 'wrong' NOT inferred from unmatched alone (>3 s admits label-gap/timing-artifact explanations)",
+      "earliest_diagnostic_loss": "EVENT_OR_BOUNDARY_PROJECTION (H100-M and F0 emit 100 ms unmatched runs; H100-C silent by threshold selection)",
+      "existing": "H100-M unmatched 100 ms; F0 unmatched 100 ms; H100-C silent",
+      "f0": "F0-high frames incl. 3 target-positive",
+      "gt_context": "episode A00013, speaker SPK4080; no reference inside; nearest 3480 ms away; speech 0.462; overlap 0.154; target 3/13",
+      "h": "H100-M fires, H100-C does not",
+      "id": "G14",
+      "interval": {
+        "frames": [
+          1956,
+          1968
+        ],
+        "source": "alimeeting_R1021_M4073",
+        "src_span_ms": [
+          313100.0,
+          315000.0
+        ]
+      },
+      "recoverable": "unknown",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G14"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured)",
+      "diagnostic_vs_delivered": "same unmatched-qualification as G14",
+      "earliest_diagnostic_loss": "EVENT_OR_BOUNDARY_PROJECTION + verified capture-order interaction (C emits unmatched 100 ms at 10940800; M emits nothing covering the span because the episode's single capture was consumed by an earlier M run at 10881600 \u2014 threshold changes WHICH run is captured)",
+      "existing": "H100-C unmatched 100 ms; H100-M nothing covering; F0 silent",
+      "f0": "silent",
+      "gt_context": "episode A00051; no reference inside; speech 0.5; target 1/12",
+      "h": "single C-high frame 5309 + M-high pair 5309-5310",
+      "id": "G15",
+      "interval": {
+        "frames": [
+          5310,
+          5321
+        ],
+        "source": "ami_ES2002b",
+        "src_span_ms": [
+          683900.0,
+          685100.0
+        ]
+      },
+      "recoverable": "unknown",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G15"
+    },
+    {
+      "baseline": "UNKNOWN (ordinary separation unmeasured)",
+      "diagnostic_vs_delivered": "same unmatched-qualification as G14; target positives 8 s from any reference question label completeness, not acoustics alone",
+      "earliest_diagnostic_loss": "EVENT_OR_BOUNDARY_PROJECTION (H100-M unmatched 400 ms; F0 unmatched 300 ms; H100-C silent)",
+      "existing": "H100-M unmatched 400 ms; F0 unmatched 300 ms; H100-C silent",
+      "f0": "F0-high frames incl. 3 target-positive, speech 0.231",
+      "gt_context": "single episode; no reference inside; nearest 8264 ms away; target 3/13",
+      "h": "H100-M fires, H100-C does not",
+      "id": "G16",
+      "interval": {
+        "frames": [
+          4529,
+          4541
+        ],
+        "source": "ami_ES2009a",
+        "src_span_ms": [
+          799600.0,
+          801100.0
+        ]
+      },
+      "recoverable": "unknown",
+      "reference": "frozen GT-derived events, single scope, no lifecycle generations",
+      "requested_applied": "none (no contract exists)",
+      "support": "traces/case_enrichment.json:G16"
+    }
+  ],
+  "correction_amendment": {
+    "corrected_at_utc": "2026-09-08T10:25:24Z",
+    "correction_2": [
+      "whole/split runs relabeled as lexical sensitivity probes everywhere; ideal-test language withdrawn",
+      "G04/G05 exact word diffs recorded (text_diff.json); near-zero/no-merge/no-loss claims withdrawn; loss attribution UNKNOWN",
+      "halves-concatenated translations labeled single-request artifacts",
+      "realcheck.py cleaned: dead placeholder/vars/imports and added comments removed; fallback close added; STT iterator bounded by asyncio.timeout"
+    ],
+    "correction_2_utc": "2026-09-08T10:30:25Z",
+    "correction_3": [
+      "F1: 8 pinned AMI segments.xml retrieved (359KB total, sha256-verified vs V2 manifest) as reuse; owner alignment executed on G04/G05 whole-pass tokens via provider token end_ms tee (no adapter edits)",
+      "F5: bare text was harness discard; token_timing.json retains provider end_ms; only whole passes timed, halves untimed",
+      "F4: canonical simulate_episode first-event return cited; emission bounds computed for G02/G04/G05; commit unknown, no latency credit",
+      "F3: G01 aggregate context excluded from tally; 15 tallied cases; predeclaration disclosure preserved, no reselection",
+      "F2: technical acceptance numbers removed (see contract amendment + decision 11)"
+    ],
+    "correction_3_utc": "2026-09-08T10:39:32Z",
+    "correction_4": [
+      "retained realcheck.py cut over to existing OpenRouter provider google/gemma-4-26b-a4b-it (repo-configured default) with matching prompt/key; DeepSeek and Cerebras fallback removed; zero API calls to verify; historical traces untouched as previous-route evidence",
+      "decision 11 narrowed to single Audio-owned causal applicability acknowledgement; paid token timing and VAD extension explicitly conditional, not blanket; reopening keeps achievable-at/after-availability + actual baseline + paired owner harm"
+    ],
+    "correction_4_utc": "2026-09-08T10:43:36Z",
+    "director_findings": [
+      "AP/proxy gain proves no delivered value; unknown boundaries never justify 'no loss/harmless'; overlap GT never proves lexical damage",
+      "same-tau .05 supports local O/C similarity only; headline cause unresolved; lifecycle cause neither proven nor rejected",
+      "missing receiver proves no earliest loss and authorizes no A/C/P2 repair scope",
+      "real VAD+ASR/translation measurement required now on 1-2 ambiguous cases",
+      "if actionability prevents technical repair: bounded F defer + smallest missing measurement"
+    ],
+    "identities_preserved": [
+      "contract psem.evidence_delivery_gap.contract.v1 frozen 2026-09-08T10:12:12Z",
+      "predeclaration 2026-09-08T10:12:42Z with procedure + operating points unchanged",
+      "ledger psem.evidence_delivery_gap.ledger.v1; this amendment corrects overclaim fields in place, timestamps the correction, and supersedes PSEM_NEXT_DECISION branch A with branch F"
+    ],
+    "prior_branch_A_withdrawn": true
+  },
+  "count_note": "15 tallied diagnostic cases (G01 moved to aggregate context, excluded from tally) + G01 aggregate context = 16 predeclared items intact; 15 within the 12-20 bound. NOT a prevalence sample.",
+  "ledger_version": "psem.evidence_delivery_gap.ledger.v1",
+  "loss_tally": {
+    "EVENT_OR_BOUNDARY_PROJECTION": 3,
+    "MASK_OR_RESET_BREAK": 2,
+    "OBSERVATION_WRONG_F0_frame_layer_only": 2,
+    "SUSTAINED_ERRONEOUS_EVIDENCE_unmatched_with_context": 2,
+    "TRUE_EVIDENCE_FRAGMENTED": 3,
+    "none_correctly_no_event_DELIVERED_UNKNOWN": 2,
+    "none_matched_true_catch_DELIVERED_UNKNOWN": 1
+  },
+  "predeclaration": {
+    "contract_frozen_at_utc": "2026-09-08T10:12:12Z",
+    "declared_at_utc": "2026-09-08T10:12:42Z",
+    "operating_points": {
+      "F0": "sigmoid(f0_raw) >= 0.5",
+      "H": "sigmoid(cand_raw) >= 0.5887844788775033 (H100 global C-envelope)"
+    },
+    "selection_procedure": "mechanical frame-level disagreement scan over 10 DEV npz (no episode/reference/causal data touched); top runs per source per direction by length, diversified across sources and target-overlap before causal inspection"
+  },
+  "real_asr_translation_calls": {
+    "clips_used": 2,
+    "label": "lexical sensitivity probes ONLY: NOT a no-PSEM delivery baseline, NOT an achievable-ideal intervention, NOT an existing-evidence intervention; halves are retrospective GT splits; concatenated translations are single-request artifacts; no runtime owner or output path was exercised",
+    "model_calls": {
+      "cerebras_historical_spent": 4,
+      "deepseek": 4,
+      "openrouter_gemma4": "resolved google/gemma-4-26b-a4b-it, zero calls made",
+      "soniox_stt_passes": 8
+    },
+    "providers_touched": [
+      "soniox stt-rt-v5 (6 passes OK)",
+      "deepseek deepseek-v4-flash (0/4: 402 Insufficient Balance, exact configured-path blocker)",
+      "cerebras fallback (2/4 OK on G05; 2/4 max_completion_tokens truncation on G04 with long production prompt)"
+    ],
+    "trace": "traces/realcheck.json via analysis/realcheck.py (isolated adapters, keys in-process, no settings/production writes)",
+    "translation_note": "Cerebras: 4 calls already spent (G05 2 OK, G04 2 truncated); BANNED going forward per cost constraint, fallback removed from retained script, no replacement reruns. OpenRouter Gemma4 (google/gemma-4-26b-a4b-it, repo-configured default) authorized if genuinely necessary; zero calls made."
+  }
+}

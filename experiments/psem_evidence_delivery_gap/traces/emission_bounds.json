@@ -1,0 +1,107 @@
+{
+  "G02": {
+    "bounds": {
+      "F0": [
+        {
+          "boundary_ms": 86400.0,
+          "boundary_sample": 1382400,
+          "emit_ms": 87442.5,
+          "emit_sample": 1399080,
+          "episode": "ami_ES2009b:A00005",
+          "frontier_sample": 1399080,
+          "speaker": "MEE034"
+        }
+      ],
+      "H": [
+        {
+          "boundary_ms": 88300.0,
+          "boundary_sample": 1412800,
+          "emit_ms": 89362.5,
+          "emit_sample": 1429800,
+          "episode": "ami_ES2009b:A00005",
+          "frontier_sample": 1429800,
+          "speaker": "MEE034"
+        }
+      ]
+    },
+    "canonical": "frontier_sweep.simulate_episode first-event return",
+    "case_episodes": [
+      "ami_ES2009b:A00005"
+    ],
+    "frames": [
+      829,
+      832
+    ],
+    "source": "ami_ES2009b"
+  },
+  "G04": {
+    "bounds": {
+      "F0": [
+        {
+          "boundary_ms": 568600.0,
+          "boundary_sample": 9097600,
+          "emit_ms": 569362.5,
+          "emit_sample": 9109800,
+          "episode": "ami_ES2009a:A00047",
+          "frontier_sample": 9109800,
+          "speaker": "MEE033"
+        }
+      ],
+      "H": [
+        {
+          "boundary_ms": 568600.0,
+          "boundary_sample": 9097600,
+          "emit_ms": 569362.5,
+          "emit_sample": 9109800,
+          "episode": "ami_ES2009a:A00047",
+          "frontier_sample": 9109800,
+          "speaker": "MEE033"
+        }
+      ]
+    },
+    "canonical": "frontier_sweep.simulate_episode first-event return",
+    "case_episodes": [
+      "ami_ES2009a:A00047"
+    ],
+    "frames": [
+      5016,
+      5022
+    ],
+    "source": "ami_ES2009a"
+  },
+  "G05": {
+    "bounds": {
+      "F0": [
+        {
+          "boundary_ms": 367800.0,
+          "boundary_sample": 5884800,
+          "emit_ms": 368722.5,
+          "emit_sample": 5899560,
+          "episode": "ami_EN2009d:A00027",
+          "frontier_sample": 5899560,
+          "speaker": "MEE094"
+        }
+      ],
+      "H": [
+        {
+          "boundary_ms": 379700.0,
+          "boundary_sample": 6075200,
+          "emit_ms": 380722.5,
+          "emit_sample": 6091560,
+          "episode": "ami_EN2009d:A00027",
+          "frontier_sample": 6091560,
+          "speaker": "MEE094"
+        }
+      ]
+    },
+    "canonical": "frontier_sweep.simulate_episode first-event return",
+    "case_episodes": [
+      "ami_EN2009d:A00027"
+    ],
+    "frames": [
+      3752,
+      3762
+    ],
+    "source": "ami_EN2009d"
+  }
+}

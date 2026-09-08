@@ -293,7 +293,7 @@ class _SonioxSession(STTBackendSession):
             end_ms = token.get("end_ms")
             if isinstance(end_ms, (int, float)):
                 end_ms = int(end_ms)
-                if self._pending_last_end_ms is not None and end_ms <= self._pending_last_end_ms:
+                if self._pending_last_end_ms is not None and end_ms < self._pending_last_end_ms:
                     logger.debug(
                         "[STT] Soniox token skipped end_ms=%s last_end_ms=%s",
                         end_ms,

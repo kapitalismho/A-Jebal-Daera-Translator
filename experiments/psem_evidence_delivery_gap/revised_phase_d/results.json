@@ -1,0 +1,372 @@
+{
+ "run_utc": "2026-09-08T12:31:06+00:00",
+ "freeze_id": "psem.revised_phase_d.freeze.v1",
+ "stt_model": "stt-rt-v5",
+ "stt_endpoint": "wss://stt-rt.soniox.com/transcribe-websocket",
+ "hold_samples": 24000,
+ "payload_samples": [
+  52126528,
+  52246656
+ ],
+ "vad_spans": [
+  {
+   "start_abs": 51971200,
+   "end_abs": 52063360,
+   "reason": "silence"
+  },
+  {
+   "start_abs": 52072256,
+   "end_abs": 52119680,
+   "reason": "silence"
+  },
+  {
+   "start_abs": 52126528,
+   "end_abs": 52246656,
+   "reason": "max_duration"
+  },
+  {
+   "start_abs": 52238656,
+   "end_abs": 52295296,
+   "reason": "silence"
+  },
+  {
+   "start_abs": 52302144,
+   "end_abs": 52317312,
+   "reason": "silence"
+  },
+  {
+   "start_abs": 52320576,
+   "end_abs": 52361600,
+   "reason": "eos-flush"
+  }
+ ],
+ "translations": 0,
+ "results": [
+  {
+   "arm": "baseline",
+   "arm_utc": "2026-09-08T12:31:07+00:00",
+   "bounds": [
+    52126528,
+    52246656
+   ],
+   "segments": [
+    {
+     "utterance_id": "3ac3a6a7-4bf3-4649-9d1d-d917cbeb9f5a",
+     "src_start": 52126528,
+     "src_end": 52246656,
+     "session": 0,
+     "open_wall": 0.75,
+     "finalize_wall": 9.765,
+     "final_text": "Right. How could you possibly do that? You have to hope that there's language in one of them say something. But that's a human coding. Mm-hm. Right. So they'",
+     "final_wall": 10.093,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    }
+   ],
+   "injections": [],
+   "switches": [],
+   "forward_accounting": {
+    "target_samples": 120128,
+    "gap_dup_ok": true
+   },
+   "queue": {
+    "max_depth": 48,
+    "bound": 128,
+    "stalls": 0
+   },
+   "session_opens_s": [
+    0.75
+   ],
+   "drain_waits_s": [
+    0.391
+   ],
+   "wall_s": 11.39
+  },
+  {
+   "arm": "ideal",
+   "arm_utc": "2026-09-08T12:31:18+00:00",
+   "bounds": [
+    52126528,
+    52156984,
+    52246656
+   ],
+   "segments": [
+    {
+     "utterance_id": "5747a791-18db-4ef9-b0ed-81daec799693",
+     "src_start": 52126528,
+     "src_end": 52156984,
+     "session": 0,
+     "open_wall": 0.703,
+     "finalize_wall": 4.75,
+     "final_text": "Right. How could you possibly",
+     "final_wall": 5.047,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    },
+    {
+     "utterance_id": "37216740-5b16-498a-ad3c-bc314c40eab4",
+     "src_start": 52156984,
+     "src_end": 52246656,
+     "session": 1,
+     "open_wall": 0.672,
+     "finalize_wall": 10.375,
+     "final_text": "You have to hope that there's language in one of them say something. But that's a human coding. Mm-hm. Right. So they'",
+     "final_wall": 10.672,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    }
+   ],
+   "injections": [
+    {
+     "S": 52156984,
+     "Te": 52175224,
+     "inject_wall": 4.422,
+     "watermark_sent": 52151104,
+     "received_pos": 52175680,
+     "applied": true,
+     "reason": "within-unsent-window"
+    }
+   ],
+   "switches": [
+    {
+     "at_sample": 52156984,
+     "from_seg": 0,
+     "to_seg": 1,
+     "wall": 4.75
+    }
+   ],
+   "forward_accounting": {
+    "target_samples": 120128,
+    "gap_dup_ok": true
+   },
+   "queue": {
+    "max_depth": 48,
+    "bound": 128,
+    "stalls": 0
+   },
+   "session_opens_s": [
+    0.703,
+    0.672
+   ],
+   "drain_waits_s": [
+    5.625,
+    0.344
+   ],
+   "wall_s": 13.203
+  },
+  {
+   "arm": "f0",
+   "arm_utc": "2026-09-08T12:31:31+00:00",
+   "bounds": [
+    52126528,
+    52139200,
+    52203200,
+    52246656
+   ],
+   "segments": [
+    {
+     "utterance_id": "b31fa295-3635-4ad1-b448-4fa4013b13df",
+     "src_start": 52126528,
+     "src_end": 52139200,
+     "session": 0,
+     "open_wall": 0.657,
+     "finalize_wall": 4.141,
+     "final_text": "R",
+     "final_wall": 4.438,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    },
+    {
+     "utterance_id": "96ebc88d-1577-432d-833e-96d1b9c15e9e",
+     "src_start": 52139200,
+     "src_end": 52203200,
+     "session": 1,
+     "open_wall": 0.593,
+     "finalize_wall": 8.157,
+     "final_text": "How could you possibly do that? You have to hope that there's language in one of them say something.",
+     "final_wall": 8.438,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    },
+    {
+     "utterance_id": "76c7386d-9b08-4448-98cc-3301b04b3102",
+     "src_start": 52203200,
+     "src_end": 52246656,
+     "session": 2,
+     "open_wall": 0.61,
+     "finalize_wall": 10.86,
+     "final_text": "But that's a human coding, right? Yep, so they'",
+     "final_wall": 11.125,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    }
+   ],
+   "injections": [
+    {
+     "S": 52139200,
+     "Te": 52156200,
+     "inject_wall": 3.703,
+     "watermark_sent": 52132160,
+     "received_pos": 52156224,
+     "applied": true,
+     "reason": "within-unsent-window"
+    },
+    {
+     "S": 52203200,
+     "Te": 52217640,
+     "inject_wall": 7.563,
+     "watermark_sent": 52194112,
+     "received_pos": 52217664,
+     "applied": true,
+     "reason": "within-unsent-window"
+    }
+   ],
+   "switches": [
+    {
+     "at_sample": 52139200,
+     "from_seg": 0,
+     "to_seg": 1,
+     "wall": 4.141
+    },
+    {
+     "at_sample": 52203200,
+     "from_seg": 1,
+     "to_seg": 2,
+     "wall": 8.157
+    }
+   ],
+   "forward_accounting": {
+    "target_samples": 120128,
+    "gap_dup_ok": true
+   },
+   "queue": {
+    "max_depth": 48,
+    "bound": 128,
+    "stalls": 0
+   },
+   "session_opens_s": [
+    0.657,
+    0.593,
+    0.61
+   ],
+   "drain_waits_s": [
+    6.719,
+    2.703,
+    0.312
+   ],
+   "wall_s": 14.813
+  },
+  {
+   "arm": "h",
+   "arm_utc": "2026-09-08T12:31:46+00:00",
+   "bounds": [
+    52126528,
+    52158400,
+    52203200,
+    52246656
+   ],
+   "segments": [
+    {
+     "utterance_id": "65899fb3-e49d-4b7e-9b34-a0f0068ab42e",
+     "src_start": 52126528,
+     "src_end": 52158400,
+     "session": 0,
+     "open_wall": 0.578,
+     "finalize_wall": 5.297,
+     "final_text": "Right. How could you possibly do",
+     "final_wall": 5.547,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    },
+    {
+     "utterance_id": "8f777811-a2ff-4885-ab41-abe9277b8214",
+     "src_start": 52158400,
+     "src_end": 52203200,
+     "session": 1,
+     "open_wall": 0.578,
+     "finalize_wall": 8.094,
+     "final_text": "You have to hope that there's language in one of them say something.",
+     "final_wall": 8.375,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    },
+    {
+     "utterance_id": "3c883016-5ee7-486d-8903-7200fb131d44",
+     "src_start": 52203200,
+     "src_end": 52246656,
+     "session": 2,
+     "open_wall": 0.656,
+     "finalize_wall": 10.797,
+     "final_text": "But that's a human coding, right? Yep, so they'",
+     "final_wall": 11.109,
+     "final_status": "ok",
+     "pre_finalize_finals": [],
+     "partials_tail": []
+    }
+   ],
+   "injections": [
+    {
+     "S": 52158400,
+     "Te": 52171560,
+     "inject_wall": 4.64,
+     "watermark_sent": 52148032,
+     "received_pos": 52171584,
+     "applied": true,
+     "reason": "within-unsent-window"
+    },
+    {
+     "S": 52203200,
+     "Te": 52217640,
+     "inject_wall": 7.515,
+     "watermark_sent": 52193600,
+     "received_pos": 52217664,
+     "applied": true,
+     "reason": "within-unsent-window"
+    }
+   ],
+   "switches": [
+    {
+     "at_sample": 52158400,
+     "from_seg": 0,
+     "to_seg": 1,
+     "wall": 5.297
+    },
+    {
+     "at_sample": 52203200,
+     "from_seg": 1,
+     "to_seg": 2,
+     "wall": 8.094
+    }
+   ],
+   "forward_accounting": {
+    "target_samples": 120128,
+    "gap_dup_ok": true
+   },
+   "queue": {
+    "max_depth": 48,
+    "bound": 128,
+    "stalls": 0
+   },
+   "session_opens_s": [
+    0.578,
+    0.578,
+    0.656
+   ],
+   "drain_waits_s": [
+    5.5,
+    2.703,
+    0.359
+   ],
+   "wall_s": 14.781
+  }
+ ],
+ "errors": 0
+}

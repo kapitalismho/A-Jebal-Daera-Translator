@@ -1,0 +1,38 @@
+{
+  "C_at_0.05": {
+    "contamination_s_per_speech_h": 749.405440102704,
+    "false_cuts": 14,
+    "missed": 12,
+    "missed_rate": 0.75,
+    "n_cut": 16,
+    "n_keep": 24,
+    "tau": 0.05
+  },
+  "C_at_selected_0.05": {
+    "contamination_s_per_speech_h": 749.405440102704,
+    "false_cuts": 14,
+    "missed": 12,
+    "missed_rate": 0.75,
+    "n_cut": 16,
+    "n_keep": 24,
+    "tau": 0.05
+  },
+  "O_at_0.05": {
+    "contamination_s_per_speech_h": 746.324319987162,
+    "false_cuts": 15,
+    "missed": 13,
+    "missed_rate": 0.8125,
+    "n_cut": 16,
+    "n_keep": 24,
+    "tau": 0.05
+  },
+  "O_at_selected_0.85": {
+    "contamination_s_per_speech_h": 282.30763058653616,
+    "false_cuts": 22,
+    "missed": 3,
+    "missed_rate": 0.1875,
+    "n_cut": 16,
+    "n_keep": 24,
+    "tau": 0.85
+  }
+}

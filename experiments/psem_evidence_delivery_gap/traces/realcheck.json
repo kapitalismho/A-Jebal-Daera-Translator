@@ -1,0 +1,168 @@
+[
+ {
+  "case": "G04",
+  "wav": "C:\\Users\\salee\\.psem-corpus\\ami\\audio\\ES2009a\\ES2009a.Mix-Headset.wav",
+  "excerpt_ms": [
+   559000,
+   580000
+  ],
+  "frozen_ref_boundary_sample": 9116704,
+  "frozen_ref_boundary_excerpt_ms": 10794.0,
+  "vad_baseline_spans": [
+   {
+    "utterance": "8b0d1b27",
+    "start_sample": 69312,
+    "end_sample": 189440,
+    "reason": "max_duration",
+    "trailing_silence_ms": 0,
+    "start_excerpt_ms": 4332.0,
+    "end_excerpt_ms": 11840.0
+   },
+   {
+    "utterance": "cd08ffe7",
+    "start_sample": 181440,
+    "end_sample": 211456,
+    "reason": "silence",
+    "trailing_silence_ms": 512,
+    "start_excerpt_ms": 11340.0,
+    "end_excerpt_ms": 13216.0
+   },
+   {
+    "utterance": "d801ab51",
+    "start_sample": 212160,
+    "end_sample": 221696,
+    "reason": "silence",
+    "trailing_silence_ms": 512,
+    "start_excerpt_ms": 13260.0,
+    "end_excerpt_ms": 13856.0
+   },
+   {
+    "utterance": "80be9ea6",
+    "start_sample": 227520,
+    "end_sample": 336000,
+    "reason": "eos-flush",
+    "trailing_silence_ms": 0,
+    "start_excerpt_ms": 14220.0,
+    "end_excerpt_ms": 21000.0
+   }
+  ],
+  "stt_model": "stt-rt-v5",
+  "stt_endpoint": "wss://stt-rt.soniox.com/transcribe-websocket",
+  "translation_model": "deepseek-v4-flash",
+  "translation_route": {
+   "whole": "deepseek-failed:RuntimeError:DeepSeek request failed (status=402 message=Insufficient Balance)|cerebras-failed:RuntimeError:Cerebras response was truncated by max_completion_tokens limit",
+   "halves": "deepseek-failed:RuntimeError:DeepSeek request failed (status=402 message=Insufficient Balance)|cerebras-failed:RuntimeError:Cerebras response was truncated by max_completion_tokens limit"
+  },
+  "whole": {
+   "tag": "whole",
+   "wall_s": 19.09,
+   "partials": [],
+   "finals": [
+    "Anyway. No, I'm too balanced. Prayed not. Afrobeat orchestra? Very cool. Afrobeat orchestra. Yeah. Very cool. They're like 15 members from Brooklyn. Um, and I'm hoping to go to the concert in Belgium. In Brussels. Wow. Exciting. Yeah. I'm supposed to be in Brussels anyway"
+   ]
+  },
+  "first_half": {
+   "tag": "first-half",
+   "wall_s": 9.86,
+   "partials": [],
+   "finals": [
+    "Anyway. No, I'm too balanced. Prayed not. Afrobeat orchestra? Very cool. Afrobeat orchestra. Yeah. Very cool."
+   ]
+  },
+  "second_half": {
+   "tag": "second-half",
+   "wall_s": 9.14,
+   "partials": [],
+   "finals": [
+    "Nice. They like 15 members from Brooklyn. Um, and I'm hoping to go to the concert in Belgium. In Brussels. Wow. Exciting. Yeah. I'm supposed to be in Brussels any"
+   ]
+  },
+  "translations": {
+   "whole": "",
+   "halves": ""
+  }
+ },
+ {
+  "case": "G05",
+  "wav": "C:\\Users\\salee\\.psem-corpus\\ami\\audio\\EN2009d\\EN2009d.Mix-Headset.wav",
+  "excerpt_ms": [
+   372000,
+   393000
+  ],
+  "frozen_ref_boundary_sample": 6131104,
+  "frozen_ref_boundary_excerpt_ms": 11194.0,
+  "vad_baseline_spans": [
+   {
+    "utterance": "93b770d5",
+    "start_sample": 0,
+    "end_sample": 117760,
+    "reason": "max_duration",
+    "trailing_silence_ms": 0,
+    "start_excerpt_ms": 0.0,
+    "end_excerpt_ms": 7360.0
+   },
+   {
+    "utterance": "3e31e8af",
+    "start_sample": 109760,
+    "end_sample": 144896,
+    "reason": "silence",
+    "trailing_silence_ms": 512,
+    "start_excerpt_ms": 6860.0,
+    "end_excerpt_ms": 9056.0
+   },
+   {
+    "utterance": "b9c64a21",
+    "start_sample": 152256,
+    "end_sample": 272384,
+    "reason": "max_duration",
+    "trailing_silence_ms": 0,
+    "start_excerpt_ms": 9516.0,
+    "end_excerpt_ms": 17024.0
+   },
+   {
+    "utterance": "c0771cf8",
+    "start_sample": 264384,
+    "end_sample": 336000,
+    "reason": "eos-flush",
+    "trailing_silence_ms": 0,
+    "start_excerpt_ms": 16524.0,
+    "end_excerpt_ms": 21000.0
+   }
+  ],
+  "stt_model": "stt-rt-v5",
+  "stt_endpoint": "wss://stt-rt.soniox.com/transcribe-websocket",
+  "translation_model": "deepseek-v4-flash",
+  "translation_route": {
+   "whole": "deepseek-failed:RuntimeError:DeepSeek request failed (status=402 message=Insufficient Balance)|fallback=cerebras",
+   "halves": "deepseek-failed:RuntimeError:DeepSeek request failed (status=402 message=Insufficient Balance)|fallback=cerebras"
+  },
+  "whole": {
+   "tag": "whole",
+   "wall_s": 19.11,
+   "partials": [],
+   "finals": [
+    "And whether it would have that sort of tiered effect, so you could see the overlap of where one person was looking compared to the other, and their mouse movements and things. Yeah. That should— Because all you want to know is whether they were looking at the same object in the period after. But because it's also in the— based on the time course of the procedure, you'll be able to basically get the scan path or the pattern of"
+   ]
+  },
+  "first_half": {
+   "tag": "first-half",
+   "wall_s": 10.13,
+   "partials": [],
+   "finals": [
+    "And whether it would have that sort of tiered effect, so you could see the overlap of where one person was looking compared to the other, and their mouse movements and things. Yeah. That should— Because all you want to know is wh"
+   ]
+  },
+  "second_half": {
+   "tag": "second-half",
+   "wall_s": 8.98,
+   "partials": [],
+   "finals": [
+    "Looking at the same object in the period after. Because it's also in the— based on the time course of the procedure, you'll be able to basically get the scan path or the pattern of."
+   ]
+  },
+  "translations": {
+   "whole": "그리고 그런 단계적인 효과가 있을지, 그래서 한 사람이 다른 사람과 비교해서 어디를 보고 있었는지 겹치는 부분을 확인하고 마우스 움직임 같은 걸 볼 수 있을지 말이에요. 네. 그게— 왜냐하면 결국 알고 싶은 건 그 이후 시점에 그들이 같은 물체를 보고 있었느냐 하는 거니까요. 하지만 절차의 시간 경과에 따른 것이기도 해서, 기본적으로 스캔 경로라든지 패턴을 얻을 수 있을 거예요.",
+   "halves": "그리고 그런 계층적인 효과가 있을지, 그래서 한 사람이 어디를 보고 있었는지 다른 사람과 겹치는 부분을 확인하고 마우스 움직임 같은 것들을 볼 수 있을지 말이죠. 네, 그게— 왜냐하면 결국 알고 싶은 건 ||| 그 이후 시점에 다들 같은 물체를 보고 있었는지니까요. 그리고 절차의 시간 경과에 따라 기본적으로 스캔 경로라든가 패턴을 얻을 수 있을 거예요."
+  }
+ }
+]

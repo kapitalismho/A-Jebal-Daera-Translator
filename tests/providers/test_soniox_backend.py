@@ -369,6 +369,41 @@ async def test_soniox_session_skips_out_of_order_tokens() -> None:
 
 
 @pytest.mark.asyncio
+async def test_soniox_session_appends_equal_end_final_tokens_in_wire_order() -> None:
+    session = _make_session()
+
+    session._handle_message(
+        json.dumps(
+            {
+                "tokens": [
+                    {"text": " they", "is_final": True, "end_ms": 7140},
+                    {"text": "'", "is_final": True, "end_ms": 7200},
+                    {"text": "re", "is_final": True, "end_ms": 7200},
+                ]
+            }
+        )
+    )
+    session._handle_message(
+        json.dumps(
+            {
+                "tokens": [
+                    {"text": "NOISE", "is_final": False, "end_ms": 7200},
+                    {"text": " just", "is_final": True, "end_ms": 7200},
+                    {"text": ".", "is_final": True, "end_ms": 7200},
+                    {"text": ".", "is_final": True, "end_ms": 7200},
+                    {"text": "STALE", "is_final": True, "end_ms": 7100},
+                    {"text": "<fin>", "is_final": True},
+                ]
+            }
+        )
+    )
+    event = session._events.get_nowait()
+
+    assert isinstance(event, STTBackendTranscriptEvent)
+    assert event.text == "they're just.."
+
+
+@pytest.mark.asyncio
 async def test_soniox_session_on_speech_end_enqueues_finalize() -> None:
     session = _make_session()
 

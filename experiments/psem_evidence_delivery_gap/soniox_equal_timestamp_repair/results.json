@@ -1,0 +1,1833 @@
+{
+ "repair": "soniox pending-final equal-end guard <= to <",
+ "authority": {
+  "baseline_commit": "45956c69895aa3e33c60e9c516fc40ba7d60b954",
+  "branch": "experiment-v2-speaker-change-turn-boundaries-ls"
+ },
+ "source_evidence": {
+  "results": "experiments/psem_evidence_delivery_gap/text_partition_probe/results.json",
+  "freeze": "experiments/psem_evidence_delivery_gap/text_partition_probe/freeze.json",
+  "run_id": "bb7ee489-7e27-490d-9238-f1b89e55a053",
+  "immutable": true
+ },
+ "wire_replay": {
+  "wire_groups": 44,
+  "adapter_path": "C:\\Users\\salee\\Documents\\dev\\puripuly_heart\\.worktrees\\puripuly_heart\\experiment-v2-speaker-change-turn-boundaries-ls\\src\\puripuly_heart\\providers\\stt\\soniox.py",
+  "tokenless_messages_omitted": 2,
+  "tokenless_omission_note": "cached evidence retains no bodies for the 2 tokenless messages, so error/metadata content cannot be replayed; replay covers the 44 token-bearing groups reconstructed by consecutive arrival_wall with count equality to raw_msg_with_tokens",
+  "control_fin_included": true,
+  "finalize_lifecycle_note": "no _FinalizeRequest sent; replay covers the single <fin> accumulation path, not live client finalize lifecycle; existing tests cover unchanged finalize behavior separately",
+  "network": "none; direct _SonioxSession._handle_message in wire order",
+  "consumer_events": 1
+ },
+ "counts": {
+  "raw_tokens": 1046,
+  "interim": 992,
+  "speech_final": 53,
+  "control_fin": 1
+ },
+ "prior_accepted_preproof": {
+  "final_text": "Right. How could you possibly do that? You have to hope that there's language in one of them say something. But that's a human coding. Mm-hm. Right. So they'",
+  "n_tokens": 50,
+  "text_len": 157
+ },
+ "corrected_accepted": {
+  "final_text": "Right. How could you possibly do that? You have to hope that there's language in one of them say something. But that's a human coding. Mm-hm. Right. So they're just.",
+  "n_tokens": 53,
+  "text_len": 165,
+  "tokens": [
+   {
+    "o": 0,
+    "text": "R",
+    "end_ms": 600
+   },
+   {
+    "o": 1,
+    "text": "ight",
+    "end_ms": 720
+   },
+   {
+    "o": 2,
+    "text": ".",
+    "end_ms": 780
+   },
+   {
+    "o": 3,
+    "text": " How",
+    "end_ms": 960
+   },
+   {
+    "o": 4,
+    "text": " co",
+    "end_ms": 1080
+   },
+   {
+    "o": 5,
+    "text": "uld",
+    "end_ms": 1140
+   },
+   {
+    "o": 6,
+    "text": " y",
+    "end_ms": 1200
+   },
+   {
+    "o": 7,
+    "text": "ou",
+    "end_ms": 1260
+   },
+   {
+    "o": 8,
+    "text": " poss",
+    "end_ms": 1380
+   },
+   {
+    "o": 9,
+    "text": "ib",
+    "end_ms": 1500
+   },
+   {
+    "o": 10,
+    "text": "ly",
+    "end_ms": 1560
+   },
+   {
+    "o": 11,
+    "text": " do",
+    "end_ms": 1680
+   },
+   {
+    "o": 12,
+    "text": " that",
+    "end_ms": 1800
+   },
+   {
+    "o": 13,
+    "text": "?",
+    "end_ms": 1920
+   },
+   {
+    "o": 14,
+    "text": " You",
+    "end_ms": 2100
+   },
+   {
+    "o": 15,
+    "text": " have",
+    "end_ms": 2280
+   },
+   {
+    "o": 16,
+    "text": " to",
+    "end_ms": 2340
+   },
+   {
+    "o": 17,
+    "text": " h",
+    "end_ms": 2580
+   },
+   {
+    "o": 18,
+    "text": "ope",
+    "end_ms": 2640
+   },
+   {
+    "o": 19,
+    "text": " that",
+    "end_ms": 2760
+   },
+   {
+    "o": 20,
+    "text": " there",
+    "end_ms": 2940
+   },
+   {
+    "o": 21,
+    "text": "'s",
+    "end_ms": 3060
+   },
+   {
+    "o": 22,
+    "text": " lang",
+    "end_ms": 3180
+   },
+   {
+    "o": 23,
+    "text": "uage",
+    "end_ms": 3360
+   },
+   {
+    "o": 24,
+    "text": " in",
+    "end_ms": 3660
+   },
+   {
+    "o": 25,
+    "text": " one",
+    "end_ms": 3780
+   },
+   {
+    "o": 26,
+    "text": " of",
+    "end_ms": 3840
+   },
+   {
+    "o": 27,
+    "text": " them",
+    "end_ms": 4020
+   },
+   {
+    "o": 28,
+    "text": " say",
+    "end_ms": 4200
+   },
+   {
+    "o": 29,
+    "text": " som",
+    "end_ms": 4320
+   },
+   {
+    "o": 30,
+    "text": "eth",
+    "end_ms": 4380
+   },
+   {
+    "o": 31,
+    "text": "ing.",
+    "end_ms": 4620
+   },
+   {
+    "o": 32,
+    "text": " But",
+    "end_ms": 5040
+   },
+   {
+    "o": 33,
+    "text": " that",
+    "end_ms": 5160
+   },
+   {
+    "o": 34,
+    "text": "'s",
+    "end_ms": 5220
+   },
+   {
+    "o": 35,
+    "text": " a",
+    "end_ms": 5340
+   },
+   {
+    "o": 36,
+    "text": " human",
+    "end_ms": 5460
+   },
+   {
+    "o": 37,
+    "text": " c",
+    "end_ms": 5700
+   },
+   {
+    "o": 38,
+    "text": "od",
+    "end_ms": 5820
+   },
+   {
+    "o": 39,
+    "text": "ing.",
+    "end_ms": 5940
+   },
+   {
+    "o": 40,
+    "text": " M",
+    "end_ms": 6180
+   },
+   {
+    "o": 41,
+    "text": "m",
+    "end_ms": 6240
+   },
+   {
+    "o": 42,
+    "text": "-h",
+    "end_ms": 6300
+   },
+   {
+    "o": 43,
+    "text": "m.",
+    "end_ms": 6420
+   },
+   {
+    "o": 44,
+    "text": " R",
+    "end_ms": 6540
+   },
+   {
+    "o": 45,
+    "text": "ight",
+    "end_ms": 6600
+   },
+   {
+    "o": 46,
+    "text": ".",
+    "end_ms": 6660
+   },
+   {
+    "o": 47,
+    "text": " So",
+    "end_ms": 7020
+   },
+   {
+    "o": 48,
+    "text": " they",
+    "end_ms": 7140
+   },
+   {
+    "o": 49,
+    "text": "'",
+    "end_ms": 7200
+   },
+   {
+    "o": 50,
+    "text": "re",
+    "end_ms": 7200
+   },
+   {
+    "o": 51,
+    "text": " just",
+    "end_ms": 7200
+   },
+   {
+    "o": 52,
+    "text": ".",
+    "end_ms": 7200
+   }
+  ],
+  "restored_tail": "re just.",
+  "restored_chars": 8
+ },
+ "groups": [
+  {
+   "idx": 0,
+   "text": "Right. ",
+   "char_range": [
+    0,
+    7
+   ],
+   "word": "Right.",
+   "start_src": 52126528,
+   "end_prov_ms": 780,
+   "end_src": 52139008,
+   "token_refs": [
+    {
+     "o": 0,
+     "end_ms": 600,
+     "slice": "R"
+    },
+    {
+     "o": 1,
+     "end_ms": 720,
+     "slice": "ight"
+    },
+    {
+     "o": 2,
+     "end_ms": 780,
+     "slice": "."
+    },
+    {
+     "o": 3,
+     "end_ms": 960,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "session-start-lower-bound"
+  },
+  {
+   "idx": 1,
+   "text": "How ",
+   "char_range": [
+    7,
+    11
+   ],
+   "word": "How",
+   "start_src": 52139008,
+   "end_prov_ms": 960,
+   "end_src": 52141888,
+   "token_refs": [
+    {
+     "o": 3,
+     "end_ms": 960,
+     "slice": "How"
+    },
+    {
+     "o": 4,
+     "end_ms": 1080,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 2,
+   "text": "could ",
+   "char_range": [
+    11,
+    17
+   ],
+   "word": "could",
+   "start_src": 52141888,
+   "end_prov_ms": 1140,
+   "end_src": 52144768,
+   "token_refs": [
+    {
+     "o": 4,
+     "end_ms": 1080,
+     "slice": "co"
+    },
+    {
+     "o": 5,
+     "end_ms": 1140,
+     "slice": "uld"
+    },
+    {
+     "o": 6,
+     "end_ms": 1200,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 3,
+   "text": "you ",
+   "char_range": [
+    17,
+    21
+   ],
+   "word": "you",
+   "start_src": 52144768,
+   "end_prov_ms": 1260,
+   "end_src": 52146688,
+   "token_refs": [
+    {
+     "o": 6,
+     "end_ms": 1200,
+     "slice": "y"
+    },
+    {
+     "o": 7,
+     "end_ms": 1260,
+     "slice": "ou"
+    },
+    {
+     "o": 8,
+     "end_ms": 1380,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 4,
+   "text": "possibly ",
+   "char_range": [
+    21,
+    30
+   ],
+   "word": "possibly",
+   "start_src": 52146688,
+   "end_prov_ms": 1560,
+   "end_src": 52151488,
+   "token_refs": [
+    {
+     "o": 8,
+     "end_ms": 1380,
+     "slice": "poss"
+    },
+    {
+     "o": 9,
+     "end_ms": 1500,
+     "slice": "ib"
+    },
+    {
+     "o": 10,
+     "end_ms": 1560,
+     "slice": "ly"
+    },
+    {
+     "o": 11,
+     "end_ms": 1680,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 5,
+   "text": "do ",
+   "char_range": [
+    30,
+    33
+   ],
+   "word": "do",
+   "start_src": 52151488,
+   "end_prov_ms": 1680,
+   "end_src": 52153408,
+   "token_refs": [
+    {
+     "o": 11,
+     "end_ms": 1680,
+     "slice": "do"
+    },
+    {
+     "o": 12,
+     "end_ms": 1800,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 6,
+   "text": "that? ",
+   "char_range": [
+    33,
+    39
+   ],
+   "word": "that?",
+   "start_src": 52153408,
+   "end_prov_ms": 1920,
+   "end_src": 52157248,
+   "token_refs": [
+    {
+     "o": 12,
+     "end_ms": 1800,
+     "slice": "that"
+    },
+    {
+     "o": 13,
+     "end_ms": 1920,
+     "slice": "?"
+    },
+    {
+     "o": 14,
+     "end_ms": 2100,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 7,
+   "text": "You ",
+   "char_range": [
+    39,
+    43
+   ],
+   "word": "You",
+   "start_src": 52157248,
+   "end_prov_ms": 2100,
+   "end_src": 52160128,
+   "token_refs": [
+    {
+     "o": 14,
+     "end_ms": 2100,
+     "slice": "You"
+    },
+    {
+     "o": 15,
+     "end_ms": 2280,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 8,
+   "text": "have ",
+   "char_range": [
+    43,
+    48
+   ],
+   "word": "have",
+   "start_src": 52160128,
+   "end_prov_ms": 2280,
+   "end_src": 52163008,
+   "token_refs": [
+    {
+     "o": 15,
+     "end_ms": 2280,
+     "slice": "have"
+    },
+    {
+     "o": 16,
+     "end_ms": 2340,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 9,
+   "text": "to ",
+   "char_range": [
+    48,
+    51
+   ],
+   "word": "to",
+   "start_src": 52163008,
+   "end_prov_ms": 2340,
+   "end_src": 52163968,
+   "token_refs": [
+    {
+     "o": 16,
+     "end_ms": 2340,
+     "slice": "to"
+    },
+    {
+     "o": 17,
+     "end_ms": 2580,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 10,
+   "text": "hope ",
+   "char_range": [
+    51,
+    56
+   ],
+   "word": "hope",
+   "start_src": 52163968,
+   "end_prov_ms": 2640,
+   "end_src": 52168768,
+   "token_refs": [
+    {
+     "o": 17,
+     "end_ms": 2580,
+     "slice": "h"
+    },
+    {
+     "o": 18,
+     "end_ms": 2640,
+     "slice": "ope"
+    },
+    {
+     "o": 19,
+     "end_ms": 2760,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 11,
+   "text": "that ",
+   "char_range": [
+    56,
+    61
+   ],
+   "word": "that",
+   "start_src": 52168768,
+   "end_prov_ms": 2760,
+   "end_src": 52170688,
+   "token_refs": [
+    {
+     "o": 19,
+     "end_ms": 2760,
+     "slice": "that"
+    },
+    {
+     "o": 20,
+     "end_ms": 2940,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 12,
+   "text": "there's ",
+   "char_range": [
+    61,
+    69
+   ],
+   "word": "there's",
+   "start_src": 52170688,
+   "end_prov_ms": 3060,
+   "end_src": 52175488,
+   "token_refs": [
+    {
+     "o": 20,
+     "end_ms": 2940,
+     "slice": "there"
+    },
+    {
+     "o": 21,
+     "end_ms": 3060,
+     "slice": "'s"
+    },
+    {
+     "o": 22,
+     "end_ms": 3180,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 13,
+   "text": "language ",
+   "char_range": [
+    69,
+    78
+   ],
+   "word": "language",
+   "start_src": 52175488,
+   "end_prov_ms": 3360,
+   "end_src": 52180288,
+   "token_refs": [
+    {
+     "o": 22,
+     "end_ms": 3180,
+     "slice": "lang"
+    },
+    {
+     "o": 23,
+     "end_ms": 3360,
+     "slice": "uage"
+    },
+    {
+     "o": 24,
+     "end_ms": 3660,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 14,
+   "text": "in ",
+   "char_range": [
+    78,
+    81
+   ],
+   "word": "in",
+   "start_src": 52180288,
+   "end_prov_ms": 3660,
+   "end_src": 52185088,
+   "token_refs": [
+    {
+     "o": 24,
+     "end_ms": 3660,
+     "slice": "in"
+    },
+    {
+     "o": 25,
+     "end_ms": 3780,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 15,
+   "text": "one ",
+   "char_range": [
+    81,
+    85
+   ],
+   "word": "one",
+   "start_src": 52185088,
+   "end_prov_ms": 3780,
+   "end_src": 52187008,
+   "token_refs": [
+    {
+     "o": 25,
+     "end_ms": 3780,
+     "slice": "one"
+    },
+    {
+     "o": 26,
+     "end_ms": 3840,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 16,
+   "text": "of ",
+   "char_range": [
+    85,
+    88
+   ],
+   "word": "of",
+   "start_src": 52187008,
+   "end_prov_ms": 3840,
+   "end_src": 52187968,
+   "token_refs": [
+    {
+     "o": 26,
+     "end_ms": 3840,
+     "slice": "of"
+    },
+    {
+     "o": 27,
+     "end_ms": 4020,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 17,
+   "text": "them ",
+   "char_range": [
+    88,
+    93
+   ],
+   "word": "them",
+   "start_src": 52187968,
+   "end_prov_ms": 4020,
+   "end_src": 52190848,
+   "token_refs": [
+    {
+     "o": 27,
+     "end_ms": 4020,
+     "slice": "them"
+    },
+    {
+     "o": 28,
+     "end_ms": 4200,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 18,
+   "text": "say ",
+   "char_range": [
+    93,
+    97
+   ],
+   "word": "say",
+   "start_src": 52190848,
+   "end_prov_ms": 4200,
+   "end_src": 52193728,
+   "token_refs": [
+    {
+     "o": 28,
+     "end_ms": 4200,
+     "slice": "say"
+    },
+    {
+     "o": 29,
+     "end_ms": 4320,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 19,
+   "text": "something. ",
+   "char_range": [
+    97,
+    108
+   ],
+   "word": "something.",
+   "start_src": 52193728,
+   "end_prov_ms": 4620,
+   "end_src": 52200448,
+   "token_refs": [
+    {
+     "o": 29,
+     "end_ms": 4320,
+     "slice": "som"
+    },
+    {
+     "o": 30,
+     "end_ms": 4380,
+     "slice": "eth"
+    },
+    {
+     "o": 31,
+     "end_ms": 4620,
+     "slice": "ing."
+    },
+    {
+     "o": 32,
+     "end_ms": 5040,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 20,
+   "text": "But ",
+   "char_range": [
+    108,
+    112
+   ],
+   "word": "But",
+   "start_src": 52200448,
+   "end_prov_ms": 5040,
+   "end_src": 52207168,
+   "token_refs": [
+    {
+     "o": 32,
+     "end_ms": 5040,
+     "slice": "But"
+    },
+    {
+     "o": 33,
+     "end_ms": 5160,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 21,
+   "text": "that's ",
+   "char_range": [
+    112,
+    119
+   ],
+   "word": "that's",
+   "start_src": 52207168,
+   "end_prov_ms": 5220,
+   "end_src": 52210048,
+   "token_refs": [
+    {
+     "o": 33,
+     "end_ms": 5160,
+     "slice": "that"
+    },
+    {
+     "o": 34,
+     "end_ms": 5220,
+     "slice": "'s"
+    },
+    {
+     "o": 35,
+     "end_ms": 5340,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 22,
+   "text": "a ",
+   "char_range": [
+    119,
+    121
+   ],
+   "word": "a",
+   "start_src": 52210048,
+   "end_prov_ms": 5340,
+   "end_src": 52211968,
+   "token_refs": [
+    {
+     "o": 35,
+     "end_ms": 5340,
+     "slice": "a"
+    },
+    {
+     "o": 36,
+     "end_ms": 5460,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 23,
+   "text": "human ",
+   "char_range": [
+    121,
+    127
+   ],
+   "word": "human",
+   "start_src": 52211968,
+   "end_prov_ms": 5460,
+   "end_src": 52213888,
+   "token_refs": [
+    {
+     "o": 36,
+     "end_ms": 5460,
+     "slice": "human"
+    },
+    {
+     "o": 37,
+     "end_ms": 5700,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 24,
+   "text": "coding. ",
+   "char_range": [
+    127,
+    135
+   ],
+   "word": "coding.",
+   "start_src": 52213888,
+   "end_prov_ms": 5940,
+   "end_src": 52221568,
+   "token_refs": [
+    {
+     "o": 37,
+     "end_ms": 5700,
+     "slice": "c"
+    },
+    {
+     "o": 38,
+     "end_ms": 5820,
+     "slice": "od"
+    },
+    {
+     "o": 39,
+     "end_ms": 5940,
+     "slice": "ing."
+    },
+    {
+     "o": 40,
+     "end_ms": 6180,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 25,
+   "text": "Mm-hm. ",
+   "char_range": [
+    135,
+    142
+   ],
+   "word": "Mm-hm.",
+   "start_src": 52221568,
+   "end_prov_ms": 6420,
+   "end_src": 52229248,
+   "token_refs": [
+    {
+     "o": 40,
+     "end_ms": 6180,
+     "slice": "M"
+    },
+    {
+     "o": 41,
+     "end_ms": 6240,
+     "slice": "m"
+    },
+    {
+     "o": 42,
+     "end_ms": 6300,
+     "slice": "-h"
+    },
+    {
+     "o": 43,
+     "end_ms": 6420,
+     "slice": "m."
+    },
+    {
+     "o": 44,
+     "end_ms": 6540,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 26,
+   "text": "Right. ",
+   "char_range": [
+    142,
+    149
+   ],
+   "word": "Right.",
+   "start_src": 52229248,
+   "end_prov_ms": 6660,
+   "end_src": 52233088,
+   "token_refs": [
+    {
+     "o": 44,
+     "end_ms": 6540,
+     "slice": "R"
+    },
+    {
+     "o": 45,
+     "end_ms": 6600,
+     "slice": "ight"
+    },
+    {
+     "o": 46,
+     "end_ms": 6660,
+     "slice": "."
+    },
+    {
+     "o": 47,
+     "end_ms": 7020,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 27,
+   "text": "So ",
+   "char_range": [
+    149,
+    152
+   ],
+   "word": "So",
+   "start_src": 52233088,
+   "end_prov_ms": 7020,
+   "end_src": 52238848,
+   "token_refs": [
+    {
+     "o": 47,
+     "end_ms": 7020,
+     "slice": "So"
+    },
+    {
+     "o": 48,
+     "end_ms": 7140,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 28,
+   "text": "they're ",
+   "char_range": [
+    152,
+    160
+   ],
+   "word": "they're",
+   "start_src": 52238848,
+   "end_prov_ms": 7200,
+   "end_src": 52241728,
+   "token_refs": [
+    {
+     "o": 48,
+     "end_ms": 7140,
+     "slice": "they"
+    },
+    {
+     "o": 49,
+     "end_ms": 7200,
+     "slice": "'"
+    },
+    {
+     "o": 50,
+     "end_ms": 7200,
+     "slice": "re"
+    },
+    {
+     "o": 51,
+     "end_ms": 7200,
+     "slice": " "
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  },
+  {
+   "idx": 29,
+   "text": "just.",
+   "char_range": [
+    160,
+    165
+   ],
+   "word": "just.",
+   "start_src": 52241728,
+   "end_prov_ms": 7200,
+   "end_src": 52241728,
+   "token_refs": [
+    {
+     "o": 51,
+     "end_ms": 7200,
+     "slice": "just"
+    },
+    {
+     "o": 52,
+     "end_ms": 7200,
+     "slice": "."
+    }
+   ],
+   "unresolved": false,
+   "start_note": "chained-prev-end"
+  }
+ ],
+ "variants": {
+  "baseline": {
+   "bounds": [],
+   "fragments": [
+    {
+     "fi": 0,
+     "group_range": [
+      0,
+      29
+     ],
+     "n_groups": 30,
+     "text": "Right. How could you possibly do that? You have to hope that there's language in one of them say something. But that's a human coding. Mm-hm. Right. So they're just.",
+     "start_src": 52126528,
+     "end_src": 52241728,
+     "ambiguous_groups": [],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    }
+   ],
+   "conservation": true
+  },
+  "ideal": {
+   "bounds": [
+    52156984
+   ],
+   "fragments": [
+    {
+     "fi": 0,
+     "group_range": [
+      0,
+      5
+     ],
+     "n_groups": 6,
+     "text": "Right. How could you possibly do ",
+     "start_src": 52126528,
+     "end_src": 52153408,
+     "ambiguous_groups": [],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    },
+    {
+     "fi": 1,
+     "group_range": [
+      6,
+      29
+     ],
+     "n_groups": 24,
+     "text": "that? You have to hope that there's language in one of them say something. But that's a human coding. Mm-hm. Right. So they're just.",
+     "start_src": 52153408,
+     "end_src": 52241728,
+     "ambiguous_groups": [
+      6
+     ],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    }
+   ],
+   "conservation": true
+  },
+  "f0": {
+   "bounds": [
+    52139200,
+    52203200
+   ],
+   "fragments": [
+    {
+     "fi": 0,
+     "group_range": [
+      0,
+      0
+     ],
+     "n_groups": 1,
+     "text": "Right. ",
+     "start_src": 52126528,
+     "end_src": 52139008,
+     "ambiguous_groups": [],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    },
+    {
+     "fi": 1,
+     "group_range": [
+      1,
+      19
+     ],
+     "n_groups": 19,
+     "text": "How could you possibly do that? You have to hope that there's language in one of them say something. ",
+     "start_src": 52139008,
+     "end_src": 52200448,
+     "ambiguous_groups": [
+      1
+     ],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    },
+    {
+     "fi": 2,
+     "group_range": [
+      20,
+      29
+     ],
+     "n_groups": 10,
+     "text": "But that's a human coding. Mm-hm. Right. So they're just.",
+     "start_src": 52200448,
+     "end_src": 52241728,
+     "ambiguous_groups": [
+      20
+     ],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    }
+   ],
+   "conservation": true
+  },
+  "h": {
+   "bounds": [
+    52158400,
+    52203200
+   ],
+   "fragments": [
+    {
+     "fi": 0,
+     "group_range": [
+      0,
+      6
+     ],
+     "n_groups": 7,
+     "text": "Right. How could you possibly do that? ",
+     "start_src": 52126528,
+     "end_src": 52157248,
+     "ambiguous_groups": [],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    },
+    {
+     "fi": 1,
+     "group_range": [
+      7,
+      19
+     ],
+     "n_groups": 13,
+     "text": "You have to hope that there's language in one of them say something. ",
+     "start_src": 52157248,
+     "end_src": 52200448,
+     "ambiguous_groups": [
+      7
+     ],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    },
+    {
+     "fi": 2,
+     "group_range": [
+      20,
+      29
+     ],
+     "n_groups": 10,
+     "text": "But that's a human coding. Mm-hm. Right. So they're just.",
+     "start_src": 52200448,
+     "end_src": 52241728,
+     "ambiguous_groups": [
+      20
+     ],
+     "unresolved_groups": [],
+     "ownership_supported": true
+    }
+   ],
+   "conservation": true
+  }
+ },
+ "gt_posthoc": {
+  "retention": {
+   "right": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     0,
+     26
+    ]
+   },
+   "How": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     1
+    ]
+   },
+   "could": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     2
+    ]
+   },
+   "you": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     3,
+     7
+    ]
+   },
+   "possibly": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     4
+    ]
+   },
+   "do": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     5
+    ]
+   },
+   "that": {
+    "side": "A",
+    "present": true,
+    "groups": [
+     6,
+     11
+    ]
+   },
+   "You": {
+    "side": "C",
+    "present": true,
+    "groups": [
+     3,
+     7
+    ]
+   },
+   "have": {
+    "side": "C",
+    "present": true,
+    "groups": [
+     8
+    ]
+   },
+   "to": {
+    "side": "C",
+    "present": true,
+    "groups": [
+     9
+    ]
+   },
+   "hope": {
+    "side": "C",
+    "present": true,
+    "groups": [
+     10
+    ]
+   }
+  },
+  "ownership": {
+   "do": {
+    "gt_side": "left",
+    "region": "A",
+    "per_variant": {
+     "baseline": {
+      "scored_group": 5,
+      "fragment": 0,
+      "label": "single",
+      "expected": "left",
+      "verdict": "merged-single",
+      "end_src": 52153408,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       5
+      ],
+      "selection": "first-transcript-occurrence"
+     },
+     "ideal": {
+      "scored_group": 5,
+      "fragment": 0,
+      "label": "left",
+      "expected": "left",
+      "verdict": "agree",
+      "end_src": 52153408,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       5
+      ],
+      "selection": "first-transcript-occurrence"
+     },
+     "f0": {
+      "scored_group": 5,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "left",
+      "verdict": "disagree",
+      "end_src": 52153408,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       5
+      ],
+      "selection": "first-transcript-occurrence"
+     },
+     "h": {
+      "scored_group": 5,
+      "fragment": 0,
+      "label": "left",
+      "expected": "left",
+      "verdict": "agree",
+      "end_src": 52153408,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       5
+      ],
+      "selection": "first-transcript-occurrence"
+     }
+    }
+   },
+   "that": {
+    "gt_side": "left",
+    "region": "A",
+    "per_variant": {
+     "baseline": {
+      "scored_group": 6,
+      "fragment": 0,
+      "label": "single",
+      "expected": "left",
+      "verdict": "merged-single",
+      "end_src": 52157248,
+      "timing_note": "word-timing-misalignment",
+      "all_occurrences": [
+       6,
+       11
+      ],
+      "selection": "first-transcript-occurrence"
+     },
+     "ideal": {
+      "scored_group": 6,
+      "fragment": 1,
+      "label": "right",
+      "expected": "left",
+      "verdict": "disagree",
+      "end_src": 52157248,
+      "timing_note": "word-timing-misalignment",
+      "all_occurrences": [
+       6,
+       11
+      ],
+      "selection": "first-transcript-occurrence"
+     },
+     "f0": {
+      "scored_group": 6,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "left",
+      "verdict": "disagree",
+      "end_src": 52157248,
+      "timing_note": "word-timing-misalignment",
+      "all_occurrences": [
+       6,
+       11
+      ],
+      "selection": "first-transcript-occurrence"
+     },
+     "h": {
+      "scored_group": 6,
+      "fragment": 0,
+      "label": "left",
+      "expected": "left",
+      "verdict": "agree",
+      "end_src": 52157248,
+      "timing_note": "word-timing-misalignment",
+      "all_occurrences": [
+       6,
+       11
+      ],
+      "selection": "first-transcript-occurrence"
+     }
+    }
+   },
+   "You": {
+    "gt_side": "right",
+    "region": "C",
+    "per_variant": {
+     "baseline": {
+      "scored_group": 7,
+      "fragment": 0,
+      "label": "single",
+      "expected": "right-side",
+      "verdict": "merged-single",
+      "end_src": 52160128,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       3,
+       7
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "ideal": {
+      "scored_group": 7,
+      "fragment": 1,
+      "label": "right",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52160128,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       3,
+       7
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "f0": {
+      "scored_group": 7,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52160128,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       3,
+       7
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "h": {
+      "scored_group": 7,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52160128,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       3,
+       7
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     }
+    }
+   },
+   "have": {
+    "gt_side": "right",
+    "region": "C",
+    "per_variant": {
+     "baseline": {
+      "scored_group": 8,
+      "fragment": 0,
+      "label": "single",
+      "expected": "right-side",
+      "verdict": "merged-single",
+      "end_src": 52163008,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       8
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "ideal": {
+      "scored_group": 8,
+      "fragment": 1,
+      "label": "right",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52163008,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       8
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "f0": {
+      "scored_group": 8,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52163008,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       8
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "h": {
+      "scored_group": 8,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52163008,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       8
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     }
+    }
+   },
+   "to": {
+    "gt_side": "right",
+    "region": "C",
+    "per_variant": {
+     "baseline": {
+      "scored_group": 9,
+      "fragment": 0,
+      "label": "single",
+      "expected": "right-side",
+      "verdict": "merged-single",
+      "end_src": 52163968,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       9
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "ideal": {
+      "scored_group": 9,
+      "fragment": 1,
+      "label": "right",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52163968,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       9
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "f0": {
+      "scored_group": 9,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52163968,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       9
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "h": {
+      "scored_group": 9,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52163968,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       9
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     }
+    }
+   },
+   "hope": {
+    "gt_side": "right",
+    "region": "C",
+    "per_variant": {
+     "baseline": {
+      "scored_group": 10,
+      "fragment": 0,
+      "label": "single",
+      "expected": "right-side",
+      "verdict": "merged-single",
+      "end_src": 52168768,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       10
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "ideal": {
+      "scored_group": 10,
+      "fragment": 1,
+      "label": "right",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52168768,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       10
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "f0": {
+      "scored_group": 10,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52168768,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       10
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     },
+     "h": {
+      "scored_group": 10,
+      "fragment": 1,
+      "label": "mid",
+      "expected": "right-side",
+      "verdict": "agree",
+      "end_src": 52168768,
+      "timing_note": "timing-consistent",
+      "all_occurrences": [
+       10
+      ],
+      "selection": "first-occurrence-after-scored-A-that"
+     }
+    }
+   }
+  },
+  "final_len": 165,
+  "selection_rule": "A-probes score the first transcript occurrence (GT A-question opens the utterance); C-probes score the first occurrence after the scored A-that group (GT C-head follows the A-question). All occurrences listed regardless."
+ },
+ "ownership_parity_with_baseline": true,
+ "duplicate_right_groups": [
+  0,
+  26
+ ],
+ "same_end_7200_wire_order": [
+  "'",
+  "re",
+  " just",
+  "."
+ ],
+ "consumer_language_invariant": "final_language_runs == () with language identification off; event text equals raw speech-final concat",
+ "limits": [
+  "Content conservation is measured at the normalized final against the raw speech-final concat, not ASR accuracy against ground truth.",
+  "Provider token ms are approximate; partition ownership is agreement with GT side at known bounds, never exact speaker purity.",
+  "The append-equal guarantee is scoped to the pending final before <fin>; unsolicited-fin merge behavior is unchanged and not generally characterized.",
+  "Restored tail tokens keep approximate end_ms 7200; tail overlap remains unscored."
+ ]
+}

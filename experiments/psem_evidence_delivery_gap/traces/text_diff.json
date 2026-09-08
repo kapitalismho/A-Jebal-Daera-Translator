@@ -1,0 +1,91 @@
+{
+  "G04": {
+    "frame_window": [
+      4993,
+      5053
+    ],
+    "halves_finals_joined": "Anyway. No, I'm too balanced. Prayed not. Afrobeat orchestra? Very cool. Afrobeat orchestra. Yeah. Very cool. ||| Nice. They like 15 members from Brooklyn. Um, and I'm hoping to go to the concert in Belgium. In Brussels. Wow. Exciting. Yeah. I'm supposed to be in Brussels any",
+    "overlap_window": ".....................111111..1..............................",
+    "speaker_ids_window": [
+      "MEE033",
+      "MEE035"
+    ],
+    "speakers_window": "11111111111111*********************1111111111111111111111111",
+    "speech_window": "11111111111111111.1111111111111111111111.....11111......1111",
+    "split_frame": 5023,
+    "target_window": ".........11111....111......11.11111.........................",
+    "whole_final": "Anyway. No, I'm too balanced. Prayed not. Afrobeat orchestra? Very cool. Afrobeat orchestra. Yeah. Very cool. They're like 15 members from Brooklyn. Um, and I'm hoping to go to the concert in Belgium. In Brussels. Wow. Exciting. Yeah. I'm supposed to be in Brussels anyway",
+    "word_diff": [
+      "--- ",
+      "+++ ",
+      "@@ -14,7 +14,9 @@",
+      " Yeah.",
+      " Very",
+      " cool.",
+      "-They're",
+      "+|||",
+      "+Nice.",
+      "+They",
+      " like",
+      " 15",
+      " members",
+      "@@ -42,4 +44,4 @@",
+      " be",
+      " in",
+      " Brussels",
+      "-anyway",
+      "+any"
+    ]
+  },
+  "G05": {
+    "frame_window": [
+      3732,
+      3792
+    ],
+    "halves_finals_joined": "And whether it would have that sort of tiered effect, so you could see the overlap of where one person was looking compared to the other, and their mouse movements and things. Yeah. That should\u2014 Because all you want to know is wh ||| Looking at the same object in the period after. Because it's also in the\u2014 based on the time course of the procedure, you'll be able to basically get the scan path or the pattern of.",
+    "overlap_window": "....................1111111111..........1111....111.........",
+    "speaker_ids_window": [
+      "FEE083",
+      "MEE094"
+    ],
+    "speakers_window": "11111111111111111111111111111111111*********************1111",
+    "speech_window": ".1111111..........111111111111111111111111111111111111111111",
+    "split_frame": 3762,
+    "target_window": "..................11..........11111................11111....",
+    "whole_final": "And whether it would have that sort of tiered effect, so you could see the overlap of where one person was looking compared to the other, and their mouse movements and things. Yeah. That should\u2014 Because all you want to know is whether they were looking at the same object in the period after. But because it's also in the\u2014 based on the time course of the procedure, you'll be able to basically get the scan path or the pattern of",
+    "word_diff": [
+      "--- ",
+      "+++ ",
+      "@@ -40,10 +40,9 @@",
+      " to",
+      " know",
+      " is",
+      "-whether",
+      "-they",
+      "-were",
+      "-looking",
+      "+wh",
+      "+|||",
+      "+Looking",
+      " at",
+      " the",
+      " same",
+      "@@ -52,8 +51,7 @@",
+      " the",
+      " period",
+      " after.",
+      "-But",
+      "-because",
+      "+Because",
+      " it's",
+      " also",
+      " in",
+      "@@ -78,4 +76,4 @@",
+      " or",
+      " the",
+      " pattern",
+      "-of",
+      "+of."
+    ]
+  }
+}

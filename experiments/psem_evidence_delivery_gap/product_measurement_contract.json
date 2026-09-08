@@ -1,0 +1,118 @@
+{
+  "acceptance_budgets_prospective": {
+    "scope": "same 2 clips; <=6 total clips; bounded calls (STT<=8 passes spent, translation only if genuinely necessary); zero new models/training; unknown timing exposed, never credited",
+    "technical_acceptance": "UNSPECIFIED: any product acceptance numbers require a later Audio decision; this contract sets none"
+  },
+  "allowed_evidence_use": "diagnostic case attribution and next-branch selection only; no prevalence, generalization, or production-readiness claims",
+  "amendment_F2": "Invented p50-500ms / false-cut-gate numbers removed; measurement budgets are actual small scope; technical acceptance unspecified pending Audio decision. Identity psem.evidence_delivery_gap.contract.v1 preserved.",
+  "audio_prerequisites": [
+    "Audio-owned source-time applied-boundary receiver with commit/ack reporting (applied source position, application time, or reason-not-applied)",
+    "stated provider commit semantics: which already-delivered content is mutable and for how long",
+    "no-PSEM delivery baseline profile on the declared support scope"
+  ],
+  "authority": {
+    "baseline_commit": "45956c69895aa3e33c60e9c516fc40ba7d60b954",
+    "branch": "experiment-v2-speaker-change-turn-boundaries-ls",
+    "frozen_at_utc": "2026-09-08T10:12:12Z",
+    "governs": "#133 Child P1 under #132; written BEFORE any case selection or causal inspection"
+  },
+  "causal_rules": [
+    "future evidence MUST NOT be credited before its availability/decision time",
+    "a retrospectively correct boundary counts as recovered ONLY if the downstream path can actually apply it (applied boundary recorded, or Audio ack)",
+    "no oracle transcript, no source separation, no speaker-conditioned ASR, no boundary before evidence availability, no unsupported rollback in the ideal intervention",
+    "unmatched runs are NOT automatically acoustic false positives (timing/matching failures possible)",
+    "ordinary delivery separation that already prevents harm MUST be classified ALREADY_SEPARATED_BY_DELIVERY, not as a recoverable PSEM failure",
+    "correct-but-late vs acoustically-wrong MUST be separated before any branch claim",
+    "simultaneous-speech lexical damage MUST be separated from sequential segmentation damage",
+    "unknown vs measured MUST be explicit; rollback or future evidence MUST NOT be credited"
+  ],
+  "contract_version": "psem.evidence_delivery_gap.contract.v1",
+  "harm_categories": [
+    "sequential cross-speaker merge / wrong attribution",
+    "meaningful content loss",
+    "content duplication",
+    "unnecessary fragmentation",
+    "speaker-unresolved / mixed exposure",
+    "added delivery delay",
+    "reference cascade / poisoning",
+    "simultaneous-speech lexical mixing unrepairable by segmentation"
+  ],
+  "layers": {
+    "applied_delivery_boundary": {
+      "definition": "source position actually split/reowned by the Audio/provider path, with application/commit time or reason-not-applied",
+      "owners": [
+        "Audio",
+        "provider",
+        "output runtime"
+      ]
+    },
+    "delivered_consequence": {
+      "definition": "user-visible ASR/translation harm per harm_categories, measured against no-PSEM baseline on the same material",
+      "owners": [
+        "output runtime",
+        "provider"
+      ]
+    },
+    "evidence_run_confirmation": {
+      "definition": "persistence/confirmation of frame evidence into a decision-bearing run (horizon, threshold, mask/reset handling)",
+      "owners": [
+        "PSEM temporal interpretation"
+      ]
+    },
+    "provider_applicability": {
+      "definition": "whether Audio/provider can still apply the requested boundary (mutability window, commit state)",
+      "owners": [
+        "Audio",
+        "provider"
+      ]
+    },
+    "reference_state": {
+      "definition": "reference identity, generation/scope, validity, enrollment/rebind/retention state covering the interval",
+      "owners": [
+        "PSEM reference lifecycle"
+      ]
+    },
+    "requested_source_boundary": {
+      "definition": "source position the speaker path asks delivery to apply, with request/decision time",
+      "owners": [
+        "PSEM",
+        "Audio interface"
+      ]
+    },
+    "semantic_transition_hypothesis": {
+      "definition": "confirmed speaker-continuity vs transition hypothesis projected to a source boundary (tolerance-explicit)",
+      "owners": [
+        "PSEM event projection"
+      ]
+    },
+    "source_speaker_evidence": {
+      "definition": "per-source-interval acoustic speaker observation with validity/coverage flags",
+      "owners": [
+        "PSEM acoustic observation"
+      ]
+    }
+  },
+  "loss_categories": [
+    "OBSERVATION_WRONG",
+    "REFERENCE_WRONG_OR_CHANGED",
+    "TRUE_EVIDENCE_FRAGMENTED",
+    "SUSTAINED_ERRONEOUS_EVIDENCE",
+    "MASK_OR_RESET_BREAK",
+    "EVENT_OR_BOUNDARY_PROJECTION",
+    "ALREADY_SEPARATED_BY_DELIVERY",
+    "CORRECT_BUT_TOO_LATE",
+    "LEXICALLY_UNRECOVERABLE",
+    "OTHER_NAMED_CAUSE",
+    "UNRESOLVED_WITH_MISSING_OBSERVATION"
+  ],
+  "time_semantics": [
+    "source_support_interval",
+    "model_evidence_frontier",
+    "availability_decision_time",
+    "requested_boundary_time",
+    "actual_applied_boundary_time",
+    "provider_output_commit_or_actionability",
+    "reference_generation_scope",
+    "capture_generation"
+  ]
+}

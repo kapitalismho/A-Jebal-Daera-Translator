@@ -1,0 +1,806 @@
+{
+  "G01": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [
+      {
+        "boundary_sample": 20328000,
+        "duration_ms": 3200.0,
+        "episode": "ami_ES2015d:A00192",
+        "matched": false
+      },
+      {
+        "boundary_sample": 20532800,
+        "duration_ms": 1200.0,
+        "episode": "ami_ES2015d:A00193",
+        "matched": false
+      },
+      {
+        "boundary_sample": 20598400,
+        "duration_ms": 1000.0,
+        "episode": "ami_ES2015d:A00194",
+        "matched": false
+      },
+      {
+        "boundary_sample": 20649600,
+        "duration_ms": 1300.0,
+        "episode": "ami_ES2015d:A00195",
+        "matched": false
+      }
+    ],
+    "H100M_runs_covering": [
+      {
+        "boundary_sample": 20323216,
+        "duration_ms": 3499.0,
+        "episode": "ami_ES2015d:A00192",
+        "matched": false
+      },
+      {
+        "boundary_sample": 20532800,
+        "duration_ms": 1200.0,
+        "episode": "ami_ES2015d:A00193",
+        "matched": false
+      },
+      {
+        "boundary_sample": 20598400,
+        "duration_ms": 1000.0,
+        "episode": "ami_ES2015d:A00194",
+        "matched": false
+      },
+      {
+        "boundary_sample": 20649600,
+        "duration_ms": 1300.0,
+        "episode": "ami_ES2015d:A00195",
+        "matched": false
+      }
+    ],
+    "direction": "H-only",
+    "frames": [
+      10504,
+      15874
+    ],
+    "high_and_speech_frames": 3632,
+    "high_episodes": [
+      "ami_ES2015d:A00192",
+      "ami_ES2015d:A00193",
+      "ami_ES2015d:A00194",
+      "ami_ES2015d:A00195",
+      "ami_ES2015d:A00196",
+      "ami_ES2015d:A00197",
+      "ami_ES2015d:A00198",
+      "ami_ES2015d:A00199",
+      "ami_ES2015d:A00200",
+      "ami_ES2015d:A00201",
+      "ami_ES2015d:A00202",
+      "ami_ES2015d:A00203",
+      "ami_ES2015d:A00204",
+      "ami_ES2015d:A00205",
+      "ami_ES2015d:A00206",
+      "ami_ES2015d:A00207",
+      "ami_ES2015d:A00208",
+      "ami_ES2015d:A00209",
+      "ami_ES2015d:A00210",
+      "ami_ES2015d:A00211",
+      "ami_ES2015d:A00212",
+      "ami_ES2015d:A00213",
+      "ami_ES2015d:A00214",
+      "ami_ES2015d:A00215",
+      "ami_ES2015d:A00216",
+      "ami_ES2015d:A00217",
+      "ami_ES2015d:A00218",
+      "ami_ES2015d:A00219",
+      "ami_ES2015d:A00221",
+      "ami_ES2015d:A00222",
+      "ami_ES2015d:A00223",
+      "ami_ES2015d:A00224",
+      "ami_ES2015d:A00225",
+      "ami_ES2015d:A00226",
+      "ami_ES2015d:A00227",
+      "ami_ES2015d:A00228",
+      "ami_ES2015d:A00229",
+      "ami_ES2015d:A00230",
+      "ami_ES2015d:A00231",
+      "ami_ES2015d:A00232",
+      "ami_ES2015d:A00233",
+      "ami_ES2015d:A00234",
+      "ami_ES2015d:A00235",
+      "ami_ES2015d:A00236",
+      "ami_ES2015d:A00237",
+      "ami_ES2015d:A00238",
+      "ami_ES2015d:A00239",
+      "ami_ES2015d:A00240",
+      "ami_ES2015d:A00241",
+      "ami_ES2015d:A00242",
+      "ami_ES2015d:A00243",
+      "ami_ES2015d:A00244",
+      "ami_ES2015d:A00245",
+      "ami_ES2015d:A00246",
+      "ami_ES2015d:A00247",
+      "ami_ES2015d:A00248",
+      "ami_ES2015d:A00249",
+      "ami_ES2015d:A00250",
+      "ami_ES2015d:A00251",
+      "ami_ES2015d:A00252",
+      "ami_ES2015d:A00253",
+      "ami_ES2015d:A00254",
+      "ami_ES2015d:A00255",
+      "ami_ES2015d:A00256",
+      "ami_ES2015d:A00257",
+      "ami_ES2015d:A00258",
+      "ami_ES2015d:A00259",
+      "ami_ES2015d:A00260",
+      "ami_ES2015d:A00261",
+      "ami_ES2015d:A00262",
+      "ami_ES2015d:A00263",
+      "ami_ES2015d:A00264",
+      "ami_ES2015d:A00265",
+      "ami_ES2015d:A00266",
+      "ami_ES2015d:A00267",
+      "ami_ES2015d:A00268",
+      "ami_ES2015d:A00269",
+      "ami_ES2015d:A00270",
+      "ami_ES2015d:A00271",
+      "ami_ES2015d:A00272",
+      "ami_ES2015d:A00273",
+      "ami_ES2015d:A00274",
+      "ami_ES2015d:A00275",
+      "ami_ES2015d:A00276",
+      "ami_ES2015d:A00277",
+      "ami_ES2015d:A00278",
+      "ami_ES2015d:A00279",
+      "ami_ES2015d:A00280",
+      "ami_ES2015d:A00281",
+      "ami_ES2015d:A00282",
+      "ami_ES2015d:A00283",
+      "ami_ES2015d:A00284",
+      "ami_ES2015d:A00285",
+      "ami_ES2015d:A00286",
+      "ami_ES2015d:A00287",
+      "ami_ES2015d:A00288",
+      "ami_ES2015d:A00289",
+      "ami_ES2015d:A00290",
+      "ami_ES2015d:A00291",
+      "ami_ES2015d:A00292",
+      "ami_ES2015d:A00293"
+    ],
+    "masked_frac": 0.091,
+    "n_episodes": 101,
+    "overlap_frac": 0.068,
+    "reference_inside": 56,
+    "reference_inside_detail": [
+      {
+        "anchor_episode_id": "ami_ES2015d:A00193",
+        "anchor_id": "FEE060",
+        "boundary_sample": 20587008,
+        "decoder_emit_sample": 20595008,
+        "frontier_sample": 20595008
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00194",
+        "anchor_id": "FEE058",
+        "boundary_sample": 20633408,
+        "decoder_emit_sample": 20641408,
+        "frontier_sample": 20641408
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00196",
+        "anchor_id": "FEE060",
+        "boundary_sample": 20899936,
+        "decoder_emit_sample": 20942528,
+        "frontier_sample": 20942528
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00197",
+        "anchor_id": "FEE059",
+        "boundary_sample": 20966272,
+        "decoder_emit_sample": 20974272,
+        "frontier_sample": 20974272
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00198",
+        "anchor_id": "FEE057",
+        "boundary_sample": 21024768,
+        "decoder_emit_sample": 21032768,
+        "frontier_sample": 21032768
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00199",
+        "anchor_id": "FEE058",
+        "boundary_sample": 21079600,
+        "decoder_emit_sample": 21087600,
+        "frontier_sample": 21087600
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00200",
+        "anchor_id": "FEE060",
+        "boundary_sample": 21276672,
+        "decoder_emit_sample": 21284672,
+        "frontier_sample": 21284672
+      },
+      {
+        "anchor_episode_id": "ami_ES2015d:A00202",
+        "anchor_id": "FEE059",
+        "boundary_sample": 21480992,
+        "decoder_emit_sample": 21488992,
+        "frontier_sample": 21488992
+      }
+    ],
+    "reference_near_edge_ms": 1008.0,
+    "source": "ami_ES2015d",
+    "speakers_in_span": [
+      "FEE057",
+      "FEE058",
+      "FEE059",
+      "FEE060"
+    ],
+    "speech_frac": 0.676,
+    "src_span_ms": [
+      1270500.0,
+      1931562.7
+    ],
+    "target_positive_frames": 632
+  },
+  "G02": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [
+      {
+        "boundary_sample": 1412800,
+        "duration_ms": 381.0,
+        "episode": "ami_ES2009b:A00005",
+        "matched": true
+      }
+    ],
+    "H100M_runs_covering": [
+      {
+        "boundary_sample": 1412800,
+        "duration_ms": 381.0,
+        "episode": "ami_ES2009b:A00005",
+        "matched": true
+      }
+    ],
+    "direction": "H-only",
+    "frames": [
+      829,
+      832
+    ],
+    "high_and_speech_frames": 4,
+    "high_episodes": [
+      "ami_ES2009b:A00005"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 119.0,
+    "source": "ami_ES2009b",
+    "speakers_in_span": [
+      "MEE034"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      88300.0,
+      88681.0
+    ],
+    "target_positive_frames": 4
+  },
+  "G03": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "H-only",
+    "frames": [
+      2888,
+      2901
+    ],
+    "high_and_speech_frames": 14,
+    "high_episodes": [
+      "ami_ES2002b:A00024"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.786,
+    "reference_inside": 1,
+    "reference_inside_detail": [
+      {
+        "anchor_episode_id": "ami_ES2002b:A00024",
+        "anchor_id": "MEE008",
+        "boundary_sample": 6624752,
+        "decoder_emit_sample": 6640752,
+        "frontier_sample": 6640752
+      }
+    ],
+    "reference_near_edge_ms": 253.0,
+    "source": "ami_ES2002b",
+    "speakers_in_span": [
+      "MEE008"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      412900.0,
+      414300.0
+    ],
+    "target_positive_frames": 3
+  },
+  "G04": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "H-only",
+    "frames": [
+      5016,
+      5022
+    ],
+    "high_and_speech_frames": 7,
+    "high_episodes": [
+      "ami_ES2009a:A00047"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.714,
+    "reference_inside": 1,
+    "reference_inside_detail": [
+      {
+        "anchor_episode_id": "ami_ES2009a:A00047",
+        "anchor_id": "MEE033",
+        "boundary_sample": 9116704,
+        "decoder_emit_sample": 9124704,
+        "frontier_sample": 9124704
+      }
+    ],
+    "reference_near_edge_ms": 6.0,
+    "source": "ami_ES2009a",
+    "speakers_in_span": [
+      "MEE033"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      569100.0,
+      569800.0
+    ],
+    "target_positive_frames": 2
+  },
+  "G05": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "H-only",
+    "frames": [
+      3752,
+      3762
+    ],
+    "high_and_speech_frames": 11,
+    "high_episodes": [
+      "ami_EN2009d:A00027"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.909,
+    "reference_inside": 1,
+    "reference_inside_detail": [
+      {
+        "anchor_episode_id": "ami_EN2009d:A00027",
+        "anchor_id": "MEE094",
+        "boundary_sample": 6131104,
+        "decoder_emit_sample": 6139104,
+        "frontier_sample": 6139104
+      }
+    ],
+    "reference_near_edge_ms": 106.0,
+    "source": "ami_EN2009d",
+    "speakers_in_span": [
+      "MEE094"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      382200.0,
+      383300.0
+    ],
+    "target_positive_frames": 1
+  },
+  "G06": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "H-only",
+    "frames": [
+      17742,
+      17749
+    ],
+    "high_and_speech_frames": 8,
+    "high_episodes": [
+      "ami_EN2009d:A00167"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 1.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 91.0,
+    "source": "ami_EN2009d",
+    "speakers_in_span": [
+      "FEE083"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      1836800.0,
+      1837600.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G07": {
+    "F0_runs_covering": [
+      {
+        "boundary_sample": 9240000,
+        "duration_ms": 100.0,
+        "episode": "ami_ES2009a:A00048",
+        "matched": false
+      }
+    ],
+    "H100C_runs_covering": [
+      {
+        "boundary_sample": 9225600,
+        "duration_ms": 1000.0,
+        "episode": "ami_ES2009a:A00048",
+        "matched": false
+      }
+    ],
+    "H100M_runs_covering": [
+      {
+        "boundary_sample": 9224000,
+        "duration_ms": 1100.0,
+        "episode": "ami_ES2009a:A00048",
+        "matched": false
+      }
+    ],
+    "direction": "H-only",
+    "frames": [
+      5088,
+      5096
+    ],
+    "high_and_speech_frames": 9,
+    "high_episodes": [
+      "ami_ES2009a:A00048"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 1.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 6281.0,
+    "source": "ami_ES2009a",
+    "speakers_in_span": [
+      "MEE035"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      576600.0,
+      577500.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G08": {
+    "F0_runs_covering": [
+      {
+        "boundary_sample": 10675200,
+        "duration_ms": 200.0,
+        "episode": "ami_ES2009d:A00047",
+        "matched": false
+      }
+    ],
+    "H100C_runs_covering": [
+      {
+        "boundary_sample": 10675200,
+        "duration_ms": 1100.0,
+        "episode": "ami_ES2009d:A00047",
+        "matched": false
+      }
+    ],
+    "H100M_runs_covering": [
+      {
+        "boundary_sample": 10675200,
+        "duration_ms": 1400.0,
+        "episode": "ami_ES2009d:A00047",
+        "matched": false
+      }
+    ],
+    "direction": "H-only",
+    "frames": [
+      5955,
+      5963
+    ],
+    "high_and_speech_frames": 9,
+    "high_episodes": [
+      "ami_ES2009d:A00047"
+    ],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 1.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 1136.0,
+    "source": "ami_ES2009d",
+    "speakers_in_span": [
+      "MEE034"
+    ],
+    "speech_frac": 1.0,
+    "src_span_ms": [
+      667400.0,
+      668300.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G09": {
+    "F0_runs_covering": [
+      {
+        "boundary_sample": 33423040,
+        "duration_ms": 460.0,
+        "episode": "ami_EN2009d:A00199",
+        "matched": false
+      }
+    ],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "F0-only",
+    "frames": [
+      20064,
+      20091
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.357,
+    "n_episodes": 2,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 1700.0,
+    "source": "ami_EN2009d",
+    "speakers_in_span": [
+      "FEE083",
+      "MEE094"
+    ],
+    "speech_frac": 0.321,
+    "src_span_ms": [
+      2086400.0,
+      2091300.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G10": {
+    "F0_runs_covering": [
+      {
+        "boundary_sample": 952000,
+        "duration_ms": 300.0,
+        "episode": "ami_ES2009a:A00009",
+        "matched": false
+      }
+    ],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "F0-only",
+    "frames": [
+      390,
+      412
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.0,
+    "n_episodes": 2,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 47426.0,
+    "source": "ami_ES2009a",
+    "speakers_in_span": [
+      "MEE033"
+    ],
+    "speech_frac": 0.13,
+    "src_span_ms": [
+      55400.0,
+      60700.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G11": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "F0-only",
+    "frames": [
+      10861,
+      10883
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 1.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.217,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 830.0,
+    "source": "ami_ES2009d",
+    "speakers_in_span": [
+      "FEE036"
+    ],
+    "speech_frac": 0.435,
+    "src_span_ms": [
+      1222200.0,
+      1224500.0
+    ],
+    "target_positive_frames": 1
+  },
+  "G12": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "F0-only",
+    "frames": [
+      3706,
+      3724
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.842,
+    "n_episodes": 1,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 4210.0,
+    "source": "ami_ES2009c",
+    "speakers_in_span": [
+      "FEE036"
+    ],
+    "speech_frac": 0.0,
+    "src_span_ms": [
+      409500.0,
+      411400.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G13": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [],
+    "direction": "F0-only",
+    "frames": [
+      5185,
+      5200
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 13690.0,
+    "source": "alimeeting_R8009_M8019",
+    "speakers_in_span": [
+      "SPK8023"
+    ],
+    "speech_frac": 0.562,
+    "src_span_ms": [
+      545500.0,
+      547100.0
+    ],
+    "target_positive_frames": 0
+  },
+  "G14": {
+    "F0_runs_covering": [
+      {
+        "boundary_sample": 3240000,
+        "duration_ms": 100.0,
+        "episode": "alimeeting_R1021_M4073:A00013",
+        "matched": false
+      }
+    ],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [
+      {
+        "boundary_sample": 3254400,
+        "duration_ms": 100.0,
+        "episode": "alimeeting_R1021_M4073:A00013",
+        "matched": false
+      }
+    ],
+    "direction": "F0-only",
+    "frames": [
+      1956,
+      1968
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.154,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 3480.0,
+    "source": "alimeeting_R1021_M4073",
+    "speakers_in_span": [
+      "SPK4080"
+    ],
+    "speech_frac": 0.462,
+    "src_span_ms": [
+      202500.0,
+      203800.0
+    ],
+    "target_positive_frames": 3
+  },
+  "G15": {
+    "F0_runs_covering": [],
+    "H100C_runs_covering": [
+      {
+        "boundary_sample": 10940800,
+        "duration_ms": 100.0,
+        "episode": "ami_ES2002b:A00051",
+        "matched": false
+      }
+    ],
+    "H100M_runs_covering": [],
+    "direction": "F0-only",
+    "frames": [
+      5310,
+      5321
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 1057.0,
+    "source": "ami_ES2002b",
+    "speakers_in_span": [
+      "MEE008"
+    ],
+    "speech_frac": 0.5,
+    "src_span_ms": [
+      683900.0,
+      685100.0
+    ],
+    "target_positive_frames": 1
+  },
+  "G16": {
+    "F0_runs_covering": [
+      {
+        "boundary_sample": 7995200,
+        "duration_ms": 300.0,
+        "episode": "ami_ES2009a:A00036",
+        "matched": false
+      }
+    ],
+    "H100C_runs_covering": [],
+    "H100M_runs_covering": [
+      {
+        "boundary_sample": 7995200,
+        "duration_ms": 400.0,
+        "episode": "ami_ES2009a:A00036",
+        "matched": false
+      }
+    ],
+    "direction": "F0-only",
+    "frames": [
+      4529,
+      4541
+    ],
+    "high_and_speech_frames": 0,
+    "high_episodes": [],
+    "masked_frac": 0.0,
+    "n_episodes": 1,
+    "overlap_frac": 0.0,
+    "reference_inside": 0,
+    "reference_inside_detail": [],
+    "reference_near_edge_ms": 8264.0,
+    "source": "ami_ES2009a",
+    "speakers_in_span": [
+      "FEE036"
+    ],
+    "speech_frac": 0.231,
+    "src_span_ms": [
+      498700.0,
+      500000.0
+    ],
+    "target_positive_frames": 3
+  }
+}

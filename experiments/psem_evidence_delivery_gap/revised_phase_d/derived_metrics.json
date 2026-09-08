@@ -1,0 +1,38 @@
+{
+ "derived_from": {
+  "results_run_utc": "2026-09-08T12:31:06+00:00",
+  "freeze_id": "psem.revised_phase_d.freeze.v1",
+  "note": "Recompute from stored walls only. No provider calls. results.json and freeze.json byte-unchanged."
+ },
+ "final_latency_s": {
+  "definition": "per-segment final arrival minus own finalize (final_wall - finalize_wall), seconds",
+  "arms": {
+   "baseline": [
+    0.328
+   ],
+   "ideal": [
+    0.297,
+    0.297
+   ],
+   "f0": [
+    0.297,
+    0.281,
+    0.265
+   ],
+   "h": [
+    0.25,
+    0.281,
+    0.312
+   ]
+  }
+ },
+ "legacy_field_mapping": "results.json drain_waits_s is collection elapsed after the whole stream ended, not provider latency. Future script field renamed collection_elapsed_s; per-segment arrival latency added as final_latency_s.",
+ "amendments": {
+  "sessions_methodology": "9 pre-opened per-segment provider sessions (1/2/3/3 across arms), paid 9 matching the frozen 9-session budget. Single-session production behavior untested; no assertion about the ordinary production route end-to-end.",
+  "secondary_split": "The F0/H 3262700 split falls inside the later B/A/C overlap region. It is an additional split there, not part of the turn recovery; its consequence is unresolved, neither neutral nor known no-harm. F0 same.",
+  "dup_scope": "No-duplicated-words holds for the scored A/C phrases only. Tail overlap region unscored.",
+  "queue": "Observed max depth 48 over finite 235-chunk input; 128 was a stall threshold, no hard bound enforced.",
+  "script_repairs": "run.py records final_latency_s and collection_elapsed_s, closes sessions in finally with 10 s bound, keeps bounded timeouts."
+ },
+ "script_verified": "py_compile ok, import side-effect free, zero comment lines, synthetic timestamp check passes."
+}
