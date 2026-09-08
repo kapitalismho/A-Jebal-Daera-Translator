@@ -216,6 +216,95 @@ def test_serialization_from_dict_normalizes_legacy_deepseek_openrouter_model() -
     assert loaded.intent.translation.openrouter_model == "deepseek/deepseek-v4-flash-0731"
 
 
+def test_restart_roundtrip_preserves_gemma_main_model_with_stale_openrouter_url() -> None:
+    from puripuly_heart.config.settings_vnext import migration, serialization
+
+    canonical = serialization.to_dict(AppSettingsVNext())
+    translation = canonical["intent"]["translation"]
+    translation["model"] = "gemma4_26b_31b"
+    translation["connection"] = "managed"
+    translation["openrouter_model"] = "deepseek/deepseek-v4-flash"
+    translation["openrouter_selected_source"] = "managed"
+    translation["openrouter_selection_alias"] = "gemma4_26b_31b_managed"
+
+    result = serialization.to_dict(migration.from_dict(canonical))["intent"]["translation"]
+
+    assert result["model"] == "gemma4_26b_31b"
+    assert result["connection"] == "managed"
+
+
+def test_restart_roundtrip_preserves_gemma_main_model_with_disabled_fallback() -> None:
+    from puripuly_heart.config.settings_vnext import migration, serialization
+
+    canonical = serialization.to_dict(AppSettingsVNext())
+    translation = canonical["intent"]["translation"]
+    translation["model"] = "gemma4_26b_31b"
+    translation["connection"] = "openrouter"
+    translation["fallback"] = {
+        "enabled": False,
+        "model": "deepseek_v4_flash",
+        "connection": "official_byok",
+        "selection_alias": "none",
+    }
+
+    result = serialization.to_dict(migration.from_dict(canonical))["intent"]["translation"]
+
+    assert result["model"] == "gemma4_26b_31b"
+    assert result["connection"] == "openrouter"
+
+
+def test_restart_save_load_cycle_keeps_gemma_without_remigration(tmp_path: Path) -> None:
+    compat = _compat()
+    serialization = _serialization()
+    raw = serialization.to_dict(AppSettingsVNext())
+    translation = raw["intent"]["translation"]
+    translation["model"] = "gemma4_26b_31b"
+    translation["connection"] = "openrouter"
+    translation["openrouter_model"] = "google/gemma-4-26b-a4b-it"
+    path = tmp_path / "settings.json"
+    _write_json_bytes(path, raw)
+
+    first = compat.load_vnext_settings(path)
+    assert first.ok
+    assert first.settings is not None
+    assert first.settings.intent.translation.model == "gemma4_26b_31b"
+
+    second = compat.load_vnext_settings(path)
+    assert second.ok
+    assert second.migrated is False
+    assert second.settings is not None
+    assert second.settings.intent.translation.model == "gemma4_26b_31b"
+    assert second.settings.intent.translation.connection == "openrouter"
+
+
+def test_current_version_deepseek_v4_pro_remnant_normalizes_to_flash() -> None:
+    migration = _migration()
+    serialization = _serialization()
+    raw = serialization.to_dict(AppSettingsVNext())
+    raw["intent"]["translation"].update(
+        {
+            "model": "deepseek_v4_pro",
+            "connection": "official_byok",
+            "previous_llm_model": "deepseek_v4_pro",
+            "connection_history": {"deepseek_v4_pro": "official_byok"},
+            "fallback": {
+                "enabled": True,
+                "model": "deepseek_v4_pro",
+                "connection": "official_byok",
+                "selection_alias": "none",
+            },
+        }
+    )
+
+    loaded = migration.from_dict(raw)
+    translated = loaded.intent.translation
+
+    assert translated.model == "deepseek_v4_flash"
+    assert translated.previous_llm_model == "deepseek_v4_flash"
+    assert translated.connection_history == {"deepseek_v4_flash": "official_byok"}
+    assert "deepseek_v4_pro" not in json.dumps(serialization.to_dict(loaded))
+
+
 def test_vnext_dict_migrates_shared_qwen_audio_model_to_per_channel_provider() -> None:
     from puripuly_heart.config.settings_vnext import migration, serialization
 
