@@ -84,6 +84,10 @@ def select_vrchat_log(
         for candidate in candidates
         if candidate.name_time <= now + _NAME_SKEW_FUTURE_S
         and candidate.name_time >= start_second - _NAME_BEFORE_START_TOLERANCE_S
+        and (
+            candidate.name_time >= start_second
+            or abs(candidate.created - create_time) <= _CTIME_TOLERANCE_S
+        )
         and not (
             candidate.name_time == start_second
             and candidate.created < create_time - _CREATION_SKEW_S

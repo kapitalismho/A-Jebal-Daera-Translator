@@ -342,7 +342,7 @@ class VrchatSceneService(SceneSnapshotProvider):
             return
         if not self._fresh(generation) or tailer is not self._tailer:
             return
-        if self._feed_lines(lines):
+        if self._feed_lines(lines) > 0:
             self._touch()
         self._settle_if_quiet(generation)
 

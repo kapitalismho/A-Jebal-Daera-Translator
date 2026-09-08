@@ -115,6 +115,14 @@ def test_select_rejects_name_beyond_start_tolerance() -> None:
     assert select_vrchat_log((stale,), create_time=create, now=now) is None
 
 
+def test_select_rejects_prestart_name_without_nearby_creation() -> None:
+    create = 1788767641.0
+    now = create + 0.2
+    previous = _candidate(Path("output_log_previous.txt"), create - 3, create - 600, now - 2)
+
+    assert select_vrchat_log((previous,), create_time=create, now=now) is None
+
+
 def test_select_accepts_delayed_fresh_log_over_stale_previous() -> None:
     now = 1788767641.0
     create = now - 5

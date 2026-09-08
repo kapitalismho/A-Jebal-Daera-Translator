@@ -40,6 +40,8 @@ def parse_vrchat_scene_line(line: str) -> VrchatSceneEvent | None:
         return LeftRoom()
     if payload == _LEFT_ROOM_NOTICE_VERB:
         return None
+    if payload.startswith(_LEFT_ROOM_NOTICE_VERB):
+        return IdlessPresence()
     if payload.startswith(_JOINED_VERB):
         user_id = _user_id_after(payload, len(_JOINED_VERB))
         if user_id is None:
