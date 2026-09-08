@@ -26,6 +26,7 @@ class ConcurrentRecordingProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         await self.started.put(
             {
@@ -65,6 +66,7 @@ class TargetControlledProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = system_prompt, context
         key = (text, target_language)

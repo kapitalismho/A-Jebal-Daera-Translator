@@ -174,6 +174,7 @@ class ImmediateFailingTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (utterance_id, text, system_prompt, source_language, target_language, context)
         raise self.error
@@ -195,6 +196,7 @@ class StubTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = (system_prompt, context)
         return Translation(
@@ -223,6 +225,7 @@ class BlockingTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (utterance_id, text, system_prompt, source_language, target_language, context)
         self.started.set()
@@ -248,6 +251,7 @@ class CancelSuppressingTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = (text, system_prompt, source_language, target_language, context)
         self.started.set()
@@ -281,6 +285,7 @@ class ReleasableTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (system_prompt, context)
         self.requested_source_language = source_language
@@ -315,6 +320,7 @@ class ClockedTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (utterance_id, text, system_prompt, source_language, target_language, context)
         if not self.responses:
@@ -342,6 +348,7 @@ class SequencedTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (utterance_id, system_prompt, source_language, target_language, context)
         self.calls.append(text)
@@ -369,6 +376,7 @@ class RecordingSequencedTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (system_prompt, source_language, target_language, context)
         self.calls.append((utterance_id, text))
@@ -398,6 +406,7 @@ class GatedRecordingTranslateLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         _ = (system_prompt, source_language, target_language)
         response_index = len(self.calls)

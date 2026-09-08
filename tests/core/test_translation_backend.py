@@ -26,6 +26,7 @@ class RecordingProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         self.calls.append(
             {
@@ -35,6 +36,7 @@ class RecordingProvider:
                 "source_language": source_language,
                 "target_language": target_language,
                 "context": context,
+                "scene_participant_count": scene_participant_count,
             }
         )
         return Translation(utterance_id=utterance_id, text="translated")
@@ -69,6 +71,7 @@ async def test_llm_adapter_maps_request_object_to_legacy_provider() -> None:
             "source_language": "en",
             "target_language": "ko",
             "context": "prior",
+            "scene_participant_count": None,
         }
     ]
 
@@ -81,3 +84,23 @@ async def test_llm_adapter_owns_close_delegation() -> None:
     await backend.close()
 
     assert provider.closed is True
+
+
+@pytest.mark.asyncio
+async def test_llm_adapter_forwards_scene_participant_count() -> None:
+    provider = RecordingProvider()
+    backend = LlmTranslationBackend(provider)
+    utterance_id = uuid4()
+    result = await backend.translate(
+        TranslationBackendRequest(
+            utterance_id=utterance_id,
+            text="hello",
+            system_prompt="system",
+            source_language="en",
+            target_language="ko",
+            context="prior",
+            scene_participant_count=2,
+        )
+    )
+    assert result.text == "translated"
+    assert provider.calls[0]["scene_participant_count"] == 2

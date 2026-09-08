@@ -62,6 +62,7 @@ class RecordingProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         self.calls.append(
             {

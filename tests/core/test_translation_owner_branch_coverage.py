@@ -62,6 +62,7 @@ class StubLLM:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = (system_prompt, source_language, target_language)
         self.calls.append((utterance_id, text, context))
@@ -86,6 +87,7 @@ class RecordingLanguageLLM:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = system_prompt
         self.calls.append(
@@ -116,6 +118,7 @@ class ManagedAuthFailingLLM:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = (utterance_id, text, system_prompt, source_language, target_language, context)
         raise ManagedOpenRouterUserFacingError(

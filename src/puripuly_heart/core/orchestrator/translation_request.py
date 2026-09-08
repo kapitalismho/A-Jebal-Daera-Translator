@@ -47,6 +47,7 @@ from puripuly_heart.core.translation_backend import (
     TranslationBackendRequest,
 )
 from puripuly_heart.core.translation_policy import TranslationContextPolicy
+from puripuly_heart.core.vrchat_scene import SceneSnapshotProvider, VrchatSceneSnapshot
 from puripuly_heart.domain.events import UIEventType
 from puripuly_heart.domain.models import ChannelId, Translation
 
@@ -170,6 +171,7 @@ class PreparedTranslationRequest:
     applied_context_mode: ContextMode
     source_language: str
     target_language: str
+    scene_snapshot: VrchatSceneSnapshot = field(default_factory=VrchatSceneSnapshot)
 
 
 @dataclass(frozen=True, slots=True)
@@ -232,6 +234,12 @@ def _safe_user_message_params(params: Mapping[str, object]) -> dict[str, SafeMes
     return safe_params
 
 
+def _scene_participant_count(snapshot: VrchatSceneSnapshot) -> int | None:
+    if snapshot.status != "ready":
+        return None
+    return snapshot.participant_count
+
+
 @dataclass(slots=True)
 class TranslationRequestOwner:
     config_snapshot: TranslationRuntimeConfigSnapshotPort = field(repr=False)
@@ -242,6 +250,7 @@ class TranslationRequestOwner:
     diagnostics: TranslationLatencyDiagnosticsOwner = field(repr=False)
     presentation: TranslationRequestPresentationPort = field(repr=False)
     clock: Clock
+    scene_provider: SceneSnapshotProvider | None = None
 
     def __post_init__(self) -> None:
         warm_prompt_cache()
@@ -404,6 +413,7 @@ class TranslationRequestOwner:
             applied_context_mode=applied_mode,
             source_language=source_language,
             target_language=target_language,
+            scene_snapshot=self._scene_snapshot(),
         )
 
     def admit(
@@ -467,6 +477,7 @@ class TranslationRequestOwner:
                     source_language=prepared.source_language,
                     target_language=prepared.target_language,
                     context=prepared.context,
+                    scene_participant_count=_scene_participant_count(prepared.scene_snapshot),
                 )
             )
         except Exception:
@@ -578,6 +589,7 @@ class TranslationRequestOwner:
                         source_language=source_language,
                         target_language=request.target_language,
                         context=prepared.context,
+                        scene_participant_count=_scene_participant_count(prepared.scene_snapshot),
                     )
                 )
             except Exception:
@@ -647,6 +659,12 @@ class TranslationRequestOwner:
         if backend is None:
             return None
         return cast(TranslationBackend, backend), generation
+
+    def _scene_snapshot(self) -> VrchatSceneSnapshot:
+        provider = self.scene_provider
+        if provider is None:
+            return VrchatSceneSnapshot()
+        return provider.snapshot()
 
     def _raise_if_stale_provider_request(
         self,

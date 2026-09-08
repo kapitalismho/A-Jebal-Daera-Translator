@@ -70,6 +70,7 @@ Broker is a control-plane dependency, not part of the normal utterance data path
 | OSC control runtime   | Receiver lifecycle, routing, state publication, restart    | `app/services/osc/control_runtime.py`                        |
 | OSCQuery service      | Zeroconf discovery, receiver advertisement, OSCQuery tree | `core/osc/oscquery.py`                                        |
 | Shutdown adapter        | Ordered application teardown                               | `app/adapters/application_runtime_shutdown.py`      |
+| VRChat scene owner     | Process-lifetime instance population, immutable snapshots | `core/vrchat_scene_service.py`, `core/vrchat_scene.py` |
 
 
 Ownership may span several processing stages. Do not assume one owner per pipeline stage.
@@ -127,6 +128,23 @@ managed authentication
 → provider runtime activation
 → normal translation request path
 ```
+
+### VRChat scene context
+
+```text
+VRChat process lifetime
+→ log tailer
+→ whitelist parser
+→ member-set trust
+→ immutable snapshot
+→ request prep
+→ structured scene to LLM
+```
+
+- Owner shared across pipeline rebuilds; no audio, VAD, or OSC dependency.
+- Count includes the local user; only `ready` snapshots expose it. Names and raw logs remain local.
+- Rendered as sanitized `<scene>` prefix in the translation user message; absent equals no scene.
+- Custom HTTP extensions never receive scene data.
 
 ## Ports and Adapters
 

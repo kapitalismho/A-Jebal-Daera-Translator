@@ -26,6 +26,7 @@ class FakeLLM:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = (system_prompt, source_language, target_language)
         self.calls.append({"text": text, "context": context})

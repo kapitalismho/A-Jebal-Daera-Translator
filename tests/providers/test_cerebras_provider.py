@@ -26,6 +26,7 @@ class FakeCerebrasClient(CerebrasClient):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str:
         self.last_call = {
             "text": text,
@@ -33,6 +34,7 @@ class FakeCerebrasClient(CerebrasClient):
             "source_language": source_language,
             "target_language": target_language,
             "context": context,
+            "scene_participant_count": scene_participant_count,
         }
         return "TRANSLATED"
 
@@ -116,6 +118,7 @@ async def test_cerebras_provider_uses_injected_client() -> None:
         "source_language": "ko-KR",
         "target_language": "en",
         "context": "",
+        "scene_participant_count": None,
     }
 
 

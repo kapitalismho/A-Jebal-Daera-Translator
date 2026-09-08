@@ -62,6 +62,7 @@ class CloseTrackingOpenRouterBranch:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         return await self.inner.translate(
             utterance_id=utterance_id,

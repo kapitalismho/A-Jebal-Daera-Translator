@@ -44,6 +44,7 @@ class FakeLLM(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         self.translate_calls.append(
             {
@@ -53,6 +54,7 @@ class FakeLLM(LLMProvider):
                 "source_language": source_language,
                 "target_language": target_language,
                 "context": context,
+                "scene_participant_count": scene_participant_count,
             }
         )
         self.translate_started.set()
@@ -107,6 +109,7 @@ async def test_fallback_racer_starts_primary_immediately_and_returns_primary_bef
             "source_language": "ko",
             "target_language": "en",
             "context": "ctx",
+            "scene_participant_count": None,
         }
     ]
     assert fallback.translate_calls == []

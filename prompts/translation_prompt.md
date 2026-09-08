@@ -3,7 +3,8 @@ Interpret ${sourceTextRef} to translate into ${targetName} naturally, preserving
 
 ## Context
 * `<context>` is a multilingual history of prior turns, ordered chronologically from older to newer.
-* Channel labels are fixed: `[self]` marks local-user turns; `[peer]` marks peer-audio turns and may represent different people across turns.
+* Channel labels are fixed: `[self]` marks local-user turns; `[peer]` marks peer-audio turns.
+* `<scene>` provides ambient VRChat metadata. `People` is the current participant count, including the local user.
 * `<input>` is the current `[${inputChannel}]` turn; `<context>` uses the same labels for earlier turns.
 * Ground the translation in `<input>`; use `<context>` cautiously to clarify it when helpful.
 * When unsure whether context applies, translate `<input>` standalone.
@@ -22,7 +23,7 @@ Use context when it directly helps with:
 Ignore context when it would cause:
 * Addition Risk: Context would add unsupported names, causes, events, emotions, intentions, or details.
 * Speaker Boundary: Carrying speaker-specific details from a turn that `<input>` does not clearly answer or reference.
-* Peer Identity Error: Treating repeated `[peer]` labels as proof of the same speaker.
+* Peer Identity Error: Assuming the same peer speaker despite contrary evidence, or without either `People: 2` or a clear conversational link.
 * Topic Shift: `<input>` starts a new topic, question, request, or unrelated reaction.
 * Conflict: Context is stale, misleading, or contradicted by `<input>`.
 * Weak Signal: Context looks related but resolves nothing specific in `<input>`.
@@ -43,5 +44,5 @@ ${targetLanguageRulesSection}
 ${translationExamplesSection}
 
 ## Output
-* Translate only the text inside `<input>`; `<context>` and channel labels are background metadata.
+* Translate only the text inside `<input>`; `<scene>`, `<context>`, and channel labels are background metadata.
 * Your response must contain ONLY the ${targetName} translation of `<input>`.

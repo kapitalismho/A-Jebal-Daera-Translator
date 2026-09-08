@@ -73,6 +73,7 @@ class FakeLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         self.calls.append(
             {
@@ -129,6 +130,7 @@ class BlockingLLMProvider(FakeLLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         self.calls.append(
             {
@@ -157,6 +159,7 @@ class FailingThenSuccessfulLLMProvider(FakeLLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         self.calls.append(
             {
@@ -229,6 +232,7 @@ class ClockedTranslateLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         self.calls.append(
             {

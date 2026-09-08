@@ -94,6 +94,7 @@ class _DeterministicLLM(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         _ = (system_prompt, context)
         self.requested_source_languages.append(source_language)

@@ -1347,6 +1347,19 @@
       "rationale": "These non-private modules are classified as implementation support unless an explicit __all__, existing public test import, packaging import, documented entry point, or approved facade appears in public_imports."
     },
     {
+      "surface": "puripuly_heart.core VRChat scene context modules",
+      "classification": "internal_runtime_owner_modules",
+      "modules": [
+        "puripuly_heart.core.vrchat_scene",
+        "puripuly_heart.core.vrchat_scene_events",
+        "puripuly_heart.core.vrchat_scene_parser",
+        "puripuly_heart.core.vrchat_scene_service",
+        "puripuly_heart.core.vrchat_scene_tailer",
+        "puripuly_heart.core.vrchat_scene_tracker"
+      ],
+      "rationale": "VRChat scene process-lifetime instance population, log tailer, whitelist parser, member-set trust, and immutable snapshots are internal runtime-owner implementation for translation request enrichment; only ready participant counts reach the LLM and names and raw logs remain local, so these modules are not external public compatibility facades."
+    },
+    {
       "surface": "puripuly_heart.core.discord domain grouping package",
       "classification": "internal_domain_grouping_package",
       "modules": [

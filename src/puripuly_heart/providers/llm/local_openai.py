@@ -370,6 +370,7 @@ class LocalOpenAIClient(Protocol):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str: ...
 
     async def close(self) -> None: ...
@@ -421,6 +422,7 @@ class HttpxLocalOpenAIClient:
         source_language: str,
         target_language: str,
         context: str,
+        scene_participant_count: int | None = None,
     ) -> dict[str, object]:
         _assert_extra_body_is_safe(self.extra_body)
         body: dict[str, object] = {
@@ -436,7 +438,11 @@ class HttpxLocalOpenAIClient:
                 },
                 {
                     "role": "user",
-                    "content": build_translation_user_message(text=text, context=context),
+                    "content": build_translation_user_message(
+                        text=text,
+                        context=context,
+                        scene_participant_count=scene_participant_count,
+                    ),
                 },
             ],
             "stream": False,
@@ -454,6 +460,7 @@ class HttpxLocalOpenAIClient:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str:
         client = await self._get_http_client()
         try:
@@ -466,6 +473,7 @@ class HttpxLocalOpenAIClient:
                     source_language=source_language,
                     target_language=target_language,
                     context=context,
+                    scene_participant_count=scene_participant_count,
                 ),
             )
         except asyncio.CancelledError:
@@ -561,6 +569,7 @@ class LocalOpenAICompatibleLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         result = await self._client_for_call().translate(
             text=text,
@@ -568,6 +577,7 @@ class LocalOpenAICompatibleLLMProvider:
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
         return Translation(
             utterance_id=utterance_id,
