@@ -112,6 +112,7 @@ from puripuly_heart.config.provider_values import (
     normalize_cloud_free_tier_providers,
     normalize_local_llm_base_url,
     normalize_owned_referral_id,
+    parse_openrouter_llm_model,
 )
 from puripuly_heart.config.resolved import (
     OVERLAY_TARGET_DESKTOP,
@@ -4238,7 +4239,7 @@ class SettingsView(ft.Column):
                 snapshot,
                 llm_provider=LLMProviderName(state.llm_provider),
                 translation=translation,
-                openrouter_llm_model=OpenRouterLLMModel(state.openrouter_llm_model),
+                openrouter_llm_model=parse_openrouter_llm_model(state.openrouter_llm_model),
                 openrouter_selected_source=OpenRouterCredentialSource(
                     state.openrouter_selected_source
                 ),

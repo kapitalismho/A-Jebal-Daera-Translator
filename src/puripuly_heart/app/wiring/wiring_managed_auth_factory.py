@@ -64,9 +64,9 @@ from puripuly_heart.config.llm_profiles import (
 )
 from puripuly_heart.config.provider_values import (
     OpenRouterCredentialSource,
-    OpenRouterLLMModel,
     OpenRouterSelectionAlias,
     normalize_owned_referral_id,
+    parse_openrouter_llm_model,
 )
 from puripuly_heart.config.settings_vnext.schema import AppSettingsVNext
 from puripuly_heart.config.translation_values import (
@@ -956,7 +956,7 @@ def build_openrouter_release_runtime_config_from_vnext(
     translation = settings.intent.translation
     alias = translation.openrouter_selection_alias
     return OpenRouterReleaseRuntimeConfig(
-        llm_model=OpenRouterLLMModel(translation.openrouter_model),
+        llm_model=parse_openrouter_llm_model(translation.openrouter_model),
         selected_source=OpenRouterCredentialSource(translation.openrouter_selected_source),
         selection_alias=None if alias is None else OpenRouterSelectionAlias(alias),
         managed_credential_kind=_managed_credential_kind_from_connection(translation.connection),

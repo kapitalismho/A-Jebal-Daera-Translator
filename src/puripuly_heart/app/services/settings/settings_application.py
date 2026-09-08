@@ -90,11 +90,11 @@ from puripuly_heart.config.overlay_calibration import OverlayCalibration
 from puripuly_heart.config.provider_values import (
     LLMProviderName,
     OpenRouterCredentialSource,
-    OpenRouterLLMModel,
     OpenRouterSelectionAlias,
     QwenRegion,
     STTProviderName,
     normalize_cloud_free_tier_providers,
+    parse_openrouter_llm_model,
 )
 from puripuly_heart.config.settings_vnext.schema import (
     AppSettingsVNext,
@@ -252,7 +252,7 @@ def settings_view_surface_snapshots(
             ensure_ascii=False,
             indent=2,
         ),
-        openrouter_llm_model=OpenRouterLLMModel(translation.openrouter_model),
+        openrouter_llm_model=parse_openrouter_llm_model(translation.openrouter_model),
         openrouter_selected_source=OpenRouterCredentialSource(
             translation.openrouter_selected_source
         ),
