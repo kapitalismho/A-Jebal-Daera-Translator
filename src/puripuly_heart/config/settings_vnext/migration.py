@@ -704,7 +704,11 @@ def _migrate_deepseek_v4_pro_translation(translation: dict[str, Any]) -> None:
 def _migrate_legacy_openrouter_model_translation(translation: dict[str, Any]) -> None:
     raw_model = translation.get("openrouter_model")
     normalized = normalize_legacy_openrouter_model(raw_model)
-    if isinstance(raw_model, str) and isinstance(normalized, str) and normalized != raw_model.strip():
+    if (
+        isinstance(raw_model, str)
+        and isinstance(normalized, str)
+        and normalized != raw_model.strip()
+    ):
         translation["openrouter_model"] = normalized
 
 
