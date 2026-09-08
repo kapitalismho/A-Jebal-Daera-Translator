@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import contextlib
 import logging
 import time
@@ -48,6 +49,78 @@ class _EndTurn:
 
 
 _STOP = object()
+
+
+@dataclass(slots=True)
+class _GeminiClientResources:
+    client: Any
+    sync_transport: Any
+    async_transport: Any
+    config: Any
+
+
+def _build_live_config_sync(language_codes: Sequence[str], custom_vocabulary: Sequence[str]) -> Any:
+    from google.genai import types
+
+    transcription_config_kwargs: dict[str, Any] = {"mode": "VERBATIM"}
+    if language_codes:
+        transcription_config_kwargs["language_codes"] = list(language_codes)
+    if custom_vocabulary:
+        transcription_config_kwargs["custom_vocabulary"] = list(custom_vocabulary)
+    return types.LiveConnectConfig(
+        response_modalities=["TEXT"],
+        input_audio_transcription=types.AudioTranscriptionConfig(**transcription_config_kwargs),
+        realtime_input_config=types.RealtimeInputConfig(
+            automatic_activity_detection=types.AutomaticActivityDetection(disabled=True),
+        ),
+    )
+
+
+def _create_transports_sync() -> tuple[Any, Any]:
+    import httpx
+
+    sync_transport = httpx.Client(timeout=None, follow_redirects=True)
+    try:
+        async_transport = httpx.AsyncClient(timeout=None, follow_redirects=True)
+    except BaseException:
+        with contextlib.suppress(Exception):
+            sync_transport.close()
+        raise
+    return sync_transport, async_transport
+
+
+def _build_http_options_sync(sync_transport: Any, async_transport: Any) -> Any:
+    from google.genai import types
+
+    return types.HttpOptions(httpx_client=sync_transport, httpx_async_client=async_transport)
+
+
+def _create_genai_client_sync(api_key: str, http_options: Any) -> Any:
+    from google import genai
+
+    return genai.Client(api_key=api_key, http_options=http_options)
+
+
+def _prepare_gemini_resources_sync(
+    api_key: str, language_codes: Sequence[str], custom_vocabulary: Sequence[str]
+) -> _GeminiClientResources:
+    config = _build_live_config_sync(language_codes, custom_vocabulary)
+    sync_transport, async_transport = _create_transports_sync()
+    try:
+        http_options = _build_http_options_sync(sync_transport, async_transport)
+        client = _create_genai_client_sync(api_key, http_options)
+    except BaseException:
+        with contextlib.suppress(Exception):
+            sync_transport.close()
+        with contextlib.suppress(Exception):
+            asyncio.run(async_transport.aclose())
+        raise
+    return _GeminiClientResources(
+        client=client,
+        sync_transport=sync_transport,
+        async_transport=async_transport,
+        config=config,
+    )
 
 
 def gemini_transcribe_language_codes(source_language: str | None) -> list[str]:
@@ -112,7 +185,6 @@ class GeminiTranscribeSTTBackend(STTBackend):
             raise ValueError("connect_timeout_s must be > 0")
         if self.finalize_timeout_s <= 0:
             raise ValueError("finalize_timeout_s must be > 0")
-
         session = _GeminiTranscribeLiveSession(
             api_key=self.api_key,
             language_codes=list(self.language_codes),
@@ -183,48 +255,187 @@ class _GeminiTranscribeLiveSession(STTBackendSession):
     _streaming_turn: _PendingTurn | None = field(init=False, default=None, repr=False)
     _pending_turns: deque[_PendingTurn] = field(init=False, default_factory=deque, repr=False)
     _protocol_failed: bool = field(init=False, default=False)
+    _client_resources: _GeminiClientResources | None = field(init=False, default=None, repr=False)
+    _setup_future: Any = field(init=False, default=None, repr=False)
+    _setup_executor: Any = field(init=False, default=None, repr=False)
+    _handshake_task: asyncio.Task[Any] | None = field(init=False, default=None, repr=False)
+    _teardown_task: asyncio.Task[None] | None = field(init=False, default=None, repr=False)
+    _teardown_done: bool = field(init=False, default=False)
 
     def __post_init__(self) -> None:
         self._events = asyncio.Queue()
         self._send_queue = asyncio.Queue()
 
     async def start(self) -> None:
-        from google.genai import types
-
-        transcription_config_kwargs: dict[str, Any] = {"mode": "VERBATIM"}
-        if self.language_codes:
-            transcription_config_kwargs["language_codes"] = list(self.language_codes)
-        if self.custom_vocabulary:
-            transcription_config_kwargs["custom_vocabulary"] = list(self.custom_vocabulary)
-
-        config = types.LiveConnectConfig(
-            response_modalities=["TEXT"],
-            input_audio_transcription=types.AudioTranscriptionConfig(**transcription_config_kwargs),
-            realtime_input_config=types.RealtimeInputConfig(
-                automatic_activity_detection=types.AutomaticActivityDetection(disabled=True),
-            ),
+        if self._stopped:
+            raise RuntimeError("Gemini Transcribe Live session is closed")
+        self._teardown_done = False
+        self._teardown_task = None
+        self._setup_future = None
+        self._setup_executor = None
+        self._handshake_task = None
+        setup_start = time.monotonic()
+        executor = concurrent.futures.ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="gemini-stt-setup"
         )
-
-        factory = self.live_connect_factory
-        if factory is None:
-            from google import genai
-
-            client = genai.Client(api_key=self.api_key)
-            factory = client.aio.live.connect
+        self._setup_executor = executor
+        try:
+            raw = executor.submit(
+                _prepare_gemini_resources_sync,
+                self.api_key,
+                list(self.language_codes),
+                list(self.custom_vocabulary),
+            )
+        except BaseException:
+            self._setup_executor = None
+            executor.shutdown(wait=False)
+            raise
+        self._setup_future = raw
+        try:
+            resources = await asyncio.wrap_future(raw)
+        except BaseException:
+            try:
+                await self._teardown()
+            except (asyncio.CancelledError, Exception):
+                pass
+            raise
+        setup_elapsed = time.monotonic() - setup_start
         logger.info(
-            "[STT] Gemini Transcribe Live connecting (timeout=%.1fs)", self.connect_timeout_s
+            "[STT] Gemini Transcribe Live setup completed in %.2fs",
+            setup_elapsed,
         )
-        start_at = time.monotonic()
-        live_context = factory(model=self.model, config=config)
+        if self._stopped:
+            try:
+                await self._teardown()
+            except (asyncio.CancelledError, Exception):
+                pass
+            raise RuntimeError("Gemini Transcribe Live session closed during setup")
+        self._client_resources = resources
+        executor.shutdown(wait=False)
+        try:
+            factory = self.live_connect_factory
+            if factory is None:
+                factory = resources.client.aio.live.connect
+            live_context = factory(model=self.model, config=resources.config)
+        except BaseException:
+            try:
+                await self._teardown()
+            except (asyncio.CancelledError, Exception):
+                pass
+            raise
         self._live_context = live_context
-        self._live_session = await asyncio.wait_for(
-            live_context.__aenter__(), timeout=self.connect_timeout_s
+        handshake_start = time.monotonic()
+        handshake_task = asyncio.create_task(live_context.__aenter__())
+        self._handshake_task = handshake_task
+        try:
+            live_session = await asyncio.wait_for(handshake_task, timeout=self.connect_timeout_s)
+        except BaseException:
+            try:
+                await self._teardown()
+            except (asyncio.CancelledError, Exception):
+                pass
+            raise
+        self._handshake_task = None
+        handshake_elapsed = time.monotonic() - handshake_start
+        logger.info(
+            "[STT] Gemini Transcribe Live ready in %.2fs (setup=%.2fs handshake=%.2fs)",
+            setup_elapsed + handshake_elapsed,
+            setup_elapsed,
+            handshake_elapsed,
         )
-        elapsed = time.monotonic() - start_at
-        logger.info("[STT] Gemini Transcribe Live connected in %.2fs", elapsed)
-
+        if self._stopped:
+            try:
+                await self._teardown()
+            except (asyncio.CancelledError, Exception):
+                pass
+            raise RuntimeError("Gemini Transcribe Live session closed during connect")
+        self._live_session = live_session
         self._send_task = asyncio.create_task(self._send_loop())
         self._recv_task = asyncio.create_task(self._recv_loop())
+
+    async def _teardown(self) -> None:
+        task = self._teardown_task
+        if task is None:
+            if self._teardown_done:
+                return
+            task = asyncio.create_task(self._teardown_body())
+            self._teardown_task = task
+        if task is asyncio.current_task():
+            return
+        while not task.done():
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                continue
+
+    async def _teardown_body(self) -> None:
+        raw = self._setup_future
+        if raw is not None and not raw.done():
+            try:
+                await asyncio.wrap_future(raw)
+            except asyncio.CancelledError:
+                body_task = asyncio.current_task()
+                if body_task is not None and body_task.cancelling():
+                    raise
+            except Exception:
+                pass
+        outcome = None
+        if raw is not None and raw.done():
+            try:
+                outcome = raw.result()
+            except BaseException:
+                outcome = None
+        if outcome is not None and outcome is not self._client_resources:
+            await self._close_resources(outcome)
+        executor, self._setup_executor = self._setup_executor, None
+        if executor is not None:
+            executor.shutdown(wait=False)
+        handshake_task, self._handshake_task = self._handshake_task, None
+        if handshake_task is not None:
+            if not handshake_task.done():
+                handshake_task.cancel()
+            try:
+                await handshake_task
+            except asyncio.CancelledError:
+                body_task = asyncio.current_task()
+                if body_task is not None and body_task.cancelling():
+                    raise
+            except Exception:
+                pass
+        for task in (self._send_task, self._recv_task):
+            if task is not None:
+                task.cancel()
+        pending_tasks = [task for task in (self._send_task, self._recv_task) if task is not None]
+        if pending_tasks:
+            await asyncio.gather(*pending_tasks, return_exceptions=True)
+        self._send_task = None
+        self._recv_task = None
+        live_context, self._live_context = self._live_context, None
+        live_session, self._live_session = self._live_session, None
+        if live_context is not None:
+            with contextlib.suppress(Exception):
+                await live_context.__aexit__(None, None, None)
+        elif live_session is not None:
+            with contextlib.suppress(Exception):
+                await live_session.close()
+        await self._release_client_resources()
+        self._teardown_done = True
+
+    async def _close_resources(self, resources: _GeminiClientResources) -> None:
+        with contextlib.suppress(Exception):
+            await resources.client.aio.aclose()
+        with contextlib.suppress(Exception):
+            await asyncio.to_thread(resources.client.close)
+        with contextlib.suppress(Exception):
+            await resources.async_transport.aclose()
+        with contextlib.suppress(Exception):
+            await asyncio.to_thread(resources.sync_transport.close)
+
+    async def _release_client_resources(self) -> None:
+        resources, self._client_resources = self._client_resources, None
+        if resources is None:
+            return
+        await self._close_resources(resources)
 
     async def _send_loop(self) -> None:
         try:
@@ -428,24 +639,13 @@ class _GeminiTranscribeLiveSession(STTBackendSession):
 
     async def close(self) -> None:
         await self.stop()
-        tasks = [self._send_task, self._recv_task]
-        for task in tasks:
-            if task is not None:
-                task.cancel()
-        await asyncio.gather(*(task for task in tasks if task is not None), return_exceptions=True)
-        self._send_task = None
-        self._recv_task = None
-        live_context = self._live_context
-        live_session = self._live_session
-        self._live_context = None
-        self._live_session = None
-        if live_context is not None:
-            with contextlib.suppress(Exception):
-                await live_context.__aexit__(None, None, None)
-            return
-        if live_session is not None:
-            with contextlib.suppress(Exception):
-                await live_session.close()
+        current_task = asyncio.current_task()
+        try:
+            await self._teardown()
+        except (asyncio.CancelledError, Exception):
+            pass
+        if current_task is not None and current_task.cancelling():
+            raise asyncio.CancelledError
 
     async def events(self) -> AsyncIterator[STTBackendTranscriptEvent]:
         while True:

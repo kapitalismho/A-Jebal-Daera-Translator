@@ -30,7 +30,7 @@ LEGACY_TASK_CREATION_ALLOWLIST = Counter(
         ("src/puripuly_heart/core/overlay/presenter.py", ASYNCIO_CREATE_TASK): 1,
         ("src/puripuly_heart/providers/stt/custom.py", ASYNCIO_CREATE_TASK): 1,
         ("src/puripuly_heart/providers/stt/elevenlabs_scribe.py", ASYNCIO_CREATE_TASK): 2,
-        ("src/puripuly_heart/providers/stt/gemini_transcribe.py", ASYNCIO_CREATE_TASK): 3,
+        ("src/puripuly_heart/providers/stt/gemini_transcribe.py", ASYNCIO_CREATE_TASK): 5,
         ("src/puripuly_heart/providers/stt/soniox.py", ASYNCIO_CREATE_TASK): 3,
         ("src/puripuly_heart/ui/components/subtab_shell.py", BARE_RUN_TASK): 1,
         ("src/puripuly_heart/ui/flet_runtime.py", BARE_RUN_TASK): 1,
@@ -134,7 +134,7 @@ TASK_CREATION_ALLOWLIST_RATIONALES = {
     (
         "src/puripuly_heart/providers/stt/gemini_transcribe.py",
         ASYNCIO_CREATE_TASK,
-    ): "Gemini Transcribe Live session owns its send, receive, and per-turn finalize-timeout tasks and cancels them through session close and turn acknowledgement",
+    ): "Gemini Transcribe Live session owns its send, receive, per-turn finalize-timeout, cancellable handshake-enter, and single teardown tasks and cancels plus joins them through the single session teardown owner on close, failure, timeout, and replacement",
     (
         "src/puripuly_heart/providers/stt/elevenlabs_scribe.py",
         ASYNCIO_CREATE_TASK,

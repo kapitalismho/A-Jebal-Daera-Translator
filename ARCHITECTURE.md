@@ -286,6 +286,21 @@ GPU worker split:
 - Python adapter: process launch, authentication, requests, heartbeat, cancellation, shutdown.
 - Rust worker: device discovery, model activation, native transcription.
 
+Gemini Transcribe Live session lifecycle (`providers/stt/gemini_transcribe.py`):
+
+- Synchronous SDK preparation (imports, `LiveConnectConfig`, explicit `httpx`
+  transports, `genai.Client`) runs in a worker thread, never on the shared audio
+  event loop; async connect, send, receive, exit, and `aio.aclose()` stay on the
+  application loop while synchronous closes run off-loop.
+- Each session owns its client plus both transports end to end, including setup
+  failure, connection timeout, cancellation, toggle OFF, and provider
+  replacement. Late setup completion after cancellation or retirement is
+  reclaimed by its owner and never attached to a retired session.
+- Readiness timing is reported as separate setup and handshake durations.
+- The shared capture queue, provider ingress controller, and final/ACK authority
+  policy are unchanged by this boundary; common ingress backpressure remains
+  owned outside the adapter.
+
 ### Translation
 
 Provider adapters own:
