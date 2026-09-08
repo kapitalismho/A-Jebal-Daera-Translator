@@ -743,3 +743,21 @@ async def test_keepalive_failure_fails_session() -> None:
         await asyncio.wait_for(next_event(session), timeout=2)
     assert session.state is QwenAudioSessionState.FAILED
     assert socket.closed
+
+
+@pytest.mark.asyncio
+async def test_abort_drains_keepalive_blocked_in_audio_send() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.01)
+    socket.block_audio = True
+    keepalive = session._keepalive_task
+    assert keepalive is not None
+    try:
+        await asyncio.wait_for(socket.audio_started.wait(), timeout=1)
+        await asyncio.wait_for(session.abort_for_toggle_off(), timeout=1)
+        assert socket.closed
+        assert keepalive.done()
+        assert not any(isinstance(item, bytes) for item in socket.sent)
+    finally:
+        keepalive.cancel()
+        await asyncio.gather(keepalive, return_exceptions=True)
+        await session.abort_for_toggle_off()

@@ -607,8 +607,8 @@ class _QwenAudioSession(STTBackendSession):
         self._sentence_ids.clear()
         if self._closing_requested and not self._pending_boundaries:
             self._state = QwenAudioSessionState.CLOSING
-            self._drain_complete.set()
             await self._close_socket()
+            self._drain_complete.set()
             return
         try:
             await self._begin_task()
@@ -662,7 +662,7 @@ class _QwenAudioSession(STTBackendSession):
 
     async def _keepalive_loop(self) -> None:
         try:
-            while True:
+            while not self._closing_requested:
                 await asyncio.sleep(min(QWEN_AUDIO_KEEPALIVE_TICK_S, self.keepalive_interval_s))
                 if not self._keepalive_eligible():
                     continue
@@ -806,11 +806,15 @@ class _QwenAudioSession(STTBackendSession):
         if task is not None and not task.done():
             task.cancel()
 
-    def _cancel_keepalive(self) -> None:
+    async def _stop_keepalive(self) -> None:
         task = self._keepalive_task
         self._keepalive_task = None
-        if task is not None and not task.done() and task is not asyncio.current_task():
+        if task is None or task is asyncio.current_task():
+            return
+        if not task.done():
             task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
 
     async def _wait_for_inflight_send(self) -> None:
         send_task = self._inflight_send_task
@@ -920,7 +924,7 @@ class _QwenAudioSession(STTBackendSession):
 
     async def _close_socket(self, *, cancel_receiver: bool = False) -> None:
         current_task = asyncio.current_task()
-        self._cancel_keepalive()
+        await self._stop_keepalive()
         deferred_task = self._deferred_finish_task
         if (
             deferred_task is not None

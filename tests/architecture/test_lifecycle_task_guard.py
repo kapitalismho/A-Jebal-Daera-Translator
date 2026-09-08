@@ -90,7 +90,7 @@ NAMED_LIFECYCLE_OWNER_TASK_ALLOWLIST = Counter(
         ("src/puripuly_heart/ui/desktop_overlay_repro.py", ASYNCIO_CREATE_TASK): 3,
         ("src/puripuly_heart/ui/flet_desktop_runtime.py", ASYNCIO_CREATE_TASK): 2,
         ("src/puripuly_heart/ui/foundation/runtime.py", RUN_TASK): 1,
-        ("src/puripuly_heart/providers/stt/qwen_audio.py", ASYNCIO_CREATE_TASK): 6,
+        ("src/puripuly_heart/providers/stt/qwen_audio.py", ASYNCIO_CREATE_TASK): 7,
     }
 )
 
@@ -142,7 +142,7 @@ TASK_CREATION_ALLOWLIST_RATIONALES = {
     (
         "src/puripuly_heart/providers/stt/qwen_audio.py",
         ASYNCIO_CREATE_TASK,
-    ): "Qwen Audio session owns send, receive, timeout, and queued-audio tasks under provider session close semantics",
+    ): "Qwen Audio session owns send, receive, timeout, queued-audio, and keepalive tasks; session close cancels and drains keepalive work",
     (
         "src/puripuly_heart/ui/foundation/runtime.py",
         RUN_TASK,
