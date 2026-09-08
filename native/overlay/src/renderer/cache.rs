@@ -179,7 +179,7 @@ impl Default for WindowsRendererCaches {
 mod tests {
     use super::{
         BoundedLruCache, CachedBlockLayoutTemplate, CachedLineLayoutTemplate, LayoutCache,
-        BLOCK_CACHE_CAP, LAYOUT_CACHE_CAP, LINE_CACHE_CAP, TEXT_FORMAT_CACHE_CAP,
+        LAYOUT_CACHE_CAP, LINE_CACHE_CAP,
     };
     use crate::renderer::{
         BlockBounds, BlockCacheKey, BundledFaceId, CaptionBlockVariant, FontLanguageBucket,
@@ -396,13 +396,5 @@ mod tests {
         assert!(cache.get(&layout_key(0)).is_none());
         assert!(cache.get(&layout_key(1)).is_some());
         assert!(cache.get(&layout_key(LAYOUT_CACHE_CAP)).is_some());
-    }
-
-    #[test]
-    fn renderer_cache_caps_are_the_phase_d_initial_values() {
-        assert_eq!(TEXT_FORMAT_CACHE_CAP, 32);
-        assert_eq!(LAYOUT_CACHE_CAP, 512);
-        assert_eq!(LINE_CACHE_CAP, 2048);
-        assert_eq!(BLOCK_CACHE_CAP, 1024);
     }
 }

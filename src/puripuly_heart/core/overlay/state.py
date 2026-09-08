@@ -787,6 +787,7 @@ class OverlayPresentationState:
         show_peer_original: bool,
         next_appearance_seq: NextAppearanceSeq,
         terminal_update_reason: OverlayTerminalUpdateReason,
+        translation_enabled: bool = True,
     ) -> OverlayReductionResult:
         """Apply reserved peer active fallback state without normalizing it as product flow."""
 
@@ -848,6 +849,7 @@ class OverlayPresentationState:
             publishable_seq=event.seq,
             next_appearance_seq=next_appearance_seq,
             show_peer_original=show_peer_original,
+            translation_enabled=translation_enabled,
             decisions=decisions,
         )
         self.set_live_turn_key_for_channel(event.channel, key)
@@ -861,6 +863,7 @@ class OverlayPresentationState:
         show_peer_original: bool,
         next_appearance_seq: NextAppearanceSeq,
         terminal_update_reason: OverlayTerminalUpdateReason,
+        translation_enabled: bool = True,
     ) -> OverlayReductionResult:
         decisions: list[OverlayTurnDecisionRecord] = []
         key = self.entry_key(event.channel, event.utterance_id)
@@ -915,6 +918,7 @@ class OverlayPresentationState:
             publishable_seq=event.seq,
             next_appearance_seq=next_appearance_seq,
             show_peer_original=show_peer_original,
+            translation_enabled=translation_enabled,
             decisions=decisions,
         )
         return OverlayReductionResult(True, tuple(decisions))
@@ -927,6 +931,7 @@ class OverlayPresentationState:
         show_peer_original: bool,
         next_appearance_seq: NextAppearanceSeq,
         terminal_update_reason: OverlayTerminalUpdateReason,
+        translation_enabled: bool = True,
     ) -> OverlayReductionResult:
         decisions: list[OverlayTurnDecisionRecord] = []
         key = self.entry_key(event.channel, event.utterance_id)
@@ -1013,6 +1018,7 @@ class OverlayPresentationState:
             publishable_seq=event.seq,
             next_appearance_seq=next_appearance_seq,
             show_peer_original=show_peer_original,
+            translation_enabled=translation_enabled,
             decisions=decisions,
         )
         return OverlayReductionResult(True, tuple(decisions))
@@ -1127,6 +1133,7 @@ class OverlayPresentationState:
         peer_presentation_refresh_burst: bool,
         next_appearance_seq: NextAppearanceSeq,
         self_presentation_refresh_burst: bool = True,
+        translation_enabled: bool = True,
     ) -> OverlayVisibleBlockSelection:
         active_self_key = (
             live_self_entry[0]
@@ -1140,6 +1147,7 @@ class OverlayPresentationState:
             and self._live_peer_entry_is_drawable(
                 live_peer_entry[1],
                 show_peer_original=show_peer_original,
+                translation_enabled=translation_enabled,
             )
             else None
         )
@@ -1154,6 +1162,7 @@ class OverlayPresentationState:
             finalized_limit=finalized_limit,
             excluded_keys=protected_key_set,
             show_peer_original=show_peer_original,
+            translation_enabled=translation_enabled,
             next_appearance_seq=next_appearance_seq,
         )
         rendered_entries = [
@@ -1167,6 +1176,7 @@ class OverlayPresentationState:
                     show_peer_original=show_peer_original,
                     peer_presentation_refresh_burst=peer_presentation_refresh_burst,
                     self_presentation_refresh_burst=self_presentation_refresh_burst,
+                    translation_enabled=translation_enabled,
                 )
             )
             is not None
@@ -1182,6 +1192,7 @@ class OverlayPresentationState:
                 show_peer_original=show_peer_original,
                 peer_presentation_refresh_burst=peer_presentation_refresh_burst,
                 self_presentation_refresh_burst=self_presentation_refresh_burst,
+                translation_enabled=translation_enabled,
             )
             if block is None:
                 continue
@@ -1203,8 +1214,11 @@ class OverlayPresentationState:
         entry: OverlayPresentationEntry,
         *,
         show_peer_original: bool,
+        translation_enabled: bool = True,
     ) -> bool:
         if entry.channel == "peer":
+            if not translation_enabled:
+                return bool(entry.live_text.strip() or entry.original_text.strip())
             return bool(
                 entry.translation_text.strip()
                 or (show_peer_original and (entry.live_text.strip() or entry.original_text.strip()))
@@ -1216,11 +1230,13 @@ class OverlayPresentationState:
         entry: OverlayPresentationEntry,
         *,
         show_peer_original: bool,
+        translation_enabled: bool = True,
     ) -> bool:
         return (
             self.entry_is_publishable(
                 entry,
                 show_peer_original=show_peer_original,
+                translation_enabled=translation_enabled,
             )
             and not entry.retained_hidden
         )
@@ -1572,9 +1588,14 @@ class OverlayPresentationState:
         publishable_seq: int | None,
         next_appearance_seq: NextAppearanceSeq,
         show_peer_original: bool = True,
+        translation_enabled: bool = True,
         decisions: list[OverlayTurnDecisionRecord],
     ) -> None:
-        if self.entry_is_publishable(entry, show_peer_original=show_peer_original):
+        if self.entry_is_publishable(
+            entry,
+            show_peer_original=show_peer_original,
+            translation_enabled=translation_enabled,
+        ):
             self._ensure_entry_visibility_metadata(
                 entry,
                 occupant_key=self._finalized_occupant_key(entry.channel, entry.utterance_id),
@@ -1632,6 +1653,7 @@ class OverlayPresentationState:
         excluded_keys: set[OverlayEntryKey],
         show_peer_original: bool,
         next_appearance_seq: NextAppearanceSeq,
+        translation_enabled: bool = True,
     ) -> tuple[list[OverlayEntryKey], list[OverlayEntryKey]]:
         if finalized_limit == 0:
             return [], []
@@ -1640,7 +1662,11 @@ class OverlayPresentationState:
         for key, entry in entries.items():
             if key in excluded_keys:
                 continue
-            if not self.entry_is_selectable(entry, show_peer_original=show_peer_original):
+            if not self.entry_is_selectable(
+                entry,
+                show_peer_original=show_peer_original,
+                translation_enabled=translation_enabled,
+            ):
                 continue
             self._ensure_entry_visibility_metadata(
                 entry,
@@ -1677,6 +1703,7 @@ class OverlayPresentationState:
         show_peer_original: bool,
         peer_presentation_refresh_burst: bool,
         self_presentation_refresh_burst: bool = True,
+        translation_enabled: bool = True,
     ) -> OverlayPresentationBlock | None:
         if prefer_live_self and entry.channel == "self":
             primary_text = entry.live_text.strip()
@@ -1723,8 +1750,53 @@ class OverlayPresentationState:
                 source_text_len=source_text_len,
                 logical_turn_key=logical_turn_key,
             )
-
         if entry.channel == "peer":
+            if not translation_enabled:
+                live_source_text = entry.live_text.strip()
+                if live_source_text:
+                    return OverlayPresentationBlock(
+                        id=entry.block_id,
+                        occupant_key=entry.occupant_key,
+                        appearance_seq=self._block_appearance_seq(entry),
+                        channel="peer",
+                        block_variant="active_peer",
+                        primary_text=live_source_text,
+                        secondary_text="",
+                        secondary_enabled=False,
+                        primary_language=_line_language(entry.original_language, live_source_text),
+                        secondary_language=None,
+                        session_scope=self._peer_session_scope_with_presentation_refresh(
+                            entry,
+                            None,
+                            peer_presentation_refresh_burst=peer_presentation_refresh_burst,
+                        ),
+                    )
+                finalized_source_text = entry.original_text.strip() or entry.live_text.strip()
+                if finalized_source_text:
+                    return OverlayPresentationBlock(
+                        id=entry.block_id,
+                        occupant_key=entry.occupant_key,
+                        appearance_seq=(
+                            entry.appearance_seq
+                            if entry.appearance_seq is not None
+                            else self._block_appearance_seq(entry)
+                        ),
+                        channel="peer",
+                        block_variant="finalized",
+                        primary_text=finalized_source_text,
+                        secondary_text="",
+                        secondary_enabled=False,
+                        primary_language=_line_language(
+                            entry.original_language, finalized_source_text
+                        ),
+                        secondary_language=None,
+                        session_scope=self._peer_session_scope_with_presentation_refresh(
+                            entry,
+                            None,
+                            peer_presentation_refresh_burst=peer_presentation_refresh_burst,
+                        ),
+                    )
+                return None
             translated_text = entry.translation_text.strip()
             original_text = entry.original_text.strip() or entry.live_text.strip()
             if translated_text:
@@ -1848,7 +1920,10 @@ class OverlayPresentationState:
         entry: OverlayPresentationEntry,
         *,
         show_peer_original: bool,
+        translation_enabled: bool = True,
     ) -> bool:
+        if not translation_enabled:
+            return bool(entry.live_text.strip() or entry.original_text.strip())
         if entry.translation_text.strip():
             return True
         if not show_peer_original:

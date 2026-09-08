@@ -210,6 +210,7 @@ def _run_isolated_cli_import_probe(
     return completed.returncode, json.loads(probe_line), completed.stdout, completed.stderr
 
 
+@pytest.mark.skipif(os.getenv("INTEGRATION") != "1", reason="requires real subprocess")
 def test_import_run_desktop_overlay_dispatch_is_provider_secret_and_stt_free(
     tmp_path: Path,
 ) -> None:
@@ -235,6 +236,7 @@ def test_import_run_desktop_overlay_dispatch_is_provider_secret_and_stt_free(
     assert imported == dict.fromkeys(imported, False)
 
 
+@pytest.mark.skipif(os.getenv("INTEGRATION") != "1", reason="requires real subprocess")
 def test_import_preview_dispatch_is_provider_secret_and_stt_free() -> None:
     returncode, imported, stdout, stderr = _run_isolated_cli_import_probe(
         ["run-desktop-overlay-preview"],

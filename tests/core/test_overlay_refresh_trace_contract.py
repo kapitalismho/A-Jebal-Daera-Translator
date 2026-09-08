@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import json
 
 import pytest
 
 from tests.helpers.overlay_refresh_trace import build_overlay_refresh_trace_contract
+from tests.helpers.paths import REPO_ROOT
 
 
 def _without_anchor(snapshots: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -64,3 +66,11 @@ async def test_production_presenter_refresh_trace_contract() -> None:
         "peer_presentation_refresh=1"
     )
     assert ownership["snapshots"][-1]["blocks"][0].get("session_scope") is None
+
+
+@pytest.mark.asyncio
+async def test_production_presenter_refresh_trace_contract_matches_checked_in_fixture() -> None:
+    fixture_path = REPO_ROOT / "native" / "overlay" / "tests" / "fixtures" / "refresh_traces.json"
+    fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+
+    assert await build_overlay_refresh_trace_contract() == fixture

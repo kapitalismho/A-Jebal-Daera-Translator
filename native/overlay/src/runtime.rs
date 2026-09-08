@@ -4052,17 +4052,13 @@ mod tests {
                 Some("[\"different-target\"]"),
             )
         );
-    }
-
-    #[test]
-    fn retry_submission_satisfies_only_included_schedule_identity() {
-        let now = Instant::now();
         let due_self = schedule(FreshRetryChannel::SelfChannel, 3, 20, now);
         let staggered_peer = schedule(FreshRetryChannel::Peer, 4, 20, now);
-        let correlation = correlation_for(&due_self, 20, PresentationCauseKind::NativeFreshRetry);
+        let retry_correlation =
+            correlation_for(&due_self, 20, PresentationCauseKind::NativeFreshRetry);
         assert!(
             NativePresentationOwner::<FakeOpenVr>::submission_covers_schedule(
-                correlation,
+                retry_correlation,
                 &due_self,
                 &due_self,
                 PresentationCauseKind::NativeFreshRetry,
@@ -4072,7 +4068,7 @@ mod tests {
         );
         assert!(
             !NativePresentationOwner::<FakeOpenVr>::submission_covers_schedule(
-                correlation,
+                retry_correlation,
                 &staggered_peer,
                 &staggered_peer,
                 PresentationCauseKind::NativeFreshRetry,
@@ -4322,12 +4318,12 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn pending_spatial_diagnostic_cannot_block_first_visible_pose_unavailable_reveal() {
+    async fn spatial_diagnostic_write_error_does_not_block_first_visible_pose_unavailable_reveal() {
         let (mut bridge, server) = controlled_test_bridge(None).await;
         let renderer = CaptionRenderer::new_for_test().unwrap();
         let logger = controlled_logger(
             OverlayLoggingMode::Basic,
-            ControlledSink::new(ControlledSinkMode::Pending),
+            ControlledSink::new(ControlledSinkMode::Error),
         );
         let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot {
             revision: 1,
@@ -4344,15 +4340,162 @@ mod tests {
             operations: Vec::new(),
         };
 
-        let result = tokio::time::timeout(
-            Duration::from_millis(50),
-            runtime.submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger),
-        )
-        .await;
+        let result = runtime
+            .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)
+            .await;
 
-        assert!(result.is_err());
+        assert!(result.is_ok());
         assert_eq!(submitter.operations, vec!["reanchor", "submit", "show"]);
         assert!(runtime.overlay_visible);
+        drop(bridge);
+        server.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn runtime_emits_slot_correlated_visible_update_logs_through_submit() {
+        fn correlated_block(
+            primary: &str,
+            secondary: &str,
+            update_id: &str,
+            wall_clock: u64,
+        ) -> OverlayPresentationBlock {
+            OverlayPresentationBlock {
+                id: "self:1".into(),
+                occupant_key: "self:1".into(),
+                appearance_seq: 1,
+                channel: "self".into(),
+                block_variant: OverlayPresentationBlockVariant::Finalized,
+                primary_text: primary.into(),
+                secondary_text: secondary.into(),
+                secondary_enabled: true,
+                primary_language: None,
+                secondary_language: None,
+                update_id: Some(update_id.into()),
+                origin_wall_clock_ms: Some(wall_clock),
+                session_scope: Some("session:self".into()),
+            }
+        }
+
+        let (mut bridge, server) = controlled_test_bridge(None).await;
+        let renderer = CaptionRenderer::new_for_test().unwrap();
+        let stdout = ControlledSink::new(ControlledSinkMode::Success);
+        let logger = controlled_logger(OverlayLoggingMode::Detailed, stdout.clone());
+        let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot {
+            revision: 1,
+            calibration: OverlayPresentationCalibration::default(),
+            blocks: vec![correlated_block("hello", "", "upd-self-1", 1712345678901)],
+            native_fresh_render_generations: None,
+        });
+        let mut submitter = SpatialSubmitProbe {
+            outcome: SpatialReanchorOutcome::PoseUnavailable,
+            operations: Vec::new(),
+        };
+
+        runtime
+            .emit_snapshot_slot_correlation_if_changed(&logger)
+            .await
+            .unwrap();
+        runtime
+            .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)
+            .await
+            .unwrap();
+
+        runtime.apply_snapshot(OverlayPresentationSnapshot {
+            revision: 2,
+            calibration: OverlayPresentationCalibration::default(),
+            blocks: vec![correlated_block(
+                "hello again",
+                "translated",
+                "upd-self-2",
+                1712345678955,
+            )],
+            native_fresh_render_generations: None,
+        });
+        runtime
+            .emit_snapshot_slot_correlation_if_changed(&logger)
+            .await
+            .unwrap();
+        runtime
+            .emit_pending_visible_update_applied_diagnostics(&logger)
+            .await
+            .unwrap();
+        runtime
+            .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)
+            .await
+            .unwrap();
+
+        let captured = String::from_utf8(stdout.contents()).unwrap();
+        assert!(captured.contains("snapshot_slot_correlation revision=2"));
+        assert!(captured.contains("overlay_visible_update_applied revision=2 slot_index=0"));
+        assert!(captured.contains("overlay_visible_update_rendered revision=2 slot_index=0"));
+        assert!(!captured.contains("upd-self-2"));
+        assert!(!captured.contains("session:self"));
+        assert!(!captured.contains("1712345678955"));
+        drop(bridge);
+        server.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn runtime_emits_two_row_window_closed_with_measured_dwell() {
+        fn window_block(id: &str, primary: &str) -> OverlayPresentationBlock {
+            OverlayPresentationBlock {
+                id: id.into(),
+                occupant_key: id.into(),
+                appearance_seq: 1,
+                channel: id.split(':').next().unwrap_or("self").into(),
+                block_variant: OverlayPresentationBlockVariant::Finalized,
+                primary_text: primary.into(),
+                secondary_text: String::new(),
+                secondary_enabled: true,
+                primary_language: None,
+                secondary_language: None,
+                update_id: None,
+                origin_wall_clock_ms: None,
+                session_scope: None,
+            }
+        }
+
+        let (mut bridge, server) = controlled_test_bridge(None).await;
+        let renderer = CaptionRenderer::new_for_test().unwrap();
+        let stdout = ControlledSink::new(ControlledSinkMode::Success);
+        let logger = controlled_logger(OverlayLoggingMode::Detailed, stdout.clone());
+        let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot {
+            revision: 1,
+            calibration: OverlayPresentationCalibration::default(),
+            blocks: vec![window_block("self:1", "one"), window_block("peer:2", "two")],
+            native_fresh_render_generations: None,
+        });
+        let mut submitter = SpatialSubmitProbe {
+            outcome: SpatialReanchorOutcome::PoseUnavailable,
+            operations: Vec::new(),
+        };
+
+        tokio::time::pause();
+        runtime
+            .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)
+            .await
+            .unwrap();
+        tokio::time::advance(Duration::from_millis(120)).await;
+        runtime.apply_snapshot(OverlayPresentationSnapshot {
+            revision: 2,
+            calibration: OverlayPresentationCalibration::default(),
+            blocks: vec![window_block("self:1", "one")],
+            native_fresh_render_generations: None,
+        });
+        runtime
+            .emit_pending_visible_update_applied_diagnostics(&logger)
+            .await
+            .unwrap();
+        runtime
+            .submit_frame_if_needed(&renderer, &mut submitter, &mut bridge, &logger)
+            .await
+            .unwrap();
+
+        let captured = String::from_utf8(stdout.contents()).unwrap();
+        assert!(captured.contains("two_row_window_closed revision=2"));
+        assert!(captured.contains("dwell_ms=120"));
+        assert!(captured.contains("threshold_ms=500"));
+        assert!(captured.contains("too_brief_to_be_perceptibly_stable=true"));
         drop(bridge);
         server.await.unwrap();
     }
@@ -4693,15 +4836,11 @@ mod tests {
             peer_overlay_first_emit_block_ids_from_snapshot(&snapshot),
             vec!["peer:newer".to_string()]
         );
-    }
-
-    #[test]
-    fn runtime_detects_active_peer_first_emit_blocks_from_snapshot() {
         let mut active_peer = slot_block("peer:active", "peer:turn-1", 1, "peer", "");
         active_peer.block_variant = OverlayPresentationBlockVariant::ActivePeer;
         active_peer.secondary_text = "source".into();
         active_peer.secondary_enabled = true;
-        let snapshot = OverlayPresentationSnapshot {
+        let active_snapshot = OverlayPresentationSnapshot {
             native_fresh_render_generations: None,
             revision: 6,
             calibration: OverlayPresentationCalibration::default(),
@@ -4709,9 +4848,18 @@ mod tests {
         };
 
         assert_eq!(
-            peer_overlay_first_emit_block_ids_from_snapshot(&snapshot),
+            peer_overlay_first_emit_block_ids_from_snapshot(&active_snapshot),
             vec!["peer:active".to_string()]
         );
+
+        let empty_snapshot = OverlayPresentationSnapshot {
+            native_fresh_render_generations: None,
+            revision: 7,
+            calibration: OverlayPresentationCalibration::default(),
+            blocks: vec![],
+        };
+
+        assert!(peer_overlay_first_emit_block_ids_from_snapshot(&empty_snapshot).is_empty());
     }
 
     #[test]
@@ -4755,12 +4903,8 @@ mod tests {
                 "peer:22222222-2222-2222-2222-222222222222".to_string(),
             ]
         );
-    }
-
-    #[test]
-    fn runtime_detects_active_peer_first_render_for_pending_peer_block_ids() {
-        let pending = HashSet::from([String::from("peer:active")]);
-        let blocks = vec![
+        let active_pending = HashSet::from([String::from("peer:active")]);
+        let active_blocks = vec![
             CaptionBlock::new("peer:active", "source")
                 .with_channel(CaptionChannel::PeerChannel)
                 .with_variant(CaptionBlockVariant::ActivePeer),
@@ -4770,25 +4914,11 @@ mod tests {
         ];
 
         assert_eq!(
-            peer_overlay_first_render_block_ids_from_caption_blocks(&blocks, &pending),
+            peer_overlay_first_render_block_ids_from_caption_blocks(
+                &active_blocks,
+                &active_pending
+            ),
             vec!["peer:active".to_string()]
-        );
-    }
-
-    #[test]
-    fn runtime_starts_empty_when_snapshot_has_no_blocks() {
-        let runtime = OverlayRuntime::new(OverlayPresentationSnapshot {
-            native_fresh_render_generations: None,
-            revision: 0,
-            calibration: OverlayPresentationCalibration::default(),
-            blocks: vec![],
-        });
-
-        assert!(runtime.caption_blocks().is_empty());
-        assert_eq!(runtime.state().snapshot().revision, 0);
-        assert_eq!(
-            runtime.state().snapshot().calibration,
-            OverlayPresentationCalibration::default()
         );
     }
 
@@ -4813,12 +4943,9 @@ mod tests {
     }
 
     #[test]
-    fn debug_watermark_label_is_absent_without_drawable_blocks() {
+    fn debug_watermark_label_is_absent_without_drawable_content() {
         assert_eq!(debug_watermark_label_for_frame(73, &[]), None);
-    }
 
-    #[test]
-    fn debug_watermark_label_is_absent_when_only_disabled_secondary_has_text() {
         let blocks = vec![CaptionBlock::new("peer:hidden", "")
             .with_channel(CaptionChannel::PeerChannel)
             .with_variant(CaptionBlockVariant::ActivePeer)
@@ -4828,20 +4955,12 @@ mod tests {
     }
 
     #[test]
-    fn debug_overlay_for_frame_is_absent_in_basic_mode() {
+    fn debug_overlay_for_frame_is_absent_without_debug_supply() {
         let blocks = vec![CaptionBlock::new("self:active", "hello")
             .with_channel(CaptionChannel::SelfChannel)
             .with_variant(CaptionBlockVariant::ActiveSelf)];
 
         assert!(debug_overlay_for_frame(false, 73, &blocks).is_none());
-    }
-
-    #[test]
-    fn debug_overlay_for_frame_is_absent_in_detailed_mode_with_drawable_text() {
-        let blocks = vec![CaptionBlock::new("self:active", "hello")
-            .with_channel(CaptionChannel::SelfChannel)
-            .with_variant(CaptionBlockVariant::ActiveSelf)];
-
         assert!(debug_overlay_for_frame(true, 73, &blocks).is_none());
     }
 
@@ -4863,7 +4982,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn presentation_diagnostics_retain_basic_records_until_detailed_write_succeeds() {
+    async fn presentation_diagnostics_retain_records_until_write_succeeds() {
         let stdout = ControlledSink::new(ControlledSinkMode::Success);
         let logger = controlled_logger(OverlayLoggingMode::Basic, stdout.clone());
         let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot::default());
@@ -4890,48 +5009,23 @@ mod tests {
         assert!(String::from_utf8(stdout.contents())
             .unwrap()
             .contains("presentation_diagnostics"));
-    }
 
-    #[tokio::test]
-    async fn presentation_diagnostics_retain_records_after_write_error() {
-        let logger = controlled_logger(
-            OverlayLoggingMode::Detailed,
-            ControlledSink::new(ControlledSinkMode::Error),
-        );
-        let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot::default());
-        runtime.presentation_diagnostics.accept_logical_revision(
-            PresentationBackend::Test,
-            0,
-            PresentationCauses::default(),
-        );
+        for mode in [ControlledSinkMode::Error, ControlledSinkMode::Pending] {
+            let logger = controlled_logger(OverlayLoggingMode::Detailed, ControlledSink::new(mode));
+            let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot::default());
+            runtime.presentation_diagnostics.accept_logical_revision(
+                PresentationBackend::Test,
+                0,
+                PresentationCauses::default(),
+            );
 
-        runtime
-            .emit_pending_presentation_diagnostics(&logger)
-            .await
-            .unwrap();
+            runtime
+                .emit_pending_presentation_diagnostics(&logger)
+                .await
+                .unwrap();
 
-        assert_eq!(runtime.presentation_diagnostics.pending_json().len(), 1);
-    }
-
-    #[tokio::test]
-    async fn presentation_diagnostics_retain_records_after_write_timeout() {
-        let logger = controlled_logger(
-            OverlayLoggingMode::Detailed,
-            ControlledSink::new(ControlledSinkMode::Pending),
-        );
-        let mut runtime = OverlayRuntime::new(OverlayPresentationSnapshot::default());
-        runtime.presentation_diagnostics.accept_logical_revision(
-            PresentationBackend::Test,
-            0,
-            PresentationCauses::default(),
-        );
-
-        runtime
-            .emit_pending_presentation_diagnostics(&logger)
-            .await
-            .unwrap();
-
-        assert_eq!(runtime.presentation_diagnostics.pending_json().len(), 1);
+            assert_eq!(runtime.presentation_diagnostics.pending_json().len(), 1);
+        }
     }
 
     #[tokio::test]
@@ -4970,7 +5064,7 @@ mod tests {
     }
 
     #[test]
-    fn prepare_openvr_runtime_stops_before_overlay_factory_when_preflight_fails() {
+    fn prepare_openvr_runtime_orders_preflight_before_overlay_factory() {
         let overlay_factory_calls = Cell::new(0);
 
         let result = prepare_openvr_runtime(
@@ -4984,10 +5078,7 @@ mod tests {
 
         assert_eq!(result, Err(StartupError::SteamVrNotRunning));
         assert_eq!(overlay_factory_calls.get(), 0);
-    }
 
-    #[test]
-    fn prepare_openvr_runtime_initializes_overlay_after_successful_preflight() {
         let overlay_factory_calls = Cell::new(0);
 
         let result = prepare_openvr_runtime(

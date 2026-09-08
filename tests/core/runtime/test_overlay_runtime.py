@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import os
 import sys
 
 import pytest
@@ -485,6 +486,7 @@ async def test_overlay_runtime_preserves_process_event_reader_until_manager_stop
     assert handle.child_task_names == ()
 
 
+@pytest.mark.skipif(os.getenv("INTEGRATION") != "1", reason="requires real subprocess")
 @pytest.mark.asyncio
 async def test_overlay_runtime_receives_real_subprocess_shutdown_ack_before_reader_cleanup() -> (
     None

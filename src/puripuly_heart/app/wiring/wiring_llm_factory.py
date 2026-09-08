@@ -437,7 +437,9 @@ def _openrouter_release_config_from_resolved_fields(
     managed_credential_kind = (
         "qq" if credential.reference == CREDENTIAL_REF_OPENROUTER_MANAGED_QQ else "standard"
     )
-    llm_model = model if isinstance(model, OpenRouterLLMModel) else parse_openrouter_llm_model(model)
+    llm_model = (
+        model if isinstance(model, OpenRouterLLMModel) else parse_openrouter_llm_model(model)
+    )
     return OpenRouterReleaseRuntimeConfig(
         llm_model=llm_model,
         selected_source=selected_source,

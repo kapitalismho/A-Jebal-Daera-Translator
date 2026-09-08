@@ -200,24 +200,63 @@ fn bridge_error_from_read_error(error: tokio_tungstenite::tungstenite::Error) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio::net::TcpListener;
+    use tokio_tungstenite::{accept_async, connect_async};
 
-    #[test]
-    fn read_side_websocket_errors_map_to_disconnected() {
-        let error = tokio_tungstenite::tungstenite::Error::ConnectionClosed;
-        assert!(matches!(
-            bridge_error_from_read_error(error),
-            BridgeError::Disconnected
-        ));
-    }
+    #[tokio::test]
+    async fn read_side_errors_map_to_disconnected_or_protocol() {
+        fn io(kind: ErrorKind) -> tokio_tungstenite::tungstenite::Error {
+            tokio_tungstenite::tungstenite::Error::Io(std::io::Error::new(kind, "probe"))
+        }
+        for error in [
+            tokio_tungstenite::tungstenite::Error::ConnectionClosed,
+            tokio_tungstenite::tungstenite::Error::AlreadyClosed,
+            io(ErrorKind::BrokenPipe),
+            io(ErrorKind::ConnectionAborted),
+            io(ErrorKind::ConnectionReset),
+            io(ErrorKind::NotConnected),
+            io(ErrorKind::UnexpectedEof),
+        ] {
+            assert!(matches!(
+                bridge_error_from_read_error(error),
+                BridgeError::Disconnected
+            ));
+        }
+        for error in [
+            tokio_tungstenite::tungstenite::Error::Protocol(
+                tokio_tungstenite::tungstenite::error::ProtocolError::ResetWithoutClosingHandshake,
+            ),
+            io(ErrorKind::PermissionDenied),
+            io(ErrorKind::TimedOut),
+            io(ErrorKind::InvalidData),
+        ] {
+            assert!(matches!(
+                bridge_error_from_read_error(error),
+                BridgeError::Protocol(_)
+            ));
+        }
 
-    #[test]
-    fn read_side_protocol_errors_remain_protocol_failures() {
-        let error = tokio_tungstenite::tungstenite::Error::Protocol(
-            tokio_tungstenite::tungstenite::error::ProtocolError::ResetWithoutClosingHandshake,
-        );
-        assert!(matches!(
-            bridge_error_from_read_error(error),
-            BridgeError::Protocol(_)
-        ));
+        for payload in [
+            Message::Text("{\"revision\":1}".into()),
+            Message::Text("{\"type\":\"snapshot\"}".into()),
+            Message::Text("{\"type\":\"unsupported_probe\"}".into()),
+            Message::Binary(vec![1, 2, 3].into()),
+            Message::Text("not json".into()),
+        ] {
+            let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let address = listener.local_addr().unwrap();
+            let server = tokio::spawn(async move {
+                let (stream, _) = listener.accept().await.unwrap();
+                let mut ws = accept_async(stream).await.unwrap();
+                ws.send(payload).await.unwrap();
+            });
+            let (stream, _) = connect_async(format!("ws://{address}")).await.unwrap();
+            let mut client = BridgeClient { stream };
+            assert!(matches!(
+                client.next_message().await,
+                Err(BridgeError::Protocol(_))
+            ));
+            server.await.unwrap();
+        }
     }
 }

@@ -31,10 +31,16 @@ class FakePresenter:
         self.runtime_log_detailed = kwargs["runtime_log_detailed"]
         self.diagnostics = kwargs["diagnostics"]
         self.task_factory = kwargs["task_factory"]
+        self.translation_enabled = bool(kwargs.get("translation_enabled", True))
         self.bridge: object | None = None
         self.snapshot_value = ("snapshot", len(self.instances))
         self.instances.append(self)
         self.events.append("presenter:create")
+
+    async def update_translation_enabled(self, enabled: bool) -> None:
+        next_enabled = bool(enabled)
+        self.events.append(f"presenter:translation_enabled:{next_enabled}")
+        self.translation_enabled = next_enabled
 
     async def update_native_retry_ownership(self, confirmed: bool) -> None:
         self.events.append(f"presenter:native_retry:{confirmed}")
