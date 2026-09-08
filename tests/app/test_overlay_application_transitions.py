@@ -145,6 +145,7 @@ class PeerOverlayHarness:
             clock=FakeClock(_now=0.0),
             log_basic=lambda message, _level: self.logs.append(message),
             log_detailed=lambda _message, _level, _exception: False,
+            translation_enabled_provider=lambda: True,
         )
         self.overlay.state = "starting"
         self.overlay.active_target = "steamvr"
@@ -271,6 +272,7 @@ def make_owner(recorder: Recorder) -> OverlayApplicationOwner:
         clock=FakeClock(_now=0.0),
         log_basic=recorder.log_basic,
         log_detailed=lambda _message, _level, _exception: False,
+        translation_enabled_provider=lambda: True,
     )
 
 

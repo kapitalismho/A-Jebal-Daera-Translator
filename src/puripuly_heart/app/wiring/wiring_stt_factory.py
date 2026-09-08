@@ -836,8 +836,8 @@ def _qwen_asr_endpoint_for_resolved_config(config: ResolvedSTTConfig) -> str:
 
 
 _ROLLING_MEMBER_SECRET_KEYS = {
-    STTProviderName.GEMINI_TRANSCRIBE.value: ("gemini_transcribe_api_key", "GEMINI_API_KEY"),
     STTProviderName.ELEVENLABS_SCRIBE.value: ("elevenlabs_scribe_api_key", "ELEVENLABS_API_KEY"),
+    STTProviderName.GEMINI_TRANSCRIBE.value: ("gemini_transcribe_api_key", "GEMINI_API_KEY"),
     STTProviderName.DEEPGRAM.value: ("deepgram_api_key", "DEEPGRAM_API_KEY"),
 }
 
@@ -928,7 +928,7 @@ def _create_rolling_stt_backend(
     include_scribe = STTProviderName.ELEVENLABS_SCRIBE.value in enabled_members
     include_deepgram = STTProviderName.DEEPGRAM.value in enabled_members and not auto_language
     if not include_gemini and not include_scribe and not include_deepgram:
-        include_gemini = True
+        include_scribe = True
 
     key_started = time.monotonic()
     gemini_key = (
@@ -984,20 +984,20 @@ def _create_rolling_stt_backend(
 
     build_started = time.monotonic()
     definitions: list[RollingProviderDefinition] = []
-    if include_gemini:
-        definitions.append(
-            _prepared_rolling_definition(
-                name=STTProviderName.GEMINI_TRANSCRIBE,
-                api_key=gemini_key,
-                build=build_gemini,
-            )
-        )
     if include_scribe:
         definitions.append(
             _prepared_rolling_definition(
                 name=STTProviderName.ELEVENLABS_SCRIBE,
                 api_key=scribe_key,
                 build=build_scribe,
+            )
+        )
+    if include_gemini:
+        definitions.append(
+            _prepared_rolling_definition(
+                name=STTProviderName.GEMINI_TRANSCRIBE,
+                api_key=gemini_key,
+                build=build_gemini,
             )
         )
     if include_deepgram:

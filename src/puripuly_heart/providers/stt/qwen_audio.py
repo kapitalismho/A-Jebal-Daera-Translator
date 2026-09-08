@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import logging
+import time
 import uuid
 from collections import deque
 from collections.abc import Awaitable, Callable, Mapping, Sequence
@@ -25,6 +26,9 @@ QWEN_AUDIO_MODEL = "qwen-audio-3.0-asr-flash-streaming"
 QWEN_AUDIO_DEFAULT_ENDPOINT = "wss://dashscope.aliyuncs.com/api-ws/v1/inference"
 QWEN_AUDIO_DEFAULT_HOTWORD_WEIGHT = 4
 QWEN_AUDIO_LANGUAGE_HINTS_LIMIT = 4
+QWEN_AUDIO_KEEPALIVE_INTERVAL_S = 15.0
+QWEN_AUDIO_KEEPALIVE_SILENCE_MS = 100
+QWEN_AUDIO_KEEPALIVE_TICK_S = 1.0
 
 
 class QwenAudioSessionState(str, Enum):
@@ -118,6 +122,8 @@ class QwenAudioStreamingSTTBackend(STTBackend):
     task_start_timeout_s: float = 5.0
     task_finish_timeout_s: float = 5.0
     send_timeout_s: float = 5.0
+    keepalive_interval_s: float = QWEN_AUDIO_KEEPALIVE_INTERVAL_S
+    keepalive_silence_ms: int = QWEN_AUDIO_KEEPALIVE_SILENCE_MS
     hotwords: HotwordInput = ()
     hotword_weight: int = QWEN_AUDIO_DEFAULT_HOTWORD_WEIGHT
     websocket_factory: WebSocketFactory | None = None
@@ -136,9 +142,13 @@ class QwenAudioStreamingSTTBackend(STTBackend):
             ("task_start_timeout_s", self.task_start_timeout_s),
             ("task_finish_timeout_s", self.task_finish_timeout_s),
             ("send_timeout_s", self.send_timeout_s),
+            ("keepalive_interval_s", self.keepalive_interval_s),
+            ("keepalive_silence_ms", self.keepalive_silence_ms),
         ):
             if value <= 0:
                 raise ValueError(f"{name} must be > 0")
+        if int(self.sample_rate_hz * self.keepalive_silence_ms / 1000) * 2 <= 0:
+            raise ValueError("keepalive_silence_ms must produce at least one audio frame")
         session = _QwenAudioSession(
             api_key=self.api_key,
             language_hints=self.language_hints,
@@ -149,6 +159,8 @@ class QwenAudioStreamingSTTBackend(STTBackend):
             task_start_timeout_s=self.task_start_timeout_s,
             task_finish_timeout_s=self.task_finish_timeout_s,
             send_timeout_s=self.send_timeout_s,
+            keepalive_interval_s=self.keepalive_interval_s,
+            keepalive_silence_ms=self.keepalive_silence_ms,
             hotwords=self.hotwords,
             hotword_weight=self.hotword_weight,
             websocket_factory=self.websocket_factory,
@@ -197,6 +209,8 @@ class _QwenAudioSession(STTBackendSession):
     task_start_timeout_s: float
     task_finish_timeout_s: float
     send_timeout_s: float
+    keepalive_interval_s: float
+    keepalive_silence_ms: int
     hotwords: HotwordInput = ()
     hotword_weight: int = QWEN_AUDIO_DEFAULT_HOTWORD_WEIGHT
     websocket_factory: WebSocketFactory | None = None
@@ -230,6 +244,8 @@ class _QwenAudioSession(STTBackendSession):
     _boundary_requested: bool = field(init=False, default=False, repr=False)
     _flush_task: asyncio.Task[None] | None = field(init=False, default=None, repr=False)
     _deferred_finish_task: asyncio.Task[None] | None = field(init=False, default=None, repr=False)
+    _keepalive_task: asyncio.Task[None] | None = field(init=False, default=None, repr=False)
+    _last_audio_send_at: float | None = field(init=False, default=None, repr=False)
     _inflight_send_task: asyncio.Task[Any] | None = field(init=False, default=None, repr=False)
     _admission_lock: asyncio.Lock = field(init=False, repr=False)
     _send_lock: asyncio.Lock = field(init=False, repr=False)
@@ -283,6 +299,9 @@ class _QwenAudioSession(STTBackendSession):
             self._state = QwenAudioSessionState.FAILED
             raise QwenAudioProtocolError(f"Qwen Audio connection failed: {exc}") from exc
         self._recv_task = asyncio.create_task(self._recv_loop(), name="qwen-audio-recv")
+        self._keepalive_task = asyncio.create_task(
+            self._keepalive_loop(), name="qwen-audio-keepalive"
+        )
         await self._begin_task(initial=True)
         future = self._start_future
         if future is None:
@@ -474,6 +493,7 @@ class _QwenAudioSession(STTBackendSession):
             return
         self._cancel_start_timeout()
         self._state = QwenAudioSessionState.TASK_ACTIVE
+        self._last_audio_send_at = time.monotonic()
         if self._post_boundary_audio_queue:
             self._audio_queue.extend(self._post_boundary_audio_queue)
             self._post_boundary_audio_queue.clear()
@@ -587,8 +607,8 @@ class _QwenAudioSession(STTBackendSession):
         self._sentence_ids.clear()
         if self._closing_requested and not self._pending_boundaries:
             self._state = QwenAudioSessionState.CLOSING
-            self._drain_complete.set()
             await self._close_socket()
+            self._drain_complete.set()
             return
         try:
             await self._begin_task()
@@ -638,6 +658,52 @@ class _QwenAudioSession(STTBackendSession):
         if not pcm16le:
             return
         await self._send_value(pcm16le)
+        self._last_audio_send_at = time.monotonic()
+
+    async def _keepalive_loop(self) -> None:
+        try:
+            while not self._closing_requested:
+                await asyncio.sleep(min(QWEN_AUDIO_KEEPALIVE_TICK_S, self.keepalive_interval_s))
+                if not self._keepalive_eligible():
+                    continue
+                silence = b"\x00" * int(self.sample_rate_hz * self.keepalive_silence_ms / 1000) * 2
+                if not silence:
+                    continue
+                try:
+                    async with self._send_lock:
+                        if not self._keepalive_eligible():
+                            continue
+                        await self._send_audio_now(silence)
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:
+                    await self._fail(
+                        QwenAudioProtocolError(f"Qwen Audio keepalive send failed: {exc}")
+                    )
+                    return
+                logger.debug(
+                    "Qwen Audio keepalive silence sent bytes=%s interval_s=%s",
+                    len(silence),
+                    self.keepalive_interval_s,
+                )
+        except asyncio.CancelledError:
+            raise
+
+    def _keepalive_eligible(self) -> bool:
+        if self._closing_requested or self._ws is None:
+            return False
+        if not self._accept_terminals:
+            return False
+        if self._state is not QwenAudioSessionState.TASK_ACTIVE:
+            return False
+        if self._boundary_requested or self._flushing_audio:
+            return False
+        if self._audio_queue or self._post_boundary_audio_queue:
+            return False
+        last = self._last_audio_send_at
+        if last is None:
+            return False
+        return time.monotonic() - last >= self.keepalive_interval_s
 
     async def send_audio(self, pcm16le: bytes) -> None:
         if not isinstance(pcm16le, bytes):
@@ -739,6 +805,16 @@ class _QwenAudioSession(STTBackendSession):
         self._finish_timeout_task = None
         if task is not None and not task.done():
             task.cancel()
+
+    async def _stop_keepalive(self) -> None:
+        task = self._keepalive_task
+        self._keepalive_task = None
+        if task is None or task is asyncio.current_task():
+            return
+        if not task.done():
+            task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
 
     async def _wait_for_inflight_send(self) -> None:
         send_task = self._inflight_send_task
@@ -848,6 +924,7 @@ class _QwenAudioSession(STTBackendSession):
 
     async def _close_socket(self, *, cancel_receiver: bool = False) -> None:
         current_task = asyncio.current_task()
+        await self._stop_keepalive()
         deferred_task = self._deferred_finish_task
         if (
             deferred_task is not None
@@ -909,6 +986,9 @@ class _QwenAudioSession(STTBackendSession):
 __all__ = [
     "QWEN_AUDIO_DEFAULT_ENDPOINT",
     "QWEN_AUDIO_DEFAULT_HOTWORD_WEIGHT",
+    "QWEN_AUDIO_KEEPALIVE_INTERVAL_S",
+    "QWEN_AUDIO_KEEPALIVE_SILENCE_MS",
+    "QWEN_AUDIO_KEEPALIVE_TICK_S",
     "QWEN_AUDIO_MODEL",
     "QwenAudioProtocolError",
     "QwenAudioSessionState",

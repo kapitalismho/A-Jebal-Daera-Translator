@@ -380,3 +380,17 @@ def get_openrouter_selection_alias_for_model_and_source(
     selected_source: str,
 ) -> str | None:
     return openrouter_alias_for_fields(model=llm_model, source=selected_source)
+
+
+LEGACY_OPENROUTER_MODEL_BY_VALUE: dict[str, str] = {
+    LEGACY_OPENROUTER_MODEL_DEEPSEEK_V4_FLASH: OPENROUTER_MODEL_DEEPSEEK_V4_FLASH,
+    "google/gemini-3-flash-preview": OPENROUTER_MODEL_GEMINI_37_FLASH,
+    LEGACY_OPENROUTER_MODEL_GEMINI_31_FLASH_LITE: OPENROUTER_MODEL_GEMINI_37_FLASH,
+}
+
+
+def normalize_legacy_openrouter_model(value: object) -> object:
+    if isinstance(value, str):
+        stripped = value.strip()
+        return LEGACY_OPENROUTER_MODEL_BY_VALUE.get(stripped, stripped)
+    return value

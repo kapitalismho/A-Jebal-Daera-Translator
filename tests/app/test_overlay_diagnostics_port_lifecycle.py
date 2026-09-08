@@ -168,6 +168,7 @@ def make_application(
             if detailed_logs is not None
             else False
         ),
+        translation_enabled_provider=lambda: True,
     )
 
 

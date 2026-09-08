@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import asyncio
 import inspect
 
@@ -682,10 +683,34 @@ def test_ctypes_win32_api_sets_topmost_without_moving_sizing_or_activating(
 
 
 def test_win32_startup_adapter_is_read_only_for_geometry_and_visibility() -> None:
-    source = inspect.getsource(desktop_window_zorder)
-
-    assert "set_window_bounds_no_activate" not in source
-    assert "show_window_no_activate" not in source
-    assert "ShowWindow" not in source
-    assert "SetWindowPos" in source
-    assert "set_topmost_no_activate" in source
+    tree = ast.parse(inspect.getsource(desktop_window_zorder))
+    defined: set[str] = set()
+    referenced: set[str] = set()
+    methods_by_class: dict[str, set[str]] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            defined.add(node.name)
+        elif isinstance(node, ast.Attribute):
+            referenced.add(node.attr)
+        elif isinstance(node, ast.ClassDef):
+            methods_by_class[node.name] = {
+                item.name
+                for item in node.body
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+            }
+    for forbidden in (
+        "set_window_bounds_no_activate",
+        "show_window_no_activate",
+        "ShowWindow",
+    ):
+        assert forbidden not in defined, f"{forbidden} must not be defined by desktop_window_zorder"
+        assert (
+            forbidden not in referenced
+        ), f"{forbidden} must not be referenced by desktop_window_zorder"
+    assert "set_topmost_no_activate" in methods_by_class.get(
+        "Win32WindowApi", set()
+    ), "Win32WindowApi must expose only set_topmost_no_activate"
+    assert "set_topmost_no_activate" in methods_by_class.get(
+        "_CtypesWin32WindowApi", set()
+    ), "_CtypesWin32WindowApi must implement set_topmost_no_activate"
+    assert "SetWindowPos" in referenced, "SetWindowPos must remain the single mutating Win32 call"

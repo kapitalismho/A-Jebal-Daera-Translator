@@ -81,6 +81,7 @@ class OverlayPresenter(OverlaySink):
     visible_window_target_blocks: int = VISIBLE_WINDOW_TARGET_BLOCKS
     show_translation: bool = True
     show_peer_original: bool = True
+    translation_enabled: bool = True
     peer_presentation_refresh_burst: bool = True
     self_presentation_refresh_burst: bool = True
     native_retry_trigger_emission: bool = False
@@ -229,6 +230,7 @@ class OverlayPresenter(OverlaySink):
                 publishable = self._presentation_state.entry_is_publishable(
                     entry,
                     show_peer_original=self.show_peer_original,
+                    translation_enabled=self.translation_enabled,
                 )
                 parts.extend(
                     [
@@ -341,6 +343,10 @@ class OverlayPresenter(OverlaySink):
         entry: _LogicalTurnEntry,
         block: OverlayPresentationBlock,
     ) -> tuple[str, str]:
+        if not self.translation_enabled and entry.channel == "peer":
+            if block.block_variant == "active_peer":
+                return "live_text", "none"
+            return "original_text", "none"
         if entry.channel == "peer" and block.block_variant == "active_peer":
             secondary_visible = block.secondary_enabled and bool(block.secondary_text.strip())
             return "blank", "source" if secondary_visible else "blank"
@@ -522,6 +528,13 @@ class OverlayPresenter(OverlaySink):
         self.show_peer_original = next_show_peer_original
         await self._publish_if_changed()
 
+    async def update_translation_enabled(self, enabled: bool) -> None:
+        next_enabled = bool(enabled)
+        if next_enabled == self.translation_enabled:
+            return
+        self.translation_enabled = next_enabled
+        await self._publish_if_changed()
+
     async def update_peer_presentation_refresh_burst(self, enabled: bool) -> None:
         next_enabled = bool(enabled)
         if next_enabled == self.peer_presentation_refresh_burst:
@@ -689,6 +702,7 @@ class OverlayPresenter(OverlaySink):
             show_peer_original=self.show_peer_original,
             next_appearance_seq=self._next_appearance_seq,
             terminal_update_reason=self._terminal_update_reason,
+            translation_enabled=self.translation_enabled,
         )
         return self._finish_peer_reduction_result(result, event)
 
@@ -704,6 +718,7 @@ class OverlayPresenter(OverlaySink):
             show_peer_original=self.show_peer_original,
             next_appearance_seq=self._next_appearance_seq,
             terminal_update_reason=self._terminal_update_reason,
+            translation_enabled=self.translation_enabled,
         )
         return self._finish_peer_reduction_result(result, event)
 
@@ -719,6 +734,7 @@ class OverlayPresenter(OverlaySink):
             show_peer_original=self.show_peer_original,
             next_appearance_seq=self._next_appearance_seq,
             terminal_update_reason=self._terminal_update_reason,
+            translation_enabled=self.translation_enabled,
         )
         return self._finish_peer_reduction_result(result, event)
 
@@ -877,6 +893,7 @@ class OverlayPresenter(OverlaySink):
             peer_presentation_refresh_burst=self.peer_presentation_refresh_burst,
             self_presentation_refresh_burst=self.self_presentation_refresh_burst,
             next_appearance_seq=self._next_appearance_seq,
+            translation_enabled=self.translation_enabled,
         )
         self._mark_entries_visible(selection.selected_keys)
         self._prune_displaced_finalized_entries(
@@ -1050,6 +1067,7 @@ class OverlayPresenter(OverlaySink):
             and self._presentation_state.entry_is_selectable(
                 entry,
                 show_peer_original=self.show_peer_original,
+                translation_enabled=self.translation_enabled,
             )
             and key not in visible_entry_keys
         ]

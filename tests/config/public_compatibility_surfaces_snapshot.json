@@ -769,7 +769,7 @@
       "MyAppName": "PuriPuly <3",
       "MyAppDirName": "PuriPulyHeart",
       "MyAppGroupName": "PuriPulyHeart",
-      "MyAppVersion": "2.6.0",
+      "MyAppVersion": "2.6.1",
       "MyAppPublisher": "salee",
       "MyAppURL": "https://github.com/kapitalismho/PuriPuly-heart",
       "MyAppExeName": "PuriPulyHeart.exe",
@@ -940,7 +940,7 @@
       "tests/core/test_overlay_bridge.py::test_overlay_bridge_sends_authenticated_initial_snapshot",
       "tests/app/test_overlay_process_manager.py::test_overlay_process_manager_waits_for_overlay_ready_before_connected",
       "tests/app/test_desktop_overlay_runner.py::test_overlay_manifest_serialization_omits_target_and_desktop_runtime_fields",
-      "tests/ui/test_desktop_overlay_renderer.py::test_desktop_overlay_snapshot_mapping_table_documents_current_block_contract"
+      "tests/ui/test_desktop_overlay_renderer.py::test_desktop_overlay_snapshot_mapping_table_covers_block_contract_and_emitted_lines"
     ],
     "prompt_loader": [
       "tests/config/test_public_compatibility_surfaces.py::test_prompt_loader_snapshot_freezes_fallback_order_and_translation_prompt_requirement",

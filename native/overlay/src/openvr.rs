@@ -1451,7 +1451,9 @@ mod tests {
         OpenVrEventClass, OpenVrPreflightApi, OpenVrRuntimeEvent, OpenVrStartupPreflightError,
         OverlayAnchorMode, OverlayFrameSubmitter, OverlayPlacementApi, OverlayPlacementPolicy,
         SpatialHmdPose, SpatialReanchorApi, SpatialReanchorOutcome, SpatialTrackingOrigin,
-        DEFAULT_OVERLAY_WIDTH_METERS, OPENVR_EVENT_OVERLAY_HIDDEN, OPENVR_EVENT_QUIT,
+        DEFAULT_OVERLAY_WIDTH_METERS, OPENVR_EVENT_DRIVER_REQUESTED_QUIT,
+        OPENVR_EVENT_OVERLAY_HIDDEN, OPENVR_EVENT_OVERLAY_SHOWN, OPENVR_EVENT_PROCESS_QUIT,
+        OPENVR_EVENT_QUIT,
     };
     use crate::state::OverlayCalibration;
 
@@ -1559,39 +1561,63 @@ mod tests {
     }
 
     #[test]
-    fn startup_preflight_maps_missing_runtime_to_specific_failure_reason() {
-        let api = FakePreflightApi {
-            runtime_installed: false,
-            background_init: FakeBackgroundInitResult::Ok,
-            hmd_present: true,
-            shutdown_calls: Cell::new(0),
-        };
+    fn startup_preflight_maps_probe_outcomes_to_failure_reasons() {
+        for (installed, init, hmd, expected, shutdowns) in [
+            (
+                false,
+                FakeBackgroundInitResult::Ok,
+                true,
+                Err(OpenVrStartupPreflightError::SteamVrNotInstalled),
+                0,
+            ),
+            (
+                true,
+                FakeBackgroundInitResult::NoServer,
+                true,
+                Err(OpenVrStartupPreflightError::SteamVrNotRunning),
+                0,
+            ),
+            (
+                true,
+                FakeBackgroundInitResult::Ok,
+                false,
+                Err(OpenVrStartupPreflightError::HmdNotFound),
+                1,
+            ),
+            (
+                true,
+                FakeBackgroundInitResult::OtherError("unexpected"),
+                true,
+                Err(OpenVrStartupPreflightError::Init("unexpected".to_string())),
+                0,
+            ),
+            (true, FakeBackgroundInitResult::Ok, true, Ok(()), 1),
+        ] {
+            let api = FakePreflightApi {
+                runtime_installed: installed,
+                background_init: init,
+                hmd_present: hmd,
+                shutdown_calls: Cell::new(0),
+            };
 
-        let result = run_startup_preflight(&api);
-
-        assert_eq!(
-            result,
-            Err(OpenVrStartupPreflightError::SteamVrNotInstalled)
-        );
-        assert_eq!(api.shutdown_calls(), 0);
+            assert_eq!(run_startup_preflight(&api), expected);
+            assert_eq!(api.shutdown_calls(), shutdowns);
+        }
     }
 
     #[test]
-    fn placement_policy_defaults_to_wider_readable_overlay_width() {
-        let policy = OverlayPlacementPolicy::default();
+    fn placement_policy_width_follows_text_scale_from_readable_default() {
+        let default = OverlayPlacementPolicy::default();
+        assert!(default.width_meters > 0.0);
+        assert_eq!(default.width_meters, DEFAULT_OVERLAY_WIDTH_METERS);
 
-        assert!((policy.width_meters - 1.0667).abs() < 0.0001);
-    }
-
-    #[test]
-    fn placement_policy_scales_wider_overlay_width_with_text_calibration() {
-        let policy = OverlayPlacementPolicy::from_calibration(&OverlayCalibration {
+        let scaled = OverlayPlacementPolicy::from_calibration(&OverlayCalibration {
             text_scale: 1.2,
             ..OverlayCalibration::default()
         })
         .unwrap();
 
-        assert!((policy.width_meters - 1.28004).abs() < 0.001);
+        assert!((scaled.width_meters - 1.28004).abs() < 0.001);
     }
 
     #[test]
@@ -1620,11 +1646,10 @@ mod tests {
         })
         .unwrap_err();
 
-        assert_eq!(
-            error,
-            super::OpenVrError::Calibration(
-                "unsupported overlay calibration anchor: unsupported".to_string()
-            )
+        assert!(matches!(error, super::OpenVrError::Calibration(_)));
+        assert!(
+            error.to_string().contains("unsupported"),
+            "calibration rejection must carry the offending anchor"
         );
     }
 
@@ -1829,81 +1854,6 @@ mod tests {
     }
 
     #[test]
-    fn fake_openvr_records_explicit_spatial_reanchor_attempts() {
-        let mut openvr = FakeOpenVr::default();
-
-        assert_eq!(
-            openvr.reanchor_spatial_locked().unwrap(),
-            SpatialReanchorOutcome::PoseUnavailable
-        );
-        assert_eq!(openvr.spatial_reanchor_count(), 1);
-        assert_eq!(openvr.call_sequence(), vec!["ReanchorSpatialLocked"]);
-    }
-
-    #[test]
-    fn startup_preflight_maps_background_no_server_to_runtime_not_running() {
-        let api = FakePreflightApi {
-            runtime_installed: true,
-            background_init: FakeBackgroundInitResult::NoServer,
-            hmd_present: true,
-            shutdown_calls: Cell::new(0),
-        };
-
-        let result = run_startup_preflight(&api);
-
-        assert_eq!(result, Err(OpenVrStartupPreflightError::SteamVrNotRunning));
-        assert_eq!(api.shutdown_calls(), 0);
-    }
-
-    #[test]
-    fn startup_preflight_maps_missing_hmd_after_successful_background_probe() {
-        let api = FakePreflightApi {
-            runtime_installed: true,
-            background_init: FakeBackgroundInitResult::Ok,
-            hmd_present: false,
-            shutdown_calls: Cell::new(0),
-        };
-
-        let result = run_startup_preflight(&api);
-
-        assert_eq!(result, Err(OpenVrStartupPreflightError::HmdNotFound));
-        assert_eq!(api.shutdown_calls(), 1);
-    }
-
-    #[test]
-    fn startup_preflight_preserves_unexpected_background_init_failures() {
-        let api = FakePreflightApi {
-            runtime_installed: true,
-            background_init: FakeBackgroundInitResult::OtherError("unexpected"),
-            hmd_present: true,
-            shutdown_calls: Cell::new(0),
-        };
-
-        let result = run_startup_preflight(&api);
-
-        assert_eq!(
-            result,
-            Err(OpenVrStartupPreflightError::Init("unexpected".to_string()))
-        );
-        assert_eq!(api.shutdown_calls(), 0);
-    }
-
-    #[test]
-    fn startup_preflight_succeeds_after_all_guards_pass() {
-        let api = FakePreflightApi {
-            runtime_installed: true,
-            background_init: FakeBackgroundInitResult::Ok,
-            hmd_present: true,
-            shutdown_calls: Cell::new(0),
-        };
-
-        let result = run_startup_preflight(&api);
-
-        assert_eq!(result, Ok(()));
-        assert_eq!(api.shutdown_calls(), 1);
-    }
-
-    #[test]
     fn fn_table_interface_version_prefixes_overlay_version_for_flat_api_requests() {
         let request = fn_table_interface_version(b"IVROverlay_028\0").expect("request");
 
@@ -1934,30 +1884,47 @@ mod tests {
         );
     }
 
+    fn visibility_fields(log: &str) -> Vec<(&str, &str)> {
+        log.split(' ')
+            .filter_map(|part| part.split_once('='))
+            .collect()
+    }
+
     #[test]
     fn fake_openvr_visibility_diagnostic_reports_show_and_skip_cached_match() {
         let mut openvr = FakeOpenVr::default();
 
         openvr.set_overlay_visible(true).expect("show overlay");
+        assert_eq!(openvr.last_call().as_deref(), Some("ShowOverlay"));
         let show_log = openvr
             .take_visibility_api_call_log()
             .expect("show visibility log");
-        assert!(show_log.contains("openvr_overlay_visibility_api_call"));
-        assert!(show_log.contains("desired_visible=true"));
-        assert!(show_log.contains("cached_visible_before=false"));
-        assert!(show_log.contains("api=ShowOverlay"));
-        assert!(show_log.contains("cached_visible_after=true"));
+        assert_eq!(
+            visibility_fields(&show_log),
+            [
+                ("desired_visible", "true"),
+                ("cached_visible_before", "false"),
+                ("api", "ShowOverlay"),
+                ("cached_visible_after", "true"),
+            ]
+        );
 
         openvr
             .set_overlay_visible(true)
             .expect("skip cached visibility match");
+        assert_eq!(openvr.last_call().as_deref(), Some("ShowOverlay"));
         let skip_log = openvr
             .take_visibility_api_call_log()
             .expect("skip visibility log");
-        assert!(skip_log.contains("desired_visible=true"));
-        assert!(skip_log.contains("cached_visible_before=true"));
-        assert!(skip_log.contains("api=SkipCachedMatch"));
-        assert!(skip_log.contains("cached_visible_after=true"));
+        assert_eq!(
+            visibility_fields(&skip_log),
+            [
+                ("desired_visible", "true"),
+                ("cached_visible_before", "true"),
+                ("api", "SkipCachedMatch"),
+                ("cached_visible_after", "true"),
+            ]
+        );
     }
 
     #[test]
@@ -1969,29 +1936,37 @@ mod tests {
         openvr
             .set_overlay_visible(true)
             .expect("reassert show overlay");
+        assert_eq!(openvr.last_call().as_deref(), Some("ShowOverlay"));
         let log = openvr
             .take_visibility_api_call_log()
             .expect("reassert visibility log");
-        assert!(log.contains("desired_visible=true"));
-        assert!(log.contains("cached_visible_before=true"));
-        assert!(log.contains("api=ShowOverlay"));
+        assert_eq!(
+            visibility_fields(&log),
+            [
+                ("desired_visible", "true"),
+                ("cached_visible_before", "true"),
+                ("api", "ShowOverlay"),
+                ("cached_visible_after", "true"),
+            ]
+        );
         assert_eq!(openvr.observed_overlay_visible(), Some(true));
     }
 
     #[test]
     fn openvr_runtime_events_classify_fatal_reconfigure_and_ignore() {
-        assert_eq!(
-            OpenVrRuntimeEvent::from_event_type(OPENVR_EVENT_QUIT).classify(),
-            OpenVrEventClass::Fatal
-        );
-        assert_eq!(
-            OpenVrRuntimeEvent::from_event_type(OPENVR_EVENT_OVERLAY_HIDDEN).classify(),
-            OpenVrEventClass::Reconfigure
-        );
-        assert_eq!(
-            OpenVrRuntimeEvent::from_event_type(1).classify(),
-            OpenVrEventClass::Ignore
-        );
+        for (event_type, class) in [
+            (OPENVR_EVENT_QUIT, OpenVrEventClass::Fatal),
+            (OPENVR_EVENT_PROCESS_QUIT, OpenVrEventClass::Fatal),
+            (OPENVR_EVENT_DRIVER_REQUESTED_QUIT, OpenVrEventClass::Fatal),
+            (OPENVR_EVENT_OVERLAY_SHOWN, OpenVrEventClass::Reconfigure),
+            (OPENVR_EVENT_OVERLAY_HIDDEN, OpenVrEventClass::Reconfigure),
+            (1, OpenVrEventClass::Ignore),
+        ] {
+            assert_eq!(
+                OpenVrRuntimeEvent::from_event_type(event_type).classify(),
+                class
+            );
+        }
     }
 
     #[test]

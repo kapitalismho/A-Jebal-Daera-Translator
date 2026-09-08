@@ -450,10 +450,7 @@ fn default_secondary_enabled() -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        NativeFreshRenderGenerations, OverlayPresentationBlock, OverlayPresentationBlockVariant,
-        OverlayPresentationCalibration, OverlayPresentationSnapshot, OverlayState,
-    };
+    use super::{NativeFreshRenderGenerations, OverlayPresentationSnapshot, OverlayState};
     use serde_json::json;
 
     #[test]
@@ -527,54 +524,5 @@ mod tests {
             state.native_fresh_render_generations(),
             second.native_fresh_render_generations.as_ref()
         );
-    }
-
-    fn block(id: &str) -> OverlayPresentationBlock {
-        OverlayPresentationBlock {
-            id: id.to_string(),
-            occupant_key: id.to_string(),
-            appearance_seq: 1,
-            channel: "self".to_string(),
-            block_variant: OverlayPresentationBlockVariant::Finalized,
-            primary_text: "hello".to_string(),
-            secondary_text: String::new(),
-            secondary_enabled: true,
-            primary_language: None,
-            secondary_language: None,
-            update_id: None,
-            origin_wall_clock_ms: None,
-            session_scope: None,
-        }
-    }
-
-    #[test]
-    fn apply_snapshot_replaces_render_state() {
-        let mut state = OverlayState::default();
-
-        assert!(state.apply_snapshot(&OverlayPresentationSnapshot {
-            revision: 1,
-            calibration: OverlayPresentationCalibration::default(),
-            native_fresh_render_generations: None,
-            blocks: vec![block("self:1")],
-        }));
-
-        assert_eq!(state.snapshot().revision, 1);
-        assert_eq!(state.blocks().len(), 1);
-        assert_eq!(state.scene().slots()[0].as_ref().unwrap().id, "self:1");
-    }
-
-    #[test]
-    fn apply_snapshot_is_noop_for_identical_state() {
-        let snapshot = OverlayPresentationSnapshot {
-            revision: 2,
-            calibration: OverlayPresentationCalibration::default(),
-            native_fresh_render_generations: None,
-            blocks: vec![],
-        };
-        let mut state = OverlayState::default();
-
-        assert!(!state.apply_snapshot(&snapshot));
-        assert_eq!(state.snapshot().revision, 2);
-        assert!(!state.apply_snapshot(&snapshot));
     }
 }

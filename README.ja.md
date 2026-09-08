@@ -7,7 +7,7 @@
 </h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.6.0-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/version-2.6.1-blue" alt="Version" />
   <img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue" alt="License: AGPL-3.0-or-later" />
   <img src="https://img.shields.io/badge/python-3.12-yellow" alt="Python" />
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platform" />
@@ -99,43 +99,43 @@ VRChatやDiscordを含む、さまざまな環境で使えます。
 
 #### 推奨モデル
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 E4B (Local)** | 無制限 | 5,000回 | 3,660回 | 1,290回 |
-| **Gemma 4 26B A4B + 31B** | 13,940回 | 3,680回 | 2,900回 | 1,180回 |
-| **DeepSeek V4 Flash** | 11,620回 | 3,500回 | 2,780回 | 1,160回 |
+| **Gemma 4 E4B (Local)** | 無制限 | 無制限 | 5,000回 | 3,660回 |
+| **Gemma 4 26B A4B + 31B** | 13,940回 | 13,940回 | 3,680回 | 2,900回 |
+| **DeepSeek V4 Flash** | 11,620回 | 11,620回 | 3,500回 | 2,780回 |
 
 #### その他のモデル
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 12B (Local)** | 無制限 | 5,000回 | 3,660回 | 1,290回 |
-| **Gemma 4 26B A4B** | 14,380回 | 3,710回 | 2,920回 | 1,180回 |
-| **Gemma 4 31B (OpenRouter)** | 10,940回 | 3,430回 | 2,740回 | 1,150回 |
-| **Gemma 4 31B (Cerebras)** | 920回 | 770回 | 730回 | 540回 |
-| **Gemini 3.7 Flash** | 1,160回 | 940回 | 880回 | 610回 |
-| **Qwen 3.8 Flash** | 7,460回 | — | 2,460回 | — |
+| **Gemma 4 12B (Local)** | 無制限 | 無制限 | 5,000回 | 3,660回 |
+| **Gemma 4 26B A4B** | 14,380回 | 14,380回 | 3,710回 | 2,920回 |
+| **Gemma 4 31B (OpenRouter)** | 10,940回 | 10,940回 | 3,430回 | 2,740回 |
+| **Gemma 4 31B (Cerebras)** | 920回 | 920回 | 770回 | 730回 |
+| **Gemini 3.7 Flash** | 1,160回 | 1,160回 | 940回 | 880回 |
+| **Qwen 3.8 Flash** | 7,460回 | 7,460回 | 2,990回 | 2,460回 |
 
 ### 発話あたりのコスト
 
 #### 推奨モデル
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 E4B (Local)** | 0円 | ~0.03円 | ~0.04円 | ~0.12円 |
-| **Gemma 4 26B A4B + 31B** | ~0.01円 | ~0.04円 | ~0.05円 | ~0.13円 |
-| **DeepSeek V4 Flash** | ~0.01円 | ~0.04円 | ~0.05円 | ~0.12円 |
+| **Gemma 4 E4B (Local)** | 0円 | 0円 | ~0.03円 | ~0.04円 |
+| **Gemma 4 26B A4B + 31B** | ~0.01円 | ~0.01円 | ~0.04円 | ~0.05円 |
+| **DeepSeek V4 Flash** | ~0.01円 | ~0.01円 | ~0.04円 | ~0.05円 |
 
 #### その他のモデル
 
-| LLM \ ASR | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
+| LLM \ ASR | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
 |---|---|---|---|---|
-| **Gemma 4 12B (Local)** | 0円 | ~0.03円 | ~0.04円 | ~0.12円 |
-| **Gemma 4 26B A4B** | ~0.01円 | ~0.04円 | ~0.05円 | ~0.13円 |
-| **Gemma 4 31B (OpenRouter)** | ~0.01円 | ~0.04円 | ~0.05円 | ~0.14円 |
-| **Gemma 4 31B (Cerebras)** | ~0.16円 | ~0.19円 | ~0.20円 | ~0.28円 |
-| **Gemini 3.7 Flash** | ~0.13円 | ~0.16円 | ~0.17円 | ~0.25円 |
-| **Qwen 3.8 Flash** | ~0.02円 | — | ~0.06円 | — |
+| **Gemma 4 12B (Local)** | 0円 | 0円 | ~0.03円 | ~0.04円 |
+| **Gemma 4 26B A4B** | ~0.01円 | ~0.01円 | ~0.04円 | ~0.05円 |
+| **Gemma 4 31B (OpenRouter)** | ~0.01円 | ~0.01円 | ~0.04円 | ~0.05円 |
+| **Gemma 4 31B (Cerebras)** | ~0.16円 | ~0.16円 | ~0.19円 | ~0.20円 |
+| **Gemini 3.7 Flash** | ~0.13円 | ~0.13円 | ~0.16円 | ~0.17円 |
+| **Qwen 3.8 Flash** | ~0.02円 | ~0.02円 | ~0.05円 | ~0.06円 |
 
 *   *（入力 900トークン + 出力 12トークン）× 発話1回あたりの平均LLM呼び出し回数 1.2回と仮定*
 *   *1ドルあたりの使用可能回数は、発話あたりのコスト表の四捨五入前の値を基準に算出*
@@ -149,7 +149,9 @@ VRChatやDiscordを含む、さまざまな環境で使えます。
 
 | サービス | 無料クレジット | 期限 | 備考 |
 |--------|------------|------|------|
-| **Deepgram** | $200 | なし | - |
+| **Deepgram** | $200 | なし | カード登録不要 |
+| **ElevenLabs** | 10,000クレジット | 毎月更新 | カード登録不要 |
+| **Gemini 3.5 Transcribe** | 無料枠 | なし | 無料枠で実質無制限 |
 | **Alibaba Cloud** | モデルごと100万トークン | 90日 | シンガポールリージョン基準 |
 | **Alibaba Cloud** | ¥300 | 1年 | 中国国内の学生向け |
 
@@ -208,7 +210,7 @@ GPU推論はVulkanを使用しています。RadeonでもArcでも、ベンダ�
 
 Soniox / Gemini / Deepgramへのアクセスがブロックされている地域の場合は、以下の組み合わせをお使いください。
 
-- STT: **Qwen ASR**
+- STT: **Qwen Audio**
 - LLM: **DeepSeek V4 Flash**
 
    > Discordの代わりにQQで認証できます。

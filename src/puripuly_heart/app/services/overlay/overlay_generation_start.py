@@ -73,6 +73,7 @@ class OverlayGenerationStartRequest:
     startup_timeout_ms: int
     fallback_reason: str | None = None
     recovering_from_crash: bool = False
+    translation_enabled: bool = True
 
     @property
     def desktop(self) -> bool:
@@ -174,11 +175,13 @@ class OverlayGenerationStartOwner:
                     task_factory=runtime.create_child_task,
                     peer_presentation_refresh_burst=peer_refresh_burst,
                     self_presentation_refresh_burst=self_refresh_burst,
+                    translation_enabled=request.translation_enabled,
                 )
             else:
                 presenter.runtime_log_detailed = effects.log_runtime
             presenter = cast(OverlayPresenter, runtime.adopt_presenter(presenter))
             presenter.runtime_log_detailed = effects.log_runtime
+            await presenter.update_translation_enabled(request.translation_enabled)
             if not request.desktop:
                 if request.recovering_from_crash:
                     await presenter.discard_epoch_retry_intent()

@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from datetime import date
 from typing import Any
 
+from puripuly_heart.config.llm_profiles import normalize_legacy_openrouter_model
 from puripuly_heart.config.settings_vnext import serialization
 from puripuly_heart.config.settings_vnext.schema import (
     DEFAULT_TRANSLATION_FALLBACK_SELECTION_ALIAS,
@@ -128,6 +129,7 @@ def _prepare_vnext_migration_dict(data: Mapping[str, Any]) -> dict[str, Any]:
             _migrate_deepseek_v4_pro_translation(translation)
         _migrate_gemini_3_flash_translation(translation)
         _migrate_qwen_35_plus_translation(translation)
+        _migrate_legacy_openrouter_model_translation(translation)
         fallback = translation.get("fallback")
         if not isinstance(fallback, Mapping):
             translation["fallback"] = _fallback_intent_to_dict(
@@ -697,6 +699,17 @@ def _migrate_deepseek_v4_pro_translation(translation: dict[str, Any]) -> None:
     if isinstance(fallback, dict) and fallback.get("model") == "deepseek_v4_pro":
         fallback["model"] = "deepseek_v4_flash"
         fallback["connection"] = "official_byok"
+
+
+def _migrate_legacy_openrouter_model_translation(translation: dict[str, Any]) -> None:
+    raw_model = translation.get("openrouter_model")
+    normalized = normalize_legacy_openrouter_model(raw_model)
+    if (
+        isinstance(raw_model, str)
+        and isinstance(normalized, str)
+        and normalized != raw_model.strip()
+    ):
+        translation["openrouter_model"] = normalized
 
 
 def _migrate_peer_source_auto_mode(intent: dict[str, Any]) -> None:

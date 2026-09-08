@@ -5713,142 +5713,93 @@ def test_overlay_tab_cards_use_settings_unit_card_defaults(
     assert not hasattr(view, "_overlay_calibration_cancel_button")
 
 
-def test_overlay_distance_card_uses_inline_minus_value_plus_layout(
+@pytest.mark.parametrize(
+    (
+        "title_key",
+        "decrease_name",
+        "increase_name",
+        "value_name",
+        "left_glyph",
+        "right_glyph",
+    ),
+    [
+        pytest.param(
+            "settings.overlay.calibration.distance",
+            "_overlay_distance_decrease_button",
+            "_overlay_distance_increase_button",
+            "_overlay_distance_value_text",
+            "－",
+            "＋",
+            id="distance",
+        ),
+        pytest.param(
+            "settings.overlay.calibration.offset_x",
+            "_overlay_offset_x_decrease_button",
+            "_overlay_offset_x_increase_button",
+            "_overlay_offset_x_value_text",
+            "◀",
+            "▶",
+            id="offset_x",
+        ),
+        pytest.param(
+            "settings.overlay.calibration.offset_y",
+            "_overlay_offset_y_decrease_button",
+            "_overlay_offset_y_increase_button",
+            "_overlay_offset_y_value_text",
+            "▲",
+            "▼",
+            id="offset_y",
+        ),
+    ],
+)
+def test_overlay_stepper_cards_use_inline_value_layout(
     monkeypatch: pytest.MonkeyPatch,
+    title_key: str,
+    decrease_name: str,
+    increase_name: str,
+    value_name: str,
+    left_glyph: str,
+    right_glyph: str,
 ) -> None:
     view, _ = _make_settings_view(monkeypatch)
 
-    distance_card = _overlay_tab_card(view, t("settings.overlay.calibration.distance"))
-    distance_card_stack = _wrapped_card_stack(distance_card)
-    distance_column = _wrapped_card_column(distance_card)
-    distance_value_row = distance_column.controls[1].content
+    card = _overlay_tab_card(view, t(title_key))
+    card_stack = _wrapped_card_stack(card)
+    column = _wrapped_card_column(card)
+    value_row = column.controls[1].content
+    decrease_button = getattr(view, decrease_name)
+    increase_button = getattr(view, increase_name)
+    value_container = value_row.controls[1]
 
-    assert isinstance(distance_card_stack, ft.Stack)
-    assert distance_card_stack.fit == ft.StackFit.EXPAND
-    click_row = distance_card_stack.controls[0]
-    visual_layer = distance_card_stack.controls[1]
-    distance_value_container = distance_value_row.controls[1]
+    assert isinstance(card_stack, ft.Stack)
+    assert card_stack.fit == ft.StackFit.EXPAND
+    click_row = card_stack.controls[0]
+    visual_layer = card_stack.controls[1]
 
     assert isinstance(click_row, ft.Row)
     assert click_row.expand == 1
     assert click_row.spacing == 0
     assert click_row.vertical_alignment == ft.CrossAxisAlignment.STRETCH
-    assert click_row.controls[0] is view._overlay_distance_decrease_button
-    assert click_row.controls[1] is view._overlay_distance_increase_button
+    assert click_row.controls[0] is decrease_button
+    assert click_row.controls[1] is increase_button
     assert isinstance(visual_layer, ft.TransparentPointer)
-    assert visual_layer.content is distance_column
-    assert isinstance(distance_value_row, ft.Row)
-    assert distance_value_row.controls[1].content is view._overlay_distance_value_text
-    assert distance_value_row.spacing == 4
-    assert isinstance(view._overlay_distance_decrease_button, ft.Container)
-    assert isinstance(view._overlay_distance_increase_button, ft.Container)
-    assert view._overlay_distance_decrease_button.expand == 1
-    assert view._overlay_distance_decrease_button.width is None
-    assert view._overlay_distance_decrease_button.height is None
-    assert view._overlay_distance_increase_button.expand == 1
-    assert view._overlay_distance_increase_button.width is None
-    assert view._overlay_distance_increase_button.height is None
-    assert distance_value_row.controls[0].content.value == "－"
-    assert distance_value_row.controls[0].alignment == ft.Alignment.CENTER_RIGHT
-    assert distance_value_row.controls[2].content.value == "＋"
-    assert distance_value_row.controls[2].alignment == ft.Alignment.CENTER_LEFT
-    assert distance_value_container.width == 84
-
-
-def test_overlay_offset_cards_use_inline_arrow_value_arrow_layout(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    view, _ = _make_settings_view(monkeypatch)
-
-    offset_x_card = _overlay_tab_card(view, t("settings.overlay.calibration.offset_x"))
-    offset_y_card = _overlay_tab_card(view, t("settings.overlay.calibration.offset_y"))
-    offset_x_card_stack = _wrapped_card_stack(offset_x_card)
-    offset_y_card_stack = _wrapped_card_stack(offset_y_card)
-    offset_x_column = _wrapped_card_column(offset_x_card)
-    offset_y_column = _wrapped_card_column(offset_y_card)
-    offset_x_value_row = offset_x_column.controls[1].content
-    offset_y_value_row = offset_y_column.controls[1].content
-
-    assert isinstance(offset_x_card_stack, ft.Stack)
-    assert offset_x_card_stack.fit == ft.StackFit.EXPAND
-    offset_x_click_row = offset_x_card_stack.controls[0]
-    offset_x_visual_layer = offset_x_card_stack.controls[1]
-    offset_x_value_container = offset_x_value_row.controls[1]
-
-    assert isinstance(offset_x_click_row, ft.Row)
-    assert offset_x_click_row.expand == 1
-    assert offset_x_click_row.spacing == 0
-    assert offset_x_click_row.vertical_alignment == ft.CrossAxisAlignment.STRETCH
-    assert offset_x_click_row.controls[0] is view._overlay_offset_x_decrease_button
-    assert offset_x_click_row.controls[1] is view._overlay_offset_x_increase_button
-    assert isinstance(offset_x_visual_layer, ft.TransparentPointer)
-    assert offset_x_visual_layer.content is offset_x_column
-    assert isinstance(offset_x_value_row, ft.Row)
-    assert offset_x_value_row.controls[1].content is view._overlay_offset_x_value_text
-    assert offset_x_value_row.spacing == 4
-    assert offset_x_value_container.width == 84
-    assert isinstance(view._overlay_offset_x_decrease_button, ft.Container)
-    assert isinstance(view._overlay_offset_x_increase_button, ft.Container)
-    assert view._overlay_offset_x_decrease_button.expand == 1
-    assert view._overlay_offset_x_decrease_button.width is None
-    assert view._overlay_offset_x_decrease_button.height is None
-    assert view._overlay_offset_x_increase_button.expand == 1
-    assert view._overlay_offset_x_increase_button.width is None
-    assert view._overlay_offset_x_increase_button.height is None
-    assert offset_x_value_row.controls[0].content.value == "◀"
-    assert offset_x_value_row.controls[0].alignment == ft.Alignment.CENTER_RIGHT
-    assert offset_x_value_row.controls[2].content.value == "▶"
-    assert offset_x_value_row.controls[2].alignment == ft.Alignment.CENTER_LEFT
-
-    assert isinstance(offset_y_card_stack, ft.Stack)
-    assert offset_y_card_stack.fit == ft.StackFit.EXPAND
-    offset_y_click_row = offset_y_card_stack.controls[0]
-    offset_y_visual_layer = offset_y_card_stack.controls[1]
-    offset_y_value_container = offset_y_value_row.controls[1]
-
-    assert isinstance(offset_y_click_row, ft.Row)
-    assert offset_y_click_row.expand == 1
-    assert offset_y_click_row.spacing == 0
-    assert offset_y_click_row.vertical_alignment == ft.CrossAxisAlignment.STRETCH
-    assert offset_y_click_row.controls[0] is view._overlay_offset_y_decrease_button
-    assert offset_y_click_row.controls[1] is view._overlay_offset_y_increase_button
-    assert isinstance(offset_y_visual_layer, ft.TransparentPointer)
-    assert offset_y_visual_layer.content is offset_y_column
-    assert isinstance(offset_y_value_row, ft.Row)
-    assert offset_y_value_row.controls[1].content is view._overlay_offset_y_value_text
-    assert offset_y_value_row.spacing == 4
-    assert offset_y_value_container.width == 84
-    assert isinstance(view._overlay_offset_y_decrease_button, ft.Container)
-    assert isinstance(view._overlay_offset_y_increase_button, ft.Container)
-    assert view._overlay_offset_y_decrease_button.expand == 1
-    assert view._overlay_offset_y_decrease_button.width is None
-    assert view._overlay_offset_y_decrease_button.height is None
-    assert view._overlay_offset_y_increase_button.expand == 1
-    assert view._overlay_offset_y_increase_button.width is None
-    assert view._overlay_offset_y_increase_button.height is None
-    assert offset_y_value_row.controls[0].content.value == "▲"
-    assert offset_y_value_row.controls[0].alignment == ft.Alignment.CENTER_RIGHT
-    assert offset_y_value_row.controls[2].content.value == "▼"
-    assert offset_y_value_row.controls[2].alignment == ft.Alignment.CENTER_LEFT
-
-
-def test_overlay_step_buttons_use_large_vr_hit_targets(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    view, _ = _make_settings_view(monkeypatch)
-
-    for button in (
-        view._overlay_distance_decrease_button,
-        view._overlay_distance_increase_button,
-        view._overlay_offset_x_decrease_button,
-        view._overlay_offset_x_increase_button,
-        view._overlay_offset_y_decrease_button,
-        view._overlay_offset_y_increase_button,
-    ):
-        assert isinstance(button, ft.Container)
-        assert button.expand == 1
-        assert button.width is None
-        assert button.height is None
+    assert visual_layer.content is column
+    assert isinstance(value_row, ft.Row)
+    assert value_row.controls[1].content is getattr(view, value_name)
+    assert value_row.spacing == 4
+    assert value_container.width == 84
+    assert isinstance(decrease_button, ft.Container)
+    assert isinstance(increase_button, ft.Container)
+    assert decrease_button.expand == 1
+    assert decrease_button.width is None
+    assert decrease_button.height is None
+    assert increase_button.expand == 1
+    assert increase_button.width is None
+    assert increase_button.height is None
+    assert value_row.controls[0].content.value == left_glyph
+    assert value_row.controls[0].alignment == ft.Alignment.CENTER_RIGHT
+    assert value_row.controls[2].content.value == right_glyph
+    assert value_row.controls[2].alignment == ft.Alignment.CENTER_LEFT
 
 
 def test_translation_card_no_longer_contains_translation_connection_row(
@@ -6990,13 +6941,13 @@ def test_cloud_free_tier_modal_is_single_column_multi_select(
     assert captured["kwargs"]["show_description"] is False
     assert captured["kwargs"]["multi_select"] is True
     assert [option.value for option in captured["options"]] == [
-        STTProviderName.GEMINI_TRANSCRIBE.value,
         STTProviderName.ELEVENLABS_SCRIBE.value,
+        STTProviderName.GEMINI_TRANSCRIBE.value,
         STTProviderName.DEEPGRAM.value,
     ]
     assert [option.label for option in captured["options"]] == [
-        t("provider.gemini_transcribe"),
         t("provider.elevenlabs_scribe"),
+        t("provider.gemini_transcribe"),
         t("provider.deepgram"),
     ]
     assert captured["current"] == (STTProviderName.GEMINI_TRANSCRIBE.value,)

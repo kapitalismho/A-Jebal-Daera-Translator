@@ -112,6 +112,7 @@ from puripuly_heart.config.provider_values import (
     normalize_cloud_free_tier_providers,
     normalize_local_llm_base_url,
     normalize_owned_referral_id,
+    parse_openrouter_llm_model,
 )
 from puripuly_heart.config.resolved import (
     OVERLAY_TARGET_DESKTOP,
@@ -212,8 +213,8 @@ _STT_UI_PROVIDERS = (
     STTProviderName.LOCAL_QWEN,
     STTProviderName.LOCAL_QWEN_GPU,
     STTProviderName.ROLLING_FREE,
-    STTProviderName.GEMINI_TRANSCRIBE,
     STTProviderName.ELEVENLABS_SCRIBE,
+    STTProviderName.GEMINI_TRANSCRIBE,
     STTProviderName.QWEN_ASR,
     STTProviderName.SONIOX,
     STTProviderName.CUSTOM_OFFLINE,
@@ -1442,8 +1443,8 @@ class SettingsView(ft.Column):
             [
                 # self._qwen_region_row removed
                 self._deepgram_key,
-                self._gemini_transcribe_key,
                 self._elevenlabs_scribe_key,
+                self._gemini_transcribe_key,
                 self._soniox_key,
                 self._google_key,
                 self._deepseek_key,
@@ -4238,7 +4239,7 @@ class SettingsView(ft.Column):
                 snapshot,
                 llm_provider=LLMProviderName(state.llm_provider),
                 translation=translation,
-                openrouter_llm_model=OpenRouterLLMModel(state.openrouter_llm_model),
+                openrouter_llm_model=parse_openrouter_llm_model(state.openrouter_llm_model),
                 openrouter_selected_source=OpenRouterCredentialSource(
                     state.openrouter_selected_source
                 ),
@@ -4551,8 +4552,8 @@ class SettingsView(ft.Column):
                 getattr(control, "visible", False)
                 for control in (
                     self._deepgram_key,
-                    getattr(self, "_gemini_transcribe_key", None),
                     getattr(self, "_elevenlabs_scribe_key", None),
+                    getattr(self, "_gemini_transcribe_key", None),
                     self._soniox_key,
                     self._google_key,
                     self._deepseek_key,

@@ -187,6 +187,35 @@ def test_vnext_dict_migrates_gemini_3_flash_nested_fields() -> None:
     }
 
 
+def test_vnext_dict_migrates_legacy_deepseek_openrouter_model() -> None:
+    from puripuly_heart.config.settings_vnext import migration, serialization
+
+    canonical = serialization.to_dict(AppSettingsVNext())
+    translation = canonical["intent"]["translation"]
+    translation["model"] = "deepseek_v4_flash"
+    translation["connection"] = "openrouter"
+    translation["openrouter_model"] = "deepseek/deepseek-v4-flash"
+    translation["openrouter_selected_source"] = "byok"
+    translation["openrouter_selection_alias"] = "deepseek_v4_flash_byok"
+
+    migrated = migration.from_dict(canonical)
+    result = serialization.to_dict(migrated)["intent"]["translation"]
+
+    assert result["openrouter_model"] == "deepseek/deepseek-v4-flash-0731"
+    assert result["openrouter_selection_alias"] == "deepseek_v4_flash_byok"
+
+
+def test_serialization_from_dict_normalizes_legacy_deepseek_openrouter_model() -> None:
+    from puripuly_heart.config.settings_vnext import serialization
+
+    canonical = serialization.to_dict(AppSettingsVNext())
+    canonical["intent"]["translation"]["openrouter_model"] = "deepseek/deepseek-v4-flash"
+
+    loaded = serialization.from_dict(canonical)
+
+    assert loaded.intent.translation.openrouter_model == "deepseek/deepseek-v4-flash-0731"
+
+
 def test_vnext_dict_migrates_shared_qwen_audio_model_to_per_channel_provider() -> None:
     from puripuly_heart.config.settings_vnext import migration, serialization
 

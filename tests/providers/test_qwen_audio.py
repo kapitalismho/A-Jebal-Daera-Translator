@@ -59,6 +59,8 @@ async def open_fake(
     task_start_timeout_s: float = 1,
     task_finish_timeout_s: float = 0.2,
     send_timeout_s: float = 5,
+    keepalive_interval_s: float = 15.0,
+    keepalive_silence_ms: int = 100,
     language_hints: tuple[str, ...] = ("ko",),
 ) -> tuple[QwenAudioStreamingSTTBackend, object, FakeWebSocket, str]:
     socket = FakeWebSocket()
@@ -75,6 +77,8 @@ async def open_fake(
         task_start_timeout_s=task_start_timeout_s,
         task_finish_timeout_s=task_finish_timeout_s,
         send_timeout_s=send_timeout_s,
+        keepalive_interval_s=keepalive_interval_s,
+        keepalive_silence_ms=keepalive_silence_ms,
     )
     opening = asyncio.create_task(backend.open_session())
     while not socket.sent:
@@ -605,3 +609,155 @@ async def test_abort_releases_two_audio_waiters_without_ingress_failures() -> No
     assert socket.closed
     assert b"first-waiter" not in socket.sent
     assert b"second-waiter" not in socket.sent
+
+
+@pytest.mark.asyncio
+async def test_keepalive_sends_zero_silence_after_idle() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.05)
+    try:
+        audio_frames: list[str | bytes] = []
+        for _ in range(200):
+            audio_frames = [item for item in socket.sent if isinstance(item, bytes)]
+            if audio_frames:
+                break
+            await asyncio.sleep(0.01)
+        assert audio_frames
+        assert all(len(frame) == 3200 for frame in audio_frames)
+        assert all(set(frame) == {0} for frame in audio_frames)
+        assert session.state is QwenAudioSessionState.TASK_ACTIVE
+    finally:
+        await session.abort_for_toggle_off()
+
+
+@pytest.mark.asyncio
+async def test_keepalive_stays_quiet_while_audio_flows() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.1)
+    try:
+        for _ in range(10):
+            await session.send_audio(b"\x01\x02")
+            await asyncio.sleep(0.02)
+        audio_frames = [item for item in socket.sent if isinstance(item, bytes)]
+        assert audio_frames
+        assert all(frame == b"\x01\x02" for frame in audio_frames)
+    finally:
+        await session.abort_for_toggle_off()
+
+
+@pytest.mark.asyncio
+async def test_keepalive_skipped_while_finishing_task() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.05, task_finish_timeout_s=1)
+    try:
+        await session.on_speech_end()
+        assert session.state is QwenAudioSessionState.FINISHING_TASK
+        sent_before = len(socket.sent)
+        await asyncio.sleep(0.25)
+        assert session.state is QwenAudioSessionState.FINISHING_TASK
+        assert [item for item in socket.sent[sent_before:] if isinstance(item, bytes)] == []
+    finally:
+        await session.abort_for_toggle_off()
+
+
+@pytest.mark.asyncio
+async def test_keepalive_options_must_be_positive() -> None:
+    for kwargs in (
+        {"keepalive_interval_s": 0},
+        {"keepalive_silence_ms": 0},
+        {"keepalive_silence_ms": 0.01},
+    ):
+        backend = QwenAudioStreamingSTTBackend(
+            api_key="test-key",
+            language_hints=("ko",),
+            connect_timeout_s=1,
+            task_start_timeout_s=1,
+            task_finish_timeout_s=0.2,
+            send_timeout_s=5,
+            **kwargs,
+        )
+        with pytest.raises(ValueError):
+            await backend.open_session()
+
+
+@pytest.mark.asyncio
+async def test_keepalive_stops_after_close() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.05)
+    await session.abort_for_toggle_off()
+    sent_count = len(socket.sent)
+    await asyncio.sleep(0.25)
+    assert len(socket.sent) == sent_count
+
+
+@pytest.mark.asyncio
+async def test_keepalive_skipped_with_queued_audio_boundary_or_flush() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.05)
+    try:
+        session._audio_queue.append(b"queued")
+        session._post_boundary_audio_queue.append(b"post-boundary")
+        session._boundary_requested = True
+        session._flushing_audio = True
+        assert session.state is QwenAudioSessionState.TASK_ACTIVE
+        sent_before = len(socket.sent)
+        await asyncio.sleep(0.25)
+        assert session.state is QwenAudioSessionState.TASK_ACTIVE
+        assert [item for item in socket.sent[sent_before:] if isinstance(item, bytes)] == []
+    finally:
+        await session.abort_for_toggle_off()
+
+
+@pytest.mark.asyncio
+async def test_keepalive_timer_resets_on_task_started() -> None:
+    _, session, socket, task_id = await open_fake(keepalive_interval_s=0.2)
+    try:
+        for _ in range(300):
+            if sum(1 for item in socket.sent if isinstance(item, bytes)) >= 2:
+                break
+            await asyncio.sleep(0.01)
+        keepalive_count = sum(1 for item in socket.sent if isinstance(item, bytes))
+        assert keepalive_count >= 2
+        await asyncio.sleep(0.1)
+        await session.on_speech_end()
+        await socket.push({"header": {"event": "task-finished", "task_id": task_id}})
+        second_id = None
+        for _ in range(300):
+            for item in socket.sent:
+                if isinstance(item, str):
+                    header = json.loads(item).get("header", {})
+                    if header.get("action") == "run-task" and header.get("task_id") != task_id:
+                        second_id = header.get("task_id")
+            if second_id:
+                break
+            await asyncio.sleep(0.01)
+        assert second_id
+        await socket.push({"header": {"event": "task-started", "task_id": second_id}})
+        await asyncio.sleep(0.19)
+        assert session.state is QwenAudioSessionState.TASK_ACTIVE
+        assert sum(1 for item in socket.sent if isinstance(item, bytes)) == keepalive_count
+    finally:
+        await session.abort_for_toggle_off()
+
+
+@pytest.mark.asyncio
+async def test_keepalive_failure_fails_session() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.05)
+    socket.fail_audio = True
+    with pytest.raises(QwenAudioProtocolError, match="keepalive send failed"):
+        await asyncio.wait_for(next_event(session), timeout=2)
+    assert session.state is QwenAudioSessionState.FAILED
+    assert socket.closed
+
+
+@pytest.mark.asyncio
+async def test_abort_drains_keepalive_blocked_in_audio_send() -> None:
+    _, session, socket, _ = await open_fake(keepalive_interval_s=0.01)
+    socket.block_audio = True
+    keepalive = session._keepalive_task
+    assert keepalive is not None
+    try:
+        await asyncio.wait_for(socket.audio_started.wait(), timeout=1)
+        await asyncio.wait_for(session.abort_for_toggle_off(), timeout=1)
+        assert socket.closed
+        assert keepalive.done()
+        assert not any(isinstance(item, bytes) for item in socket.sent)
+    finally:
+        keepalive.cancel()
+        await asyncio.gather(keepalive, return_exceptions=True)
+        await session.abort_for_toggle_off()

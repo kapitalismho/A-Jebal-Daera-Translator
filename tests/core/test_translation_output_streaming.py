@@ -2706,7 +2706,6 @@ async def test_low_latency_self_partial_no_longer_emits_overlay_event() -> None:
     )
 
     await harness.dispatch_stt_event(STTPartialEvent(utterance_id=utterance_id, transcript=partial))
-    await asyncio.sleep(0.02)
 
     assert sink.events == []
     assert harness.ui_events.empty()

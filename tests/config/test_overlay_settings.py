@@ -2,11 +2,21 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from puripuly_heart.config.desktop_overlay_values import DESKTOP_FLET_SIZE_PRESETS
+from puripuly_heart.config.desktop_overlay_values import (
+    DESKTOP_FLET_DEFAULT_SIZE_PRESET,
+    DESKTOP_FLET_SIZE_PRESET_ORDER,
+    DESKTOP_FLET_SIZE_PRESETS,
+)
 from puripuly_heart.config.settings_vnext import serialization
 from puripuly_heart.config.settings_vnext.schema import (
     VNEXT_SETTINGS_SCHEMA_VERSION,
     AppSettingsVNext,
+)
+from puripuly_heart.ui.desktop_overlay_surface.contract import (
+    _DESKTOP_CAPTION_SIZE_PRESETS as RENDERER_SIZE_PRESETS,
+)
+from puripuly_heart.ui.desktop_overlay_surface.renderer import (
+    _desktop_caption_size_preset_for_dimensions,
 )
 
 
@@ -33,14 +43,17 @@ def test_overlay_settings_desktop_flet_defaults_serialize_canonical_shape() -> N
 
 
 def test_overlay_settings_desktop_flet_size_presets_match_c_light_caption_layout() -> None:
-    assert DESKTOP_FLET_SIZE_PRESETS == {
-        "tiny": (640, 160),
-        "xsmall": (960, 240),
-        "small": (1152, 288),
-        "medium": (1344, 336),
-        "large": (1600, 400),
-        "xlarge": (1792, 448),
-    }
+    assert DESKTOP_FLET_DEFAULT_SIZE_PRESET in DESKTOP_FLET_SIZE_PRESETS
+    assert DESKTOP_FLET_DEFAULT_SIZE_PRESET in RENDERER_SIZE_PRESETS
+    for preset_id in DESKTOP_FLET_SIZE_PRESET_ORDER:
+        renderer_preset = RENDERER_SIZE_PRESETS[preset_id]
+        assert (renderer_preset.window_width, renderer_preset.window_height) == (
+            DESKTOP_FLET_SIZE_PRESETS[preset_id]
+        ), f"desktop caption preset {preset_id} diverged from settings"
+        resolved = _desktop_caption_size_preset_for_dimensions(
+            *DESKTOP_FLET_SIZE_PRESETS[preset_id]
+        )
+        assert resolved.id == preset_id
 
 
 def test_overlay_settings_desktop_flet_tiny_preset_round_trips() -> None:

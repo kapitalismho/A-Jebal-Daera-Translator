@@ -743,7 +743,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn default_presentation_diagnostics_report_p05() {
+    fn records_are_bounded_and_shutdown_removes_owned_work() {
         let mut diagnostics = PresentationDiagnostics::new();
         diagnostics.accept_logical_revision(
             PresentationBackend::Test,
@@ -754,11 +754,6 @@ mod tests {
             .records()
             .iter()
             .all(|record| record.retry_profile == "p05"));
-    }
-
-    #[test]
-    fn records_are_bounded_and_shutdown_removes_owned_work() {
-        let mut diagnostics = PresentationDiagnostics::new();
         for _ in 0..200 {
             diagnostics.accept_logical_revision(
                 PresentationBackend::Test,

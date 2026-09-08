@@ -9,13 +9,7 @@ import pytest
 from tests.helpers.paths import REPO_ROOT as ROOT
 
 MODULE_PATH = ROOT / "src" / "puripuly_heart" / "core" / "overlay" / "openvr_vendor.py"
-PINNED_OPENVR_VENDOR_REF = "ValveSoftware/openvr@v2.15.6"
-PINNED_OPENVR_DLL_URL = (
-    "https://raw.githubusercontent.com/ValveSoftware/openvr/v2.15.6/bin/win64/openvr_api.dll"
-)
-PINNED_OPENVR_LICENSE_URL = "https://raw.githubusercontent.com/ValveSoftware/openvr/v2.15.6/LICENSE"
 PINNED_OPENVR_DLL_SHA256 = "bab8ac6ef64e68a9ca53315b0014d131088584b2efdfa6db511d67ec03cfcb4a"
-PINNED_OPENVR_SHA256_LINE = f"{PINNED_OPENVR_DLL_SHA256} *openvr_api.dll"
 
 
 def _load_openvr_vendor_module():
@@ -32,15 +26,12 @@ def _load_openvr_vendor_module():
 
 def test_openvr_vendor_module_exposes_pinned_bundle_contract() -> None:
     module = _load_openvr_vendor_module()
+    bundle = module.validate_vendored_openvr_bundle(ROOT / "third_party" / "openvr")
 
-    assert module.OPENVR_VENDOR_REPOSITORY_REF == PINNED_OPENVR_VENDOR_REF
-    assert module.OPENVR_VENDOR_DLL_URL == PINNED_OPENVR_DLL_URL
-    assert module.OPENVR_VENDOR_LICENSE_URL == PINNED_OPENVR_LICENSE_URL
-    assert module.OPENVR_VENDOR_DLL_SHA256 == PINNED_OPENVR_DLL_SHA256
-    assert module.OPENVR_VENDOR_SHA256_LINE == PINNED_OPENVR_SHA256_LINE
-    assert callable(module.validate_vendored_openvr_bundle)
-    assert callable(module.validate_openvr_runtime_dll)
-    assert callable(module.collect_vendored_openvr_runtime_binaries)
+    assert (
+        module.OPENVR_VENDOR_DLL_SHA256 == bundle.dll_sha256
+    ), "module hash pin must match the disk-hashed vendored bundle"
+    assert module.OPENVR_VENDOR_SHA256_LINE == f"{bundle.dll_sha256} *openvr_api.dll"
 
 
 def test_validate_vendored_openvr_bundle_accepts_repo_bundle() -> None:

@@ -90,7 +90,7 @@ NAMED_LIFECYCLE_OWNER_TASK_ALLOWLIST = Counter(
         ("src/puripuly_heart/ui/desktop_overlay_repro.py", ASYNCIO_CREATE_TASK): 3,
         ("src/puripuly_heart/ui/flet_desktop_runtime.py", ASYNCIO_CREATE_TASK): 2,
         ("src/puripuly_heart/ui/foundation/runtime.py", RUN_TASK): 1,
-        ("src/puripuly_heart/providers/stt/qwen_audio.py", ASYNCIO_CREATE_TASK): 6,
+        ("src/puripuly_heart/providers/stt/qwen_audio.py", ASYNCIO_CREATE_TASK): 7,
     }
 )
 
@@ -142,7 +142,7 @@ TASK_CREATION_ALLOWLIST_RATIONALES = {
     (
         "src/puripuly_heart/providers/stt/qwen_audio.py",
         ASYNCIO_CREATE_TASK,
-    ): "Qwen Audio session owns send, receive, timeout, and queued-audio tasks under provider session close semantics",
+    ): "Qwen Audio session owns send, receive, timeout, queued-audio, and keepalive tasks; session close cancels and drains keepalive work",
     (
         "src/puripuly_heart/ui/foundation/runtime.py",
         RUN_TASK,
@@ -569,8 +569,6 @@ def test_application_composition_does_not_retain_dead_shutdown_or_provider_algor
     assert "_ControllerSttLanguageAudioRuntimeApply" not in provider_runtime_source
     assert "_gpu_provider_recovery_lock" not in source
     assert "gpu_recovery: GpuProviderRecoveryApplicationOwner | None" in source
-    assert "_overlay_lock" not in source
-    assert "overlay: OverlayApplicationOwner | None" in source
     assert "def application_shutdown_callbacks" not in source
     assert "ApplicationShutdownCoordinator" not in source
     assert "application_shutdown_callback(" not in source

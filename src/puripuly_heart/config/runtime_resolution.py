@@ -6,8 +6,6 @@ from types import MappingProxyType
 from typing import Final, Literal, TypeAlias, cast
 
 from puripuly_heart.config.llm_profiles import (
-    LEGACY_OPENROUTER_MODEL_DEEPSEEK_V4_FLASH,
-    LEGACY_OPENROUTER_MODEL_GEMINI_31_FLASH_LITE,
     OPENROUTER_CREDENTIAL_SOURCE_BYOK,
     OPENROUTER_CREDENTIAL_SOURCE_MANAGED,
     OPENROUTER_CREDENTIAL_SOURCE_NONE,
@@ -17,6 +15,7 @@ from puripuly_heart.config.llm_profiles import (
     OPENROUTER_MODEL_GEMMA_4_31B_IT,
     OPENROUTER_MODEL_QWEN_35_FLASH_02_23,
     get_openrouter_llm_profile,
+    normalize_legacy_openrouter_model,
     openrouter_alias_for_fields,
 )
 from puripuly_heart.config.resolved import (
@@ -462,15 +461,7 @@ def _explicit_openrouter_source(value: object) -> OpenRouterSource | None:
 
 
 def _normalize_openrouter_model(value: object) -> str:
-    if isinstance(value, str):
-        legacy_value = value.strip()
-        if legacy_value == LEGACY_OPENROUTER_MODEL_DEEPSEEK_V4_FLASH:
-            value = OPENROUTER_MODEL_DEEPSEEK_V4_FLASH
-        elif legacy_value in {
-            "google/gemini-3-flash-preview",
-            LEGACY_OPENROUTER_MODEL_GEMINI_31_FLASH_LITE,
-        }:
-            value = OPENROUTER_MODEL_GEMINI_37_FLASH
+    value = normalize_legacy_openrouter_model(value)
     return _normalize_allowed(
         value,
         allowed=_OPENROUTER_MODELS,

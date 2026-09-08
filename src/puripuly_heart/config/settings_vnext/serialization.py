@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from dataclasses import asdict, fields, is_dataclass, replace
 from typing import Any, Final, Literal, Union, get_args, get_origin, get_type_hints
 
+from puripuly_heart.config.llm_profiles import normalize_legacy_openrouter_model
 from puripuly_heart.config.settings_vnext.schema import (
     DEFAULT_TRANSLATION_FALLBACK_SELECTION_ALIAS,
     VNEXT_SETTINGS_SCHEMA_VERSION,
@@ -166,8 +167,10 @@ def from_dict(data: Mapping[str, Any]) -> AppSettingsVNext:
     _validate_persisted_types(data)
     default = AppSettingsVNext(settings_version=VNEXT_SETTINGS_SCHEMA_VERSION)
     compatible_data = _with_current_settings_version(
-        _project_legacy_translation_fallback_fields(
-            _downgrade_unbound_provider_verification_entries(data)
+        _normalize_legacy_openrouter_model_fields(
+            _project_legacy_translation_fallback_fields(
+                _downgrade_unbound_provider_verification_entries(data)
+            )
         )
     )
     merged = _merge_dataclass(default, compatible_data, path="settings")
@@ -272,6 +275,30 @@ def _with_current_settings_version(data: Mapping[str, Any]) -> Mapping[str, Any]
     compatible = copy.deepcopy(dict(data))
     compatible["settings_version"] = VNEXT_SETTINGS_SCHEMA_VERSION
     return compatible
+
+
+def _normalize_legacy_openrouter_model_fields(data: Mapping[str, Any]) -> Mapping[str, Any]:
+    intent = data.get("intent")
+    if not isinstance(intent, Mapping):
+        return data
+    translation = intent.get("translation")
+    if not isinstance(translation, Mapping):
+        return data
+    raw_model = translation.get("openrouter_model")
+    normalized = normalize_legacy_openrouter_model(raw_model)
+    if (
+        isinstance(raw_model, str)
+        and isinstance(normalized, str)
+        and normalized != raw_model.strip()
+    ):
+        compatible = copy.deepcopy(dict(data))
+        compatible_intent = dict(compatible.get("intent", {}))
+        compatible_translation = dict(compatible_intent.get("translation", {}))
+        compatible_translation["openrouter_model"] = normalized
+        compatible_intent["translation"] = compatible_translation
+        compatible["intent"] = compatible_intent
+        return compatible
+    return data
 
 
 def _downgrade_unbound_provider_verification_entries(

@@ -711,12 +711,17 @@ async def test_overlay_bridge_records_disconnect_code_and_reason(
     )
     await bridge.start()
 
+    async def _wait_until_connection_closed() -> None:
+        while not any(event["event"] == "connection_closed" for event in diagnostics.bridge_events):
+            await asyncio.sleep(0)
+
     try:
         async with connect(bridge.url) as ws:
             await ws.send(json.dumps({"type": "auth", "session_token": "expected-token"}))
             await asyncio.wait_for(ws.recv(), timeout=0.5)
             await ws.close(code=4001, reason="client_bye")
-            await asyncio.sleep(0.05)
+            await ws.wait_closed()
+            await asyncio.wait_for(_wait_until_connection_closed(), timeout=2.0)
     finally:
         await bridge.stop()
 

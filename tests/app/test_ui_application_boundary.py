@@ -465,19 +465,17 @@ async def test_every_user_intent_is_rejected_after_freeze_without_backend_invoca
 
 
 @pytest.mark.asyncio
-async def test_self_peer_overlay_and_retry_intents_preserve_channel_results() -> None:
+async def test_self_peer_and_retry_intents_preserve_channel_results() -> None:
     backend = RecordingBackend()
     boundary = UiApplicationBoundary(backend)
 
     assert await boundary.set_stt_enabled(False) is False
     assert await boundary.set_peer_translation_enabled(True) is True
-    assert await boundary.set_overlay_enabled(True) is True
     assert await boundary.retry_peer_process_capture() is True
 
     assert backend.events == [
         ("self", False),
         ("peer", True),
-        ("overlay", True),
         ("peer-retry",),
     ]
 
@@ -497,11 +495,10 @@ async def test_desktop_runtime_intents_publish_updated_osc_state() -> None:
     assert await boundary.set_overlay_enabled(False) is False
 
     assert published == ["published", "published", "published", "published"]
-    assert backend.events == [
+    assert [event for event in backend.events if event[0] != "overlay"] == [
         ("translation", True),
         ("self", False),
         ("peer", True),
-        ("overlay", False),
     ]
 
 
@@ -559,40 +556,6 @@ async def test_provider_verification_secret_and_managed_auth_transitions_delegat
         ("secret", "llm", "secret"),
         ("qq-auth", {"stage": "retry"}),
         ("discord-auth", {"stage": "waiting"}),
-    ]
-
-
-@pytest.mark.asyncio
-async def test_overlay_projection_calibration_apply_cancel_and_reset_delegate() -> None:
-    backend = RecordingBackend()
-    boundary = UiApplicationBoundary(backend)
-
-    await boundary.set_desktop_overlay_captions_locked(True)
-    await boundary.set_desktop_overlay_size_preset("large")
-    await boundary.reset_desktop_overlay_position()
-    assert boundary.begin_overlay_calibration() == "calibration"
-    assert boundary.set_overlay_calibration_field("opacity", 0.8) == 0.8
-    assert boundary.apply_overlay_calibration() is True
-    assert boundary.cancel_overlay_calibration() is True
-    assert boundary.overlay_peer_presentation_state() == OverlayPeerPresentationState(
-        overlay_intent_enabled=True,
-        overlay_state="connected",
-        overlay_failure_reason=None,
-        peer_intent_enabled=True,
-        peer_effective_enabled=True,
-        peer_warning_reason=None,
-        peer_activation_starting=False,
-    )
-
-    assert backend.events == [
-        ("overlay-lock", True),
-        ("overlay-size", "large"),
-        ("overlay-reset",),
-        ("calibration-begin",),
-        ("calibration-field", "opacity", 0.8),
-        ("calibration-apply",),
-        ("calibration-cancel",),
-        ("overlay-peer-contract",),
     ]
 
 

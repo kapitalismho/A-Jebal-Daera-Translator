@@ -10,7 +10,7 @@
 
 <p align="center">
 
-  <img src="https://img.shields.io/badge/version-2.6.0-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/version-2.6.1-blue" alt="Version" />
 
   <img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue" alt="License: AGPL-3.0-or-later" />
 
@@ -108,24 +108,24 @@ VRChat, Discord를 포함하여 여러 환경에서 사용 가능해요.
 #### 권장 모델
 
 
-| LLM \ ASR                 | Local ASR | Soniox | Qwen3 ASR (Cloud) | Deepgram |
-| ------------------------- | --------- | ------ | ----------------- | -------- |
-| **Gemma 4 E4B (Local)**   | 무제한       | 5,000회 | 3,660회            | 1,290회   |
-| **Gemma 4 26B A4B + 31B** | 13,940회   | 3,680회 | 2,900회            | 1,180회   |
-| **DeepSeek V4 Flash**     | 11,620회   | 3,500회 | 2,780회            | 1,160회   |
+| LLM \ ASR                 | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
+| ------------------------- | --------- | ------------------- | ------ | ---------- |
+| **Gemma 4 E4B (Local)**   | 무제한       | 무제한                 | 5,000회 | 3,660회     |
+| **Gemma 4 26B A4B + 31B** | 13,940회   | 13,940회             | 3,680회 | 2,900회     |
+| **DeepSeek V4 Flash**     | 11,620회   | 11,620회             | 3,500회 | 2,780회     |
 
 
 #### 기타 모델
 
 
-| LLM \ ASR                    | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
-| ---------------------------- | --------- | ------ | ---------------- | -------- |
-| **Gemma 4 12B (Local)**      | 무제한       | 5,000회 | 3,660회           | 1,290회   |
-| **Gemma 4 26B A4B**          | 14,380회   | 3,710회 | 2,920회           | 1,180회   |
-| **Gemma 4 31B (OpenRouter)** | 10,940회   | 3,430회 | 2,740회           | 1,150회   |
-| **Gemma 4 31B (Cerebras)**   | 920회      | 770회   | 730회             | 540회     |
-| **Gemini 3.7 Flash**         | 1,160회    | 940회   | 880회             | 610회     |
-| **Qwen 3.8 Flash**            | 7,460회    | —      | 2,460회           | —        |
+| LLM \ ASR                    | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
+| ---------------------------- | --------- | ------------------- | ------ | ---------- |
+| **Gemma 4 12B (Local)**      | 무제한       | 무제한                 | 5,000회 | 3,660회     |
+| **Gemma 4 26B A4B**          | 14,380회   | 14,380회             | 3,710회 | 2,920회     |
+| **Gemma 4 31B (OpenRouter)** | 10,940회   | 10,940회             | 3,430회 | 2,740회     |
+| **Gemma 4 31B (Cerebras)**   | 920회      | 920회                | 770회   | 730회       |
+| **Gemini 3.7 Flash**         | 1,160회    | 1,160회              | 940회   | 880회       |
+| **Qwen 3.8 Flash**            | 7,460회    | 7,460회              | 2,990회 | 2,460회     |
 
 
 ### 발화당 비용
@@ -133,24 +133,24 @@ VRChat, Discord를 포함하여 여러 환경에서 사용 가능해요.
 #### 권장 모델
 
 
-| LLM \ ASR                 | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
-| ------------------------- | --------- | ------ | ---------------- | -------- |
-| **Gemma 4 E4B (Local)**   | 0원        | ~0.3원  | ~0.4원            | ~1.1원    |
-| **Gemma 4 26B A4B + 31B** | ~0.1원     | ~0.4원  | ~0.5원            | ~1.2원    |
-| **DeepSeek V4 Flash**     | ~0.12원    | ~0.4원  | ~0.5원            | ~1.2원    |
+| LLM \ ASR                 | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
+| ------------------------- | --------- | ------------------- | ------ | ---------- |
+| **Gemma 4 E4B (Local)**   | 0원        | 0원                  | ~0.3원  | ~0.4원      |
+| **Gemma 4 26B A4B + 31B** | ~0.1원     | ~0.1원               | ~0.4원  | ~0.5원      |
+| **DeepSeek V4 Flash**     | ~0.12원    | ~0.12원              | ~0.4원  | ~0.5원      |
 
 
 #### 기타 모델
 
 
-| LLM \ ASR                    | Local ASR | Soniox | Qwen ASR (Cloud) | Deepgram |
-| ---------------------------- | --------- | ------ | ---------------- | -------- |
-| **Gemma 4 12B (Local)**      | 0원        | ~0.3원  | ~0.4원            | ~1.1원    |
-| **Gemma 4 26B A4B**          | ~0.1원     | ~0.4원  | ~0.5원            | ~1.2원    |
-| **Gemma 4 31B (OpenRouter)** | ~0.13원    | ~0.4원  | ~0.5원            | ~1.2원    |
-| **Gemma 4 31B (Cerebras)**   | ~1.5원     | ~1.8원  | ~1.9원            | ~2.6원    |
-| **Gemini 3.7 Flash**         | ~1.2원     | ~1.5원  | ~1.6원            | ~2.3원    |
-| **Qwen 3.8 Flash**            | ~0.2원     | —      | ~0.6원            | —        |
+| LLM \ ASR                    | Local ASR | Cloud Free Tier ASR | Soniox | Qwen Audio |
+| ---------------------------- | --------- | ------------------- | ------ | ---------- |
+| **Gemma 4 12B (Local)**      | 0원        | 0원                  | ~0.3원  | ~0.4원      |
+| **Gemma 4 26B A4B**          | ~0.1원     | ~0.1원               | ~0.4원  | ~0.5원      |
+| **Gemma 4 31B (OpenRouter)** | ~0.13원    | ~0.13원              | ~0.4원  | ~0.5원      |
+| **Gemma 4 31B (Cerebras)**   | ~1.5원     | ~1.5원               | ~1.8원  | ~1.9원      |
+| **Gemini 3.7 Flash**         | ~1.2원     | ~1.2원               | ~1.5원  | ~1.6원      |
+| **Qwen 3.8 Flash**            | ~0.2원     | ~0.2원               | ~0.5원  | ~0.6원      |
 
 
 - *(입력 900 토큰 + 출력 12토큰) x 발화 1회당 평균 LLM 호출 횟수 1.2회 가정*
@@ -166,7 +166,9 @@ VRChat, Discord를 포함하여 여러 환경에서 사용 가능해요.
 
 | 서비스               | 무료 크레딧      | 기한  | 비고         |
 | ----------------- | ----------- | --- | ---------- |
-| **Deepgram**      | $200        | 없음  | -          |
+| **Deepgram**      | $200        | 없음  | 카드 등록 불필요 |
+| **ElevenLabs**    | 10,000 크레딧 | 매월 갱신 | 카드 등록 불필요 |
+| **Gemini 3.5 Transcribe** | 프리티어 | 없음 | 프리티어에서 사실상 무제한 |
 | **Alibaba Cloud** | 모델당 100만 토큰 | 90일 | 싱가포르 리전 기준 |
 | **Alibaba Cloud** | ¥300        | 1년  | 중국 내 학생 대상 |
 
@@ -210,7 +212,7 @@ GPU 추론은 Vulkan을 사용했어요. Radeon이든 Arc든 제조사와 상관
 2. PuriPuly 설치
 3. **TALK** 버튼 클릭
 4. **TRANS** 버튼 클릭 후 디스코드 인증
-5. **CAPTIONS** 버튼을 눌러 VR 자막 켜기
+5. **CAPTIONS** 버튼을 눌러 자막 켜기
 6. (선택) **LISTEN** 버튼을 눌러 상대 음성 번역 켜기
   > 상대 음성 번역 기능이 제대로 작동하기 위해서는 시끄럽지 않은 공간이 필요해요. VRChat에서 사용할 경우 Earmuff 기능을 사용해서 환경을 통제해주세요.
 7. VRChat에서 OSC 활성화: Action menu → Settings → OSC → Enable
@@ -229,7 +231,7 @@ GPU 추론은 Vulkan을 사용했어요. Radeon이든 Arc든 제조사와 상관
 
 Soniox/Gemini/Deepgram이 차단된 지역이라면 아래와 같은 조합으로 사용해주세요.
 
-- STT: **Qwen ASR**
+- STT: **Qwen Audio**
 - LLM: **DeepSeek V4 Flash**
   > 디스코드 대신 QQ를 통해 인증할 수 있어요.
 
@@ -242,11 +244,10 @@ Soniox/Gemini/Deepgram이 차단된 지역이라면 아래와 같은 조합으�
 번역용 LLM은 Openrouter를 통해서 Gemma 4 모델을 사용하는 것을 추천해요.
 
 혹시 이왕 설정하는 김에 ASR 쪽도 같이 설정하면 어떨까요?
-PuriPuly는 클라우드 STT와 결합했을 때 최상의 경험을 제공해요.
-예를 들어 같은 Qwen ASR이라도 로컬과 클라우드의 음성 인식 성능은 상당히 차이나요.
+PuriPuly는 클라우드 ASR와 결합했을 때 최상의 경험을 제공해요.
+또한 클라우드 프리 티어 옵션을 통해 무료로 사용할 수 있어요.
 
-우선 Deepgram으로 시작하는걸 추천해요.
-가입만 하면 무료 크레딧 200달러 어치를 받을 수 있어요.
+클라우드 ASR은 우선 Gemini 3.5 Transcribe으로 시작하는걸 추천해요.
 
 <details>
 <summary><h3>OpenRouter</h3></summary>
@@ -311,6 +312,60 @@ Authorize 버튼을 눌렀는데도 인증이 안되어 있다면 재시도 하�
 </details>
 
 <details>
+<summary><h3>Cloud Free Tier ASR (Gemini, Deepgram, ElevenLabs)</h3></summary>
+
+1. 두 ASR 옵션을 사진과 같이 설정해주세요.
+   ![step1](docs/images/ASR_freetier/1.png)
+
+2. (선택) 사용하고자 하는 ASR 제공자들을 선택해주세요. 
+   ![step1](docs/images/ASR_freetier/2.png)
+
+3. 가이드를 보고 API 키를 발급한 후 API 키 폼에 입력해주세요.
+
+<details>
+<summary><h3>Gemini</h3></summary>
+
+1. [Google AI Studio](https://aistudio.google.com/apikey)에 접속해서 **Get API key** 버튼을 클릭하세요.
+   ![step1](docs/images/gemini/1.png)
+
+2. 새로운 프로젝트를 만드세요.
+   ![step2](docs/images/gemini/2.png)
+
+3. 임의의 이름을 지어주세요.
+   ![step3](docs/images/gemini/3.png)
+
+4. 만든 프로젝트를 선택하고 **Create key**를 눌러주세요
+   ![step4](docs/images/gemini/4.png)
+
+5. 동그라미 친 곳을 눌러주세요.
+   ![step5](docs/images/gemini/5.png)
+
+6. 동그라미 친 곳을 눌러 key를 복사하세요.
+   ![step6](docs/images/gemini/6.png)
+
+<details>
+<summary><h3>번역 엔진으로 제미나이 3.7 Flash를 사용하려면</h3></summary>
+
+7. 노란색으로 강조된 **Set Up Billing** 버튼을 눌러 유료 티어로 전환하세요.
+티어 전환에는 약간의 시간이 필요할 수 있어요.
+   ![step7](docs/images/gemini/7.png)
+
+</details>
+
+<details>
+<summary><h3>제미나이 유료 구독자라면</h3></summary>
+
+8. [Google Developer Program](https://developers.google.com/program/my-benefits) 에 들어가 프로그램에 참여하세요
+   ![step8](docs/images/gemini/8.png)
+
+9. 7 단계에서 설정한 유료 티어 프로젝트를 선택하세요
+   ![step9](docs/images/gemini/9.png)
+
+</details>
+
+</details>
+
+<details>
 <summary><h3>Deepgram</h3></summary>
 
 1. [Deepgram Console](https://console.deepgram.com/)에 접속하여 로그인하세요.
@@ -334,40 +389,34 @@ Authorize 버튼을 눌렀는데도 인증이 안되어 있다면 재시도 하�
 </details>
 
 <details>
-<summary><h3>Gemini</h3></summary>
+<summary><h3>ElevenLabs</h3></summary>
 
-1. [Google AI Studio](https://aistudio.google.com/apikey)에 접속해서 **Get API key** 버튼을 클릭하세요.
-   ![step1](docs/images/gemini/1.png)
+1. [ElevenLabs](https://elevenlabs.io)에 접속하여 'Sign up' 버튼 눌러주세요.
+   ![step1](docs/images/elevenlabs/1.png)
 
-2. 새로운 프로젝트를 만드세요.
-   ![step2](docs/images/gemini/2.png)
+2. 'Continue' 버튼을 눌러주세요.
+   ![step1](docs/images/elevenlabs/2.png)
 
-3. 임의의 이름을 지어주세요.
-   ![step3](docs/images/gemini/3.png)
+3. 이름를 작성한 후 체크 박스를 눌러주세요. 그 다음 'Next' 버튼을 눌러주세요.
+   ![step1](docs/images/elevenlabs/3.png)
 
-4. 만든 프로젝트를 선택하고 **Create key**를 눌러주세요
-   ![step4](docs/images/gemini/4.png)
+4. 계속 'Skip' 버튼을 눌러주세요.
+   ![step1](docs/images/elevenlabs/4.png)
 
-5. 동그라미 친 곳을 눌러주세요.
-   ![step5](docs/images/gemini/5.png)
+5. 결제 창이 나오면 'Skip' 버튼을 눌러주세요.
+   ![step1](docs/images/elevenlabs/5.png)
 
-6. 동그라미 친 곳을 눌러 key를 복사하세요.
-   ![step6](docs/images/gemini/6.png)
+6. 왼쪽 하단의 'Switch' 버튼을 누른 후 'ElevenAPI'로 전환해주세요.
+   ![step1](docs/images/elevenlabs/6.png)
 
-7. (권장) 노란색으로 강조된 **Set Up Billing** 버튼을 눌러 유료 티어로 전환하세요.
-티어 전환에는 약간의 시간이 필요할 수 있어요.
-   ![step7](docs/images/gemini/7.png)
+7. 왼쪽 탭에서 'API keys'를 누른 후 중앙의 'Create Key'를 눌러주세요.
+   ![step1](docs/images/elevenlabs/7.png)
 
-<details>
-<summary><h3>제미나이 유료 구독자라면</h3></summary>
+8. Speech to Text 권한을 부여한 후에 'Create Key' 버튼을 눌러주세요.
+   ![step1](docs/images/elevenlabs/8.png)
 
-8. [Google Developer Program](https://developers.google.com/program/my-benefits) 에 들어가 프로그램에 참여하세요
-   ![step8](docs/images/gemini/8.png)
-
-9. 7 단계에서 설정한 유료 티어 프로젝트를 선택하세요
-   ![step9](docs/images/gemini/9.png)
-
-</details>
+9. API 키를 복사하여 PuriPuly에 붙여넣어주세요.
+   ![step1](docs/images/elevenlabs/9.png)
 
 </details>
 
@@ -452,6 +501,7 @@ Authorize 버튼을 눌렀는데도 인증이 안되어 있다면 재시도 하�
 
 </details>
 
+
 ---
 
 ## 아키텍처
@@ -459,10 +509,6 @@ Authorize 버튼을 눌렀는데도 인증이 안되어 있다면 재시도 하�
 ![PuriPuly Heart 헥사고널 아키텍처 다이어그램](docs/architecture-light.png)
 
 [`ARCHITECTURE.md`](ARCHITECTURE.md)를 참고하세요.
-
-## 로드맵
-
-앞으로의 작업은 [PuriPuly 프로젝트 보드](https://github.com/users/kapitalismho/projects/2)에서 공개적으로 관리되고 있어요.
 
 ---
 
