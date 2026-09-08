@@ -15,12 +15,14 @@ class RuntimePipelineStartCallbacks:
     open_peer_ingress: RuntimePipelineAsyncCallback
     start_translation_turns: RuntimePipelineAsyncCallback
     start_local_asr: RuntimePipelineAsyncCallback
+    start_vrchat_scene: RuntimePipelineAsyncCallback
 
 
 @dataclass(frozen=True, slots=True)
 class RuntimePipelineCloseCallbacks:
     close_self_capture: RuntimePipelineCloseCallback
     close_peer_capture: RuntimePipelineCloseCallback
+    close_vrchat_scene: RuntimePipelineCloseCallback
     close_self_ingress: RuntimePipelineCloseCallback
     close_peer_ingress: RuntimePipelineCloseCallback
     close_translation_turns: RuntimePipelineCloseCallback

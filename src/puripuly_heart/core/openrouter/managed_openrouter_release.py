@@ -1893,6 +1893,7 @@ class ManagedOpenRouterLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         delegate = await self._ensure_delegate()
         return await delegate.translate(
@@ -1902,6 +1903,7 @@ class ManagedOpenRouterLLMProvider(LLMProvider):
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
 
     async def close(self) -> None:

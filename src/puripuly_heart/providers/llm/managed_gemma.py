@@ -261,6 +261,7 @@ class ManagedGemmaLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         if self._closed:
             raise RuntimeError("managed Gemma provider is closed")
@@ -278,7 +279,11 @@ class ManagedGemmaLLMProvider:
                 source_language=source_language,
                 target_language=target_language,
                 system_prompt=system_prompt,
-                user_message=build_translation_user_message(text=text, context=context),
+                user_message=build_translation_user_message(
+                    text=text,
+                    context=context,
+                    scene_participant_count=scene_participant_count,
+                ),
                 vulkan_device=self.vulkan_device,
             )
         except Exception as exc:

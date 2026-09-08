@@ -307,6 +307,7 @@ async def test_in_flight_turn_keeps_output_policy_and_later_turn_uses_replacemen
             source_language,
             target_language,
             context="",
+            scene_participant_count=None,
         ):
             _ = (system_prompt, context)
             await self.started.put(None)

@@ -71,6 +71,7 @@ from puripuly_heart.core.runtime.self_capture import SelfCaptureSessionOwner
 from puripuly_heart.core.runtime.stt_session_projection import SttSessionStateProjection
 from puripuly_heart.core.self_capture import SelfCaptureSessionConfig
 from puripuly_heart.core.storage.secrets import SecretStore
+from puripuly_heart.core.vrchat_scene_service import VrchatSceneService
 from puripuly_heart.domain.events import UIEvent
 
 from .wiring_llm_factory import (
@@ -92,6 +93,10 @@ from .wiring_translation_backend import create_translation_backend
 from .wiring_translation_runtime_configuration import (
     build_translation_runtime_config,
 )
+
+
+def _default_vrchat_scene_service() -> VrchatSceneService:
+    return VrchatSceneService()
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,6 +189,8 @@ class RuntimePipelineResourceOwner:
     translation_turns: TranslationTurnLifecycleOwner | None = None
     local_asr_runtime: LocalASRProviderRuntimePort | None = None
     llm_runtime: ProviderRuntimeHandle | None = None
+    vrchat_scene: VrchatSceneService | None = None
+    vrchat_scene_owned: bool = True
     self_capture: SelfCaptureSessionOwner | None = None
     peer_capture: PeerCaptureSessionOwner | None = None
     self_ingress_open: bool = False
@@ -198,10 +205,12 @@ class RuntimePipelineResourceOwner:
             open_peer_ingress=self.open_peer_ingress,
             start_translation_turns=self.start_translation_turns,
             start_local_asr=self.start_local_asr,
+            start_vrchat_scene=self.start_vrchat_scene,
         )
         self.close_callbacks = RuntimePipelineCloseCallbacks(
             close_self_capture=self.close_self_capture,
             close_peer_capture=self.close_peer_capture,
+            close_vrchat_scene=self.close_vrchat_scene,
             close_self_ingress=self.close_self_ingress,
             close_peer_ingress=self.close_peer_ingress,
             close_translation_turns=self.close_translation_turns,
@@ -229,6 +238,7 @@ class RuntimePipelineResourceOwner:
                     self.translation_turns,
                     self.local_asr_runtime,
                     self.llm_runtime,
+                    self.vrchat_scene,
                     self.self_capture,
                     self.peer_capture,
                 )
@@ -285,6 +295,12 @@ class RuntimePipelineResourceOwner:
             raise RuntimeError("runtime pipeline Local ASR owner is unavailable")
         await owner.start()
 
+    async def start_vrchat_scene(self) -> None:
+        owner = self.vrchat_scene
+        if owner is None:
+            raise RuntimeError("runtime pipeline VRChat scene owner is unavailable")
+        await owner.start()
+
     async def close_self_capture(self) -> None:
         owner = self.self_capture
         if owner is None:
@@ -300,6 +316,15 @@ class RuntimePipelineResourceOwner:
         await owner.close()
         if self.peer_capture is owner:
             self.peer_capture = None
+
+    async def close_vrchat_scene(self) -> None:
+        owner = self.vrchat_scene
+        if owner is None:
+            return
+        if self.vrchat_scene_owned:
+            await owner.close()
+        if self.vrchat_scene is owner:
+            self.vrchat_scene = None
 
     async def close_self_ingress(self) -> None:
         if not self.self_ingress_open:
@@ -406,6 +431,7 @@ class RuntimePipelineResourceOwner:
         for callback in (
             callbacks.close_self_capture,
             callbacks.close_peer_capture,
+            callbacks.close_vrchat_scene,
             callbacks.close_self_ingress,
             callbacks.close_peer_ingress,
             callbacks.close_translation_turns,
@@ -446,6 +472,7 @@ class RuntimePipelineComponents:
     translation_diagnostics: TranslationLatencyDiagnosticsOwner
     translation_output_projection: TranslationOutputProjectionOwner
     translation_requests: TranslationRequestOwner
+    vrchat_scene: VrchatSceneService
     self_translation_channel: SelfTranslationChannelOwner
     peer_translation_channel: PeerTranslationChannelOwner
     channel_reset: RuntimePipelineChannelResetRouter
@@ -485,6 +512,7 @@ class RuntimePipelineHandle:
         default=None,
     )
     translation_requests: TranslationRequestOwner | None = field(init=False, default=None)
+    vrchat_scene: VrchatSceneService | None = field(init=False, default=None)
     self_translation_channel: SelfTranslationChannelOwner | None = field(
         init=False,
         default=None,
@@ -514,10 +542,10 @@ class RuntimePipelineHandle:
         self.translation_turns = components.translation_turns
         self.local_asr_runtime = components.local_asr_runtime
         self.llm_runtime = components.llm_runtime
-        self.context_resolver = components.context_resolver
         self.translation_diagnostics = components.translation_diagnostics
         self.translation_output_projection = components.translation_output_projection
         self.translation_requests = components.translation_requests
+        self.vrchat_scene = components.vrchat_scene
         self.self_translation_channel = components.self_translation_channel
         self.peer_translation_channel = components.peer_translation_channel
         self.channel_reset = components.channel_reset
@@ -539,10 +567,10 @@ class RuntimePipelineHandle:
             self.translation_turns = None
             self.local_asr_runtime = None
             self.llm_runtime = None
-            self.context_resolver = None
             self.translation_diagnostics = None
             self.translation_output_projection = None
             self.translation_requests = None
+            self.vrchat_scene = None
             self.self_translation_channel = None
             self.peer_translation_channel = None
             self.channel_reset = None
@@ -589,7 +617,13 @@ class RuntimePipelineLauncher:
     cleanup_failure_sink: Callable[[str, BaseException], None]
     managed_gemma: ManagedGemmaTranslationOwner | None = None
     http_extensions: HttpExtensionRegistry | None = None
+    vrchat_scene_factory: Callable[[], VrchatSceneService] | None = None
     failed_resources: RuntimePipelineResourceOwner | None = field(
+        init=False,
+        default=None,
+        repr=False,
+    )
+    vrchat_scene: VrchatSceneService | None = field(
         init=False,
         default=None,
         repr=False,
@@ -612,6 +646,10 @@ class RuntimePipelineLauncher:
 
     async def close(self) -> None:
         await self.retry_failed_cleanup()
+        scene = self.vrchat_scene
+        if scene is not None:
+            self.vrchat_scene = None
+            await scene.close()
 
     async def launch(
         self,
@@ -624,6 +662,11 @@ class RuntimePipelineLauncher:
     ) -> RuntimePipelineComponents:
         await self.retry_failed_cleanup()
         resources = RuntimePipelineResourceOwner()
+        scene = self.vrchat_scene
+        if scene is None:
+            scene = (self.vrchat_scene_factory or _default_vrchat_scene_service)()
+            self.vrchat_scene = scene
+            await scene.start()
         try:
             pipeline = await compose_runtime_pipeline(
                 inputs=inputs,
@@ -643,6 +686,7 @@ class RuntimePipelineLauncher:
                 stt_failure_sink=self.stt_failure_sink,
                 http_extensions=self.http_extensions,
                 resources=resources,
+                vrchat_scene=scene,
             )
             if pipeline.prepare_self_provider:
                 snapshot = await pipeline.self_capture.prepare_provider(inputs.self_capture_session)
@@ -711,6 +755,7 @@ async def compose_runtime_pipeline(
     managed_gemma: ManagedGemmaTranslationOwner | None = None,
     http_extensions: HttpExtensionRegistry | None = None,
     resources: RuntimePipelineResourceOwner | None = None,
+    vrchat_scene: VrchatSceneService | None = None,
 ) -> RuntimePipelineComponents:
     owned_resources = resources is None
     pipeline_resources = resources or RuntimePipelineResourceOwner()
@@ -733,6 +778,7 @@ async def compose_runtime_pipeline(
             stt_failure_sink=stt_failure_sink,
             http_extensions=http_extensions,
             resources=pipeline_resources,
+            vrchat_scene=vrchat_scene,
         )
     except BaseException as exc:
         if not owned_resources:
@@ -781,6 +827,7 @@ async def _compose_runtime_pipeline(
     stt_failure_sink: Callable[[str], None],
     http_extensions: HttpExtensionRegistry | None,
     resources: RuntimePipelineResourceOwner,
+    vrchat_scene: VrchatSceneService | None,
 ) -> RuntimePipelineComponents:
     _ = config_path
     if http_extensions is None and inputs.translation_model == TranslationModel.CUSTOM_HTTP.value:
@@ -890,6 +937,9 @@ async def _compose_runtime_pipeline(
     )
     resources.llm_runtime = llm_runtime
     resources.pending_llm = None
+    scene = vrchat_scene or _default_vrchat_scene_service()
+    resources.vrchat_scene = scene
+    resources.vrchat_scene_owned = vrchat_scene is None
     translation_requests = TranslationRequestOwner(
         config_snapshot=translation_runtime_configuration.snapshot,
         self_runtime=self_runtime,
@@ -899,6 +949,7 @@ async def _compose_runtime_pipeline(
         diagnostics=translation_diagnostics,
         presentation=translation_output_projection,
         clock=clock,
+        scene_provider=scene,
     )
     translation_turns = TranslationTurnLifecycleOwner(
         on_child_created=callbacks.child_created,
@@ -1004,6 +1055,7 @@ async def _compose_runtime_pipeline(
         translation_diagnostics=translation_diagnostics,
         translation_output_projection=translation_output_projection,
         translation_requests=translation_requests,
+        vrchat_scene=scene,
         self_translation_channel=self_translation_channel,
         peer_translation_channel=peer_translation_channel,
         channel_reset=channel_reset,

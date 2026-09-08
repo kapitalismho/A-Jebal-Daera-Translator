@@ -83,6 +83,7 @@ class GeminiClient(Protocol):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str: ...
 
     async def close(self) -> None: ...
@@ -119,6 +120,7 @@ class GeminiLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         client = self._get_client()
         translated = await client.translate(
@@ -127,6 +129,7 @@ class GeminiLLMProvider:
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
         return Translation(utterance_id=utterance_id, text=translated)
 
@@ -191,6 +194,7 @@ class GoogleGenaiGeminiClient:
         source_language: str,
         target_language: str,
         context: str,
+        scene_participant_count: int | None = None,
     ) -> tuple[str, str]:
         formatted_system_prompt = (
             system_prompt.format(
@@ -210,7 +214,9 @@ class GoogleGenaiGeminiClient:
             context=context,
         )
 
-        return formatted_system_prompt, build_translation_user_message(text=text, context=context)
+        return formatted_system_prompt, build_translation_user_message(
+            text=text, context=context, scene_participant_count=scene_participant_count
+        )
 
     async def translate(
         self,
@@ -220,6 +226,7 @@ class GoogleGenaiGeminiClient:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str:
         from google.genai import types  # type: ignore
 
@@ -230,6 +237,7 @@ class GoogleGenaiGeminiClient:
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
 
         client = self._get_client()

@@ -17,8 +17,17 @@ class LLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
-        _ = utterance_id, text, system_prompt, source_language, target_language, context
+        _ = (
+            utterance_id,
+            text,
+            system_prompt,
+            source_language,
+            target_language,
+            context,
+            scene_participant_count,
+        )
         raise NotImplementedError
 
     async def close(self) -> None:
@@ -39,6 +48,7 @@ class SemaphoreLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         async with self.semaphore:
             return await self.inner.translate(
@@ -48,6 +58,7 @@ class SemaphoreLLMProvider(LLMProvider):
                 source_language=source_language,
                 target_language=target_language,
                 context=context,
+                scene_participant_count=scene_participant_count,
             )
 
     async def close(self) -> None:

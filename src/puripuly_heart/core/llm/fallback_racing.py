@@ -106,6 +106,7 @@ class FallbackRacingLLMProvider(LLMProvider):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         params = {
             "utterance_id": utterance_id,
@@ -114,6 +115,7 @@ class FallbackRacingLLMProvider(LLMProvider):
             "source_language": source_language,
             "target_language": target_language,
             "context": context,
+            "scene_participant_count": scene_participant_count,
         }
         started_at = self.clock()
         outcomes = [_BranchOutcome() for _ in self.attempts]

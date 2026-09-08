@@ -91,8 +91,12 @@ def _build_system_prompt(
     return formatted
 
 
-def _build_user_message(*, text: str, context: str) -> str:
-    return build_translation_user_message(text=text, context=context)
+def _build_user_message(
+    *, text: str, context: str, scene_participant_count: int | None = None
+) -> str:
+    return build_translation_user_message(
+        text=text, context=context, scene_participant_count=scene_participant_count
+    )
 
 
 def _extract_message_content(content: object) -> str:
@@ -160,6 +164,7 @@ class QwenClient(Protocol):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str: ...
 
 
@@ -183,6 +188,7 @@ class QwenLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         client = self.client or DashScopeQwenClient(
             api_key=self.api_key,
@@ -196,6 +202,7 @@ class QwenLLMProvider:
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
         return Translation(utterance_id=utterance_id, text=translated)
 
@@ -288,13 +295,16 @@ class DashScopeQwenClient:
         source_language: str,
         target_language: str,
         context: str,
+        scene_participant_count: int | None = None,
     ) -> list[dict[str, str]]:
         system_content = _build_system_prompt(
             system_prompt=system_prompt,
             source_language=source_language,
             target_language=target_language,
         )
-        user_message = _build_user_message(text=text, context=context)
+        user_message = _build_user_message(
+            text=text, context=context, scene_participant_count=scene_participant_count
+        )
         return [
             {"role": "system", "content": system_content},
             {"role": "user", "content": user_message},
@@ -308,6 +318,7 @@ class DashScopeQwenClient:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str:
         _log_basic_request(
             runtime_logging=self.runtime_logging,
@@ -325,6 +336,7 @@ class DashScopeQwenClient:
                 source_language=source_language,
                 target_language=target_language,
                 context=context,
+                scene_participant_count=scene_participant_count,
             )
             if _is_qwen_compatible_model(self.model):
                 compatible_base_url = _to_compatible_base_url(self.base_url)

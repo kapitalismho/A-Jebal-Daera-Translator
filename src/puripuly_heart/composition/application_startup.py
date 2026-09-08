@@ -238,6 +238,7 @@ class ApplicationStartupAdapter:
             raise RuntimeError("Application pipeline did not provide translation configuration")
         replace_translation_runtime_enabled(config_owner, False)
         callbacks = components.start_callbacks
+        await callbacks.start_vrchat_scene()
         await callbacks.start_output(True)
         await callbacks.open_self_ingress()
         await callbacks.open_peer_ingress()

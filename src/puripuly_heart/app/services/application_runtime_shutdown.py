@@ -119,6 +119,12 @@ def compose_application_runtime_shutdown_callbacks(
         ),
         application_shutdown_callback(
             phase=SHUTDOWN_PHASE_OWNER_DRAIN_CANCEL,
+            owner_name="VrchatSceneService",
+            callback_name="close",
+            callback=runtime.close_vrchat_scene_runtime,
+        ),
+        application_shutdown_callback(
+            phase=SHUTDOWN_PHASE_OWNER_DRAIN_CANCEL,
             owner_name="ApplicationRuntimeLoggingOwner",
             callback_name="close_background_tasks",
             callback=runtime.close_runtime_logging_background_tasks,

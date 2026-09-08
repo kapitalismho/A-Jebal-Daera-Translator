@@ -16,6 +16,7 @@ class TranslationBackendRequest:
     source_language: str
     target_language: str
     context: str = ""
+    scene_participant_count: int | None = None
 
 
 class LegacyTranslationProvider(Protocol):
@@ -28,6 +29,7 @@ class LegacyTranslationProvider(Protocol):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation: ...
 
     async def close(self) -> None: ...
@@ -57,6 +59,7 @@ class LlmTranslationBackend(TranslationBackend):
             source_language=request.source_language,
             target_language=request.target_language,
             context=request.context,
+            scene_participant_count=request.scene_participant_count,
         )
 
     async def close(self) -> None:

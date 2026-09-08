@@ -423,6 +423,9 @@ class ApplicationRuntimeShutdownStub:
     async def close_peer_capture_owner(self) -> None:
         return None
 
+    async def close_vrchat_scene_runtime(self) -> None:
+        return None
+
     async def close_self_translation_ingress(self) -> None:
         return None
 

@@ -163,6 +163,14 @@ class ApplicationRuntimeShutdownAdapter:
     async def close_runtime_pipeline_launcher(self) -> None:
         await self.pipeline_launcher.close()
 
+    async def close_vrchat_scene_runtime(self) -> None:
+        components = self.pipeline.current
+        if components is None:
+            return
+        await self._invoke_pipeline_close(components.close_callbacks.close_vrchat_scene)
+        if components.resource_owner.vrchat_scene is None:
+            self.pipeline.vrchat_scene = None
+
     async def close_peer_capture_owner(self) -> None:
         components = self.pipeline.current
         if components is None:

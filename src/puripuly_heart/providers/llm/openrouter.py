@@ -95,8 +95,12 @@ def _build_system_prompt(
     return formatted
 
 
-def _build_user_message(*, text: str, context: str) -> str:
-    return build_translation_user_message(text=text, context=context)
+def _build_user_message(
+    *, text: str, context: str, scene_participant_count: int | None = None
+) -> str:
+    return build_translation_user_message(
+        text=text, context=context, scene_participant_count=scene_participant_count
+    )
 
 
 def _extract_message_content(content: object) -> str:
@@ -219,6 +223,7 @@ class OpenRouterClient(Protocol):
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str: ...
 
     async def close(self) -> None: ...
@@ -280,6 +285,7 @@ class OpenRouterLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> Translation:
         client = self._get_client()
         translated = await client.translate(
@@ -288,6 +294,7 @@ class OpenRouterLLMProvider:
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
         return Translation(utterance_id=utterance_id, text=translated)
 
@@ -377,13 +384,16 @@ class HttpxOpenRouterClient:
         source_language: str,
         target_language: str,
         context: str,
+        scene_participant_count: int | None = None,
     ) -> dict[str, object]:
         system_content = _build_system_prompt(
             system_prompt=system_prompt,
             source_language=source_language,
             target_language=target_language,
         )
-        user_message = _build_user_message(text=text, context=context)
+        user_message = _build_user_message(
+            text=text, context=context, scene_participant_count=scene_participant_count
+        )
 
         request_body: dict[str, object] = {
             "messages": [
@@ -422,6 +432,7 @@ class HttpxOpenRouterClient:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ) -> str:
         _log_basic_request(
             runtime_logging=self.runtime_logging,
@@ -438,6 +449,7 @@ class HttpxOpenRouterClient:
             source_language=source_language,
             target_language=target_language,
             context=context,
+            scene_participant_count=scene_participant_count,
         )
 
         client = await self._get_http_client()

@@ -48,6 +48,7 @@ class FakeLLMProvider:
         source_language: str,
         target_language: str,
         context: str = "",
+        scene_participant_count: int | None = None,
     ):
         from puripuly_heart.domain.models import Translation
 
