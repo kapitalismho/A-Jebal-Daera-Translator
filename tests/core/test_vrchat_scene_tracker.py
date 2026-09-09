@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from puripuly_heart.core.vrchat_scene_parser import parse_vrchat_scene_line
 from puripuly_heart.core.vrchat_scene_tracker import VrchatScenePresenceTracker
 
 
@@ -46,6 +47,27 @@ def test_live_join_and_leave_update_ready_count() -> None:
 
     tracker.on_leave("usr_b")
     assert tracker.snapshot().participant_count == 2
+
+
+def test_redundant_leave_notice_keeps_ready_count_until_real_leave() -> None:
+    tracker = VrchatScenePresenceTracker()
+    _burst(tracker, "usr_self", "usr_leaver", "usr_c", local="usr_self")
+    tracker.settle_if_quiet()
+
+    notice = parse_vrchat_scene_line(
+        "2026.09.08 23:15:21 Debug      -  [Behaviour] OnPlayerLeftRoom"
+    )
+    assert notice is None
+
+    leave = parse_vrchat_scene_line(
+        "2026.09.08 23:15:21 Debug      -  [Behaviour] OnPlayerLeft SomeName (usr_leaver)"
+    )
+    assert leave is not None
+    tracker.on_event(leave)
+
+    snapshot = tracker.snapshot()
+    assert snapshot.status == "ready"
+    assert snapshot.participant_count == 2
 
 
 def test_unknown_leave_degrades_and_stays_sticky() -> None:

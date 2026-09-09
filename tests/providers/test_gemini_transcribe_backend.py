@@ -11,6 +11,63 @@ from puripuly_heart.providers.stt.gemini_transcribe import (
 )
 
 
+class _StubSyncTransport:
+    def __init__(self) -> None:
+        self.closed = False
+        self.close_calls = 0
+
+    def close(self) -> None:
+        self.close_calls += 1
+        self.closed = True
+
+
+class _StubAsyncTransport:
+    def __init__(self) -> None:
+        self.closed = False
+        self.aclose_calls = 0
+
+    async def aclose(self) -> None:
+        self.aclose_calls += 1
+        self.closed = True
+
+
+class _StubClientAio:
+    def __init__(self) -> None:
+        self.aclose_calls = 0
+
+    async def aclose(self) -> None:
+        self.aclose_calls += 1
+
+
+class _StubClient:
+    def __init__(self) -> None:
+        self.aio = _StubClientAio()
+        self.close_calls = 0
+
+    def close(self) -> None:
+        self.close_calls += 1
+
+
+@pytest.fixture(autouse=True)
+def _stub_gemini_setup(monkeypatch: pytest.MonkeyPatch):
+    from puripuly_heart.providers.stt import gemini_transcribe as gemini_module
+
+    created: list = []
+
+    def fake_prepare(api_key, language_codes, custom_vocabulary):
+        resources = gemini_module._GeminiClientResources(
+            client=_StubClient(),
+            sync_transport=_StubSyncTransport(),
+            async_transport=_StubAsyncTransport(),
+            config=gemini_module._build_live_config_sync(language_codes, custom_vocabulary),
+        )
+        created.append(resources)
+        return resources
+
+    monkeypatch.setattr(gemini_module, "_prepare_gemini_resources_sync", fake_prepare)
+    return created
+
+
 class _FakeLiveSession:
     def __init__(self) -> None:
         self.sent: list[dict] = []

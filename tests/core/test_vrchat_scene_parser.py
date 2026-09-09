@@ -75,6 +75,10 @@ def test_player_left_room_is_not_a_leave() -> None:
     assert parse_vrchat_scene_line(_line("OnPlayerLeftRoom")) is None
 
 
+def test_player_left_room_notice_with_suffix_is_degraded_signal() -> None:
+    assert parse_vrchat_scene_line(_line("OnPlayerLeftRoomExtra")) == IdlessPresence()
+
+
 def test_colon_left_variant_is_ignored() -> None:
     assert parse_vrchat_scene_line(_line("OnPlayerLeft:Someone (usr_abc)")) is None
 

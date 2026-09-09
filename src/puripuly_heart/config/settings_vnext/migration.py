@@ -32,7 +32,6 @@ _LOCAL_QWEN_CPU_AUTO_MIGRATION_VERSION = 30
 _PEER_SOURCE_AUTO_MIGRATION_VERSION = 31
 _MULTI_MODEL_GEMMA_MIGRATION_VERSION = 32
 _CEREBRAS_CONNECTION_MIGRATION_VERSION = 35
-_DEEPSEEK_V4_PRO_RETIREMENT_MIGRATION_VERSION = 36
 _TELEMETRY_BOOLEAN_MIGRATION_VERSION = 37
 _PROMPT_RESET_AND_DEEPGRAM_ROLLING_VERSION = 39
 _EXPLICIT_LEGACY_GEMMA_FALLBACK_ALIASES = frozenset({"openrouter_gemma4_26b_a4b"})
@@ -111,9 +110,6 @@ def _prepare_vnext_migration_dict(data: Mapping[str, Any]) -> dict[str, Any]:
     migrate_cerebras_connection = _requires_cerebras_connection_migration(
         data.get("settings_version")
     )
-    migrate_deepseek_v4_pro_retirement = _requires_deepseek_v4_pro_retirement_migration(
-        data.get("settings_version")
-    )
     migrate_prompt_reset = _requires_prompt_reset_migration(data.get("settings_version"))
     migrate_deepgram_rolling = _requires_deepgram_rolling_migration(data.get("settings_version"))
     prepared = dict(copy.deepcopy(data))
@@ -125,8 +121,7 @@ def _prepare_vnext_migration_dict(data: Mapping[str, Any]) -> dict[str, Any]:
             _migrate_multi_model_gemma_translation(translation)
         if migrate_cerebras_connection:
             _migrate_cerebras_connection_translation(translation)
-        if migrate_deepseek_v4_pro_retirement:
-            _migrate_deepseek_v4_pro_translation(translation)
+        _migrate_deepseek_v4_pro_translation(translation)
         _migrate_gemini_3_flash_translation(translation)
         _migrate_qwen_35_plus_translation(translation)
         _migrate_legacy_openrouter_model_translation(translation)
@@ -522,16 +517,6 @@ def _requires_cerebras_connection_migration(settings_version: object) -> bool:
         return settings_version < _CEREBRAS_CONNECTION_MIGRATION_VERSION
     if isinstance(settings_version, str) and settings_version.strip().isdigit():
         return int(settings_version.strip()) < _CEREBRAS_CONNECTION_MIGRATION_VERSION
-    return True
-
-
-def _requires_deepseek_v4_pro_retirement_migration(settings_version: object) -> bool:
-    if isinstance(settings_version, bool):
-        return True
-    if isinstance(settings_version, int):
-        return settings_version < _DEEPSEEK_V4_PRO_RETIREMENT_MIGRATION_VERSION
-    if isinstance(settings_version, str) and settings_version.strip().isdigit():
-        return int(settings_version.strip()) < _DEEPSEEK_V4_PRO_RETIREMENT_MIGRATION_VERSION
     return True
 
 

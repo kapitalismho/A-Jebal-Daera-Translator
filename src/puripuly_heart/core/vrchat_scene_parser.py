@@ -19,6 +19,7 @@ _ENVELOPE = re.compile(
 _JOINED_VERB = "OnPlayerJoined "
 _LEFT_VERB = "OnPlayerLeft "
 _LEFT_ROOM_VERB = "OnLeftRoom"
+_LEFT_ROOM_NOTICE_VERB = "OnPlayerLeftRoom"
 _ENTERING_VERB = "Entering Room:"
 _JOINING_WORLD_VERB = "Joining wrld_"
 _INITIALIZED_PREFIX = 'Initialized PlayerAPI "'
@@ -37,6 +38,10 @@ def parse_vrchat_scene_line(line: str) -> VrchatSceneEvent | None:
         return InstanceTransition()
     if payload == _LEFT_ROOM_VERB:
         return LeftRoom()
+    if payload == _LEFT_ROOM_NOTICE_VERB:
+        return None
+    if payload.startswith(_LEFT_ROOM_NOTICE_VERB):
+        return IdlessPresence()
     if payload.startswith(_JOINED_VERB):
         user_id = _user_id_after(payload, len(_JOINED_VERB))
         if user_id is None:
