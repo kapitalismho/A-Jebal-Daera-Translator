@@ -59,6 +59,7 @@ def capture_presentation_from_contract(
         ),
         overlay=CaptureChannelPresentation(
             enabled=overlay.state == "on",
+            starting=overlay.state == "on" and not overlay.effective_enabled,
             warning=overlay.state == "warning",
         ),
         process_capture_warning_active=process_warning,
@@ -124,8 +125,10 @@ class DashboardCaptureControls:
     ) -> None:
         self._peer_button.set_state(enabled, needs_key=warning, is_starting=starting)
 
-    def apply_overlay_state(self, *, enabled: bool, warning: bool = False) -> None:
-        self._overlay_button.set_state(enabled, needs_key=warning)
+    def apply_overlay_state(
+        self, *, enabled: bool, warning: bool = False, starting: bool = False
+    ) -> None:
+        self._overlay_button.set_state(enabled, needs_key=warning, is_starting=starting)
 
     def apply_presentation(self, presentation: DashboardCapturePresentation) -> None:
         self.apply_peer_capture_state(
@@ -136,6 +139,7 @@ class DashboardCaptureControls:
         self.apply_overlay_state(
             enabled=presentation.overlay.enabled,
             warning=presentation.overlay.warning,
+            starting=presentation.overlay.starting,
         )
 
     def apply_locale(self) -> None:

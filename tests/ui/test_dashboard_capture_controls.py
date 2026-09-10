@@ -11,6 +11,7 @@ from puripuly_heart.ui.dashboard.capture import (
 from puripuly_heart.ui.overlay_peer_contract import (
     OverlayPeerConsumerContract,
     OverlayPeerToggleContract,
+    build_overlay_peer_consumer_contract,
 )
 
 
@@ -169,12 +170,42 @@ def test_capture_presentation_reports_process_capture_warning_only_with_helper_t
     assert other_reason.process_capture_warning_active is False
 
 
-def test_capture_controls_apply_projected_presentation(
-    controls: DashboardCaptureControls,
-) -> None:
-    controls.apply_presentation(
-        capture_presentation_from_contract(_contract(peer_state="on", overlay_state="warning"))
+def _pending_overlay_controls(
+    intent_enabled: bool, overlay_state: str, failure_reason: str | None = None
+) -> DashboardCaptureControls:
+    controls = DashboardCaptureControls(
+        on_self_capture_click=lambda: None,
+        on_peer_capture_click=lambda: None,
+        on_overlay_click=lambda: None,
     )
+    contract = build_overlay_peer_consumer_contract(
+        overlay_intent_enabled=intent_enabled,
+        overlay_state=overlay_state,
+        overlay_failure_reason=failure_reason,
+        peer_intent_enabled=False,
+        peer_effective_enabled=False,
+    )
+    controls.apply_presentation(capture_presentation_from_contract(contract))
+    return controls
 
-    assert controls.peer_capture_control().states == [(True, False, False)]
-    assert controls.overlay_control().states == [(False, True, False)]
+
+def test_overlay_button_shows_spinner_only_while_startup_pending() -> None:
+    for overlay_state in ("starting", "recovering"):
+        controls = _pending_overlay_controls(True, overlay_state)
+        overlay_button = controls.overlay_control()
+        assert overlay_button._progress_control.visible is True
+        assert overlay_button._icon_control.visible is False
+        assert controls.peer_capture_control()._progress_control.visible is False
+
+    connected_button = _pending_overlay_controls(True, "connected").overlay_control()
+    assert connected_button._progress_control.visible is False
+    assert connected_button._icon_control.visible is True
+
+    failed_button = _pending_overlay_controls(True, "failed", "runtime_crashed").overlay_control()
+    assert failed_button._progress_control.visible is False
+    assert failed_button._icon_control.visible is True
+
+    for overlay_state in ("starting", "recovering"):
+        off_button = _pending_overlay_controls(False, overlay_state).overlay_control()
+        assert off_button._progress_control.visible is False
+        assert off_button._icon_control.visible is True
