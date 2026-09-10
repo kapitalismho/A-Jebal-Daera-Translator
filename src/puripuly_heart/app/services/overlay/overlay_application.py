@@ -45,6 +45,7 @@ from .overlay_generation_start import (
 from .overlay_session_transition import (
     OverlaySessionShutdownExecution,
     OverlaySessionStartExecution,
+    OverlaySessionStartStatus,
     OverlaySessionTransitionDiagnostic,
     OverlaySessionTransitionOwner,
 )
@@ -392,11 +393,16 @@ class OverlayApplicationOwner:
             self.disable_peer_intent()
             self.clear_fallback()
             self._cancel_startup_recovery()
-        self.publish_presentation()
-        if enabled:
-            await self.begin_start()
+            self.publish_presentation()
+            await self.shutdown(preserve_failure_reason=True)
             return
-        await self.shutdown(preserve_failure_reason=True)
+        try:
+            status = await self.begin_start()
+        except Exception:
+            self.publish_presentation()
+            raise
+        if status != "started":
+            self.publish_presentation()
 
     def new_runtime(self) -> OverlayRuntimeHandle:
         runtime = OverlayRuntimeHandle(shutdown_grace_s=OVERLAY_SHUTDOWN_GRACE_S)
@@ -577,11 +583,11 @@ class OverlayApplicationOwner:
             if not detailed_emitted:
                 self.log_basic(message, logging.WARNING)
 
-    async def begin_start(self) -> None:
+    async def begin_start(self) -> OverlaySessionStartStatus | None:
         if self._ingress_stopped:
-            return
+            return None
         self._cancel_startup_recovery()
-        await self._transition_owner.begin_start(self._start_execution)
+        return await self._transition_owner.begin_start(self._start_execution)
 
     async def _begin_fallback_start(self) -> None:
         generation = self._fallback_owner.generation
