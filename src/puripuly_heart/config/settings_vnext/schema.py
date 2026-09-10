@@ -336,7 +336,7 @@ class GeminiTranslationIntent:
 
 @dataclass(frozen=True, slots=True)
 class DeepSeekTranslationIntent:
-    llm_model: str = "deepseek-v4-flash"
+    llm_model: str = "deepseek-flash"
 
 
 @dataclass(frozen=True, slots=True)

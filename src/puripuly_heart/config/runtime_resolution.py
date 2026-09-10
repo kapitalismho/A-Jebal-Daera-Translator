@@ -195,7 +195,7 @@ LLM_PROVIDERS: Final[tuple[str, ...]] = (
 
 GEMINI_MODEL_37_FLASH: Final = "gemini-3.7-flash"
 LEGACY_GEMINI_MODEL_31_FLASH_LITE: Final = "gemini-3.1-flash-lite"
-DEEPSEEK_MODEL_V4_FLASH: Final = "deepseek-v4-flash"
+DEEPSEEK_MODEL_V4_FLASH: Final = "deepseek-flash"
 QWEN_MODEL_35_FLASH: Final = "qwen3.5-flash"
 QWEN_MODEL_38_FLASH: Final = "qwen3.8-flash"
 LOCAL_LLM_BACKEND_OLLAMA: Final = "ollama"

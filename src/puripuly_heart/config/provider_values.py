@@ -214,7 +214,7 @@ class GeminiLLMModel(str, Enum):
 
 
 class DeepSeekLLMModel(str, Enum):
-    DEEPSEEK_V4_FLASH = "deepseek-v4-flash"
+    DEEPSEEK_V4_FLASH = "deepseek-flash"
 
 
 class CerebrasLLMModel(str, Enum):

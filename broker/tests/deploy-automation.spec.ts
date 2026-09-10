@@ -663,6 +663,7 @@ describe('broker direct deploy automation', () => {
     expect(smokeSpec).toContain('ph-or-user-v');
     expect(smokeSpec).toContain('MANAGED_TRIAL_ALLOWED_MODELS');
     expect(smokeSpec).toContain('google/gemma-4-31b-it');
+    expect(smokeSpec).toContain('deepseek/deepseek-v4.1-flash');
     expect(smokeSpec).toContain('deepseek/deepseek-v4-flash-0731');
     expect(smokeSpec).toContain('deepseek/deepseek-v4-flash');
     expect(smokeSpec).toContain('MANAGED_TRIAL_ALLOWED_MODELS');
@@ -734,6 +735,7 @@ describe('broker direct deploy automation', () => {
     expect(readme).not.toContain('six-month expiry');
     expect(readme).toContain('optional `openrouter_user_id`');
     expect(readme).toContain('google/gemma-4-31b-it');
+    expect(readme).toContain('deepseek/deepseek-v4.1-flash');
     expect(readme).toContain('deepseek/deepseek-v4-flash-0731');
     expect(readme).toContain('deepseek/deepseek-v4-flash');
   });

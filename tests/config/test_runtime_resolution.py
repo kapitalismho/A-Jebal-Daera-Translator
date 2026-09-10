@@ -575,7 +575,7 @@ def test_overlay_runtime_resolution_maps_desktop_options_without_legacy_name() -
             "managed",
             "managed",
             "openrouter",
-            "deepseek/deepseek-v4-flash-0731",
+            "deepseek/deepseek-v4.1-flash",
             "managed",
             "openrouter:managed",
             None,
@@ -586,7 +586,7 @@ def test_overlay_runtime_resolution_maps_desktop_options_without_legacy_name() -
             "managed_china",
             "managed",
             "openrouter",
-            "deepseek/deepseek-v4-flash-0731",
+            "deepseek/deepseek-v4.1-flash",
             "managed",
             "openrouter:managed_qq",
             None,
@@ -597,7 +597,7 @@ def test_overlay_runtime_resolution_maps_desktop_options_without_legacy_name() -
             "openrouter",
             "byok",
             "openrouter",
-            "deepseek/deepseek-v4-flash-0731",
+            "deepseek/deepseek-v4.1-flash",
             "secret_store",
             "openrouter:byok",
             None,
@@ -608,7 +608,7 @@ def test_overlay_runtime_resolution_maps_desktop_options_without_legacy_name() -
             "official_byok",
             "byok",
             "deepseek",
-            "deepseek-v4-flash",
+            "deepseek-flash",
             "secret_store",
             "deepseek:byok",
             None,
@@ -873,7 +873,7 @@ def test_legacy_managed_gemma_provider_derives_cpu_product_intent() -> None:
             "secret_store",
             "deepseek:byok",
             "deepseek",
-            "deepseek-v4-flash",
+            "deepseek-flash",
             None,
         ),
         (
@@ -884,7 +884,7 @@ def test_legacy_managed_gemma_provider_derives_cpu_product_intent() -> None:
             "secret_store",
             "openrouter:byok",
             "openrouter",
-            "deepseek/deepseek-v4-flash-0731",
+            "deepseek/deepseek-v4.1-flash",
             "deepseek_v4_flash_latency",
         ),
         (
@@ -999,7 +999,7 @@ def test_openrouter_china_fallback_resolves_deepseek_only_fallback_routing() -> 
 
     assert config.fallback is not None
     assert config.fallback.target.provider == "openrouter"
-    assert config.fallback.target.model == "deepseek/deepseek-v4-flash-0731"
+    assert config.fallback.target.model == "deepseek/deepseek-v4.1-flash"
     assert config.fallback.target.credential == resolved.ResolvedCredentialRequirement(
         source=resolved.CREDENTIAL_SOURCE_MANAGED,
         required=True,
@@ -1058,7 +1058,7 @@ def test_openrouter_deepseek_only_primary_keeps_fallback_and_emergency_schedule(
     )
 
     assert config.provider == "openrouter"
-    assert config.model == "deepseek/deepseek-v4-flash-0731"
+    assert config.model == "deepseek/deepseek-v4.1-flash"
     assert config.provider_routing == "deepseek_only"
     assert config.fallback is not None
     assert config.fallback.target.provider_routing == "deepseek_only"
@@ -1117,7 +1117,7 @@ def test_openrouter_deepseek_byok_deepseek_only_preserves_routing_and_suppresses
     resolved = _resolved_module()
     openrouter_intent = runtime_resolution.normalize_openrouter_runtime_intent(
         provider_llm="openrouter",
-        model="deepseek/deepseek-v4-flash-0731",
+        model="deepseek/deepseek-v4.1-flash",
         selected_source="byok",
         fallback_selection_alias="qwen35_flash",
         routing_mode="parasail_first",
@@ -1142,7 +1142,7 @@ def test_openrouter_deepseek_byok_deepseek_only_preserves_routing_and_suppresses
     assert translation_intent.model == runtime_resolution.TRANSLATION_MODEL_DEEPSEEK_V4_FLASH
     assert translation_intent.connection == runtime_resolution.TRANSLATION_CONNECTION_OPENROUTER
     assert config.provider == "openrouter"
-    assert config.model == "deepseek/deepseek-v4-flash-0731"
+    assert config.model == "deepseek/deepseek-v4.1-flash"
     assert config.credential == resolved.ResolvedCredentialRequirement(
         source=resolved.CREDENTIAL_SOURCE_SECRET_STORE,
         required=True,
@@ -1163,7 +1163,7 @@ def test_openrouter_runtime_intent_normalizes_legacy_deepseek_model() -> None:
         selected_source="byok",
     )
 
-    assert intent.model == "deepseek/deepseek-v4-flash-0731"
+    assert intent.model == "deepseek/deepseek-v4.1-flash"
     assert intent.selection_alias == "deepseek_v4_flash_byok"
 
 
@@ -1560,7 +1560,7 @@ def test_missing_translation_openrouter_compatibility_values_derive_exact_runtim
         },
         "gemini": {"llm_model": "gemini-3.7-flash"},
         "qwen": {"llm_model": "qwen3.8-flash", "region": "beijing"},
-        "deepseek": {"llm_model": "deepseek-v4-flash"},
+        "deepseek": {"llm_model": "deepseek-flash"},
         "local_llm": {
             "base_url": "http://127.0.0.1:11434/v1",
             "model": "llama3.1:8b",
@@ -1603,10 +1603,10 @@ def test_missing_translation_openrouter_compatibility_values_derive_exact_runtim
 
     assert translation_intent.model == runtime_resolution.TRANSLATION_MODEL_DEEPSEEK_V4_FLASH
     assert translation_intent.connection == runtime_resolution.TRANSLATION_CONNECTION_OPENROUTER
-    assert openrouter_intent.model == "deepseek/deepseek-v4-flash-0731"
+    assert openrouter_intent.model == "deepseek/deepseek-v4.1-flash"
     assert openrouter_intent.selected_source == "byok"
     assert config.provider == "openrouter"
-    assert config.model == "deepseek/deepseek-v4-flash-0731"
+    assert config.model == "deepseek/deepseek-v4.1-flash"
     assert config.credential == resolved.ResolvedCredentialRequirement(
         source=resolved.CREDENTIAL_SOURCE_SECRET_STORE,
         required=True,
@@ -1720,7 +1720,7 @@ def test_missing_openrouter_source_defaults_to_byok_for_openrouter_provider() ->
         },
         "gemini": {"llm_model": "gemini-3.7-flash"},
         "qwen": {"llm_model": "qwen3.8-flash", "region": "beijing"},
-        "deepseek": {"llm_model": "deepseek-v4-flash"},
+        "deepseek": {"llm_model": "deepseek-flash"},
         "llm": {"concurrency_limit": 3},
     }
     raw_openrouter = raw_settings["openrouter"]
@@ -1809,7 +1809,7 @@ def test_missing_translation_direct_provider_compatibility_values_derive_exact_c
         },
         "gemini": {"llm_model": "gemini-3.7-flash"},
         "qwen": {"llm_model": "qwen3.8-flash", "region": "singapore"},
-        "deepseek": {"llm_model": "deepseek-v4-flash"},
+        "deepseek": {"llm_model": "deepseek-flash"},
         "llm": {"concurrency_limit": 6},
     }
     raw_openrouter = raw_settings["openrouter"]
@@ -1846,7 +1846,7 @@ def test_missing_translation_direct_provider_compatibility_values_derive_exact_c
     assert translation_intent.model == runtime_resolution.TRANSLATION_MODEL_DEEPSEEK_V4_FLASH
     assert translation_intent.connection == runtime_resolution.TRANSLATION_CONNECTION_OFFICIAL_BYOK
     assert config.provider == "deepseek"
-    assert config.model == "deepseek-v4-flash"
+    assert config.model == "deepseek-flash"
     assert config.credential == resolved.ResolvedCredentialRequirement(
         source=resolved.CREDENTIAL_SOURCE_SECRET_STORE,
         required=True,
