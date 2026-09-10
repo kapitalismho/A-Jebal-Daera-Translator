@@ -1,0 +1,66 @@
+{
+ "format": "psem-archive-index.v1",
+ "zip_name": "psem_closeout_20260910T202617Z_experiment-v2-speaker-change-turn-boundaries-ls.zip",
+ "zip_path": "C:/Users/salee/.psem-artifacts/psem_closeout_20260910T202617Z_experiment-v2-speaker-change-turn-boundaries-ls.zip",
+ "zip_sha256": "0758968f93be727b589440e5b19bae36cac419a0ac998ee1d396ccddf7b005e4",
+ "zip_bytes": 24423667,
+ "original_bytes": 49691653,
+ "member_count": 778,
+ "per_dir_counts": {
+  "HISTORY/psem_research_closeout": 6,
+  "experiments/psem_np2_continuous_state": 90,
+  "experiments/psem_product_translation": 193,
+  "experiments/psem_remaining_mask_control": 6,
+  "experiments/psem_soniox_matched_ceiling": 103,
+  "experiments/psem_soniox_standard_der": 308,
+  "experiments/psem_word_start_correction": 23,
+  "experiments/soniox_realtime_reference_benchmark": 49
+ },
+ "manifest_sha256": "e510f6f4f55c402970b901f803c8d0ea760e2b355a010922739be85a719b2464",
+ "created_utc": "20260910T202617Z",
+ "branch": "experiment-v2-speaker-change-turn-boundaries-ls",
+ "prereqs": {
+  "scorer_md_eval_22": "872aa955cbc3d57e6d4fd6fe2e699791739c1cb716cc89105bb4717415b9400d",
+  "but_only_words": "2509d8933721023fab4def2618aabd5c28eb82e9",
+  "model_sortformer_4spk_v2_1_GGUF": "62faec7b99ad23e323087597604b50728abe85089b6364970b019a845547bf99",
+  "exe_transcribe_cli": "3706db55ecf78c09188516cde829eccfcc04373a069d4f1834be0be22597540d",
+  "np2_target_pcm_sha256": "461e7f5d93fde95559fb673e1429b5cb64d0bbc7e05a18d470dc76b78fbf4df1",
+  "np2_source_wav_sha256": "b5ef423361ce67c804042ec479c6aeaf2cb8c19f73a779d61fabb7501e9e9b10",
+  "perl": "system perl 5.38.2",
+  "python_stdlib_only": "no numpy needed by replay"
+ },
+ "restore": {
+  "prerequisite": "python experiments/psem_research_closeout/replay.py --verify-archive",
+  "to_empty_dir_only": "python -c \"import tempfile,zipfile; p=tempfile.mkdtemp(prefix='psem-restore-'); zipfile.ZipFile(r'C:/Users/salee/.psem-artifacts/psem_closeout_20260910T202617Z_experiment-v2-speaker-change-turn-boundaries-ls.zip').extractall(p);print(p)\"",
+  "warning": "NEVER extract over the repo; archive is PRIVATE, never push"
+ },
+ "restore_probe": {
+  "ran_utc": "20260911",
+  "prerequisite": "replay-ok 54/54 + archive-ok 778 members before extract",
+  "verified": {
+   "experiments/psem_product_translation/capture.py": "c601f8bdbe9168e9c57f954b68779442e0ea6ec286fa36b47e771b8ccc737b5f",
+   "experiments/psem_word_start_correction/tests/test_word_start_correction.py": "manifest-match",
+   "experiments/psem_np2_continuous_state/native/CONT/diar.probs.f32": "f3bf7f2e01f45f8130036236d752acfd8930b6dd9c82f11d9f2bc765d19a3652"
+  },
+  "restored_capture_equals_repo_keeper": true,
+  "temp_tree_removed": true,
+  "cont_67mb_wave": "not in archive; recipe HISTORY/psem_research_closeout/restore_inputs.py + outside-repo AMI source"
+ },
+ "note_private": "paid raw captures included because unique; never publish the zip",
+ "discarded_staging_archives": [
+  {
+   "name": "psem_closeout_20260910T202553Z_experiment-v2-speaker-change-turn-boundaries-ls.zip",
+   "sha256": "2c421292a1c6a012685523792cb543cdbf7df3a3bae5fbf0884925755135eb12",
+   "bytes": 24388077,
+   "members": 778,
+   "reason": "superseded staging: all 778 members byte-equal same-path to canonical 0758968f; deleted user-authorized"
+  },
+  {
+   "name": "psem_closeout_5dirs_20260911.zip",
+   "sha256": "18840e68c69198647c20cbeab956880839fb926baad836e1229d872edd2fc1f9",
+   "bytes": 23472778,
+   "members": 535,
+   "reason": "superseded staging: 530 scientific members byte-equal same-path to canonical; 5 closeout draft docs superseded by canonical HISTORY versions; deleted user-authorized"
+  }
+ ]
+}

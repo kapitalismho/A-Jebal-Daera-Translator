@@ -268,3 +268,7 @@ opencode.json
 .skills/
 .opencode/
 .impeccable.md
+# psem paid captures stay private (loose originals, archived externally)
+experiments/soniox_realtime_reference_benchmark/captures/
+experiments/soniox_realtime_reference_benchmark/historical/v1/captures/
+experiments/soniox_realtime_reference_benchmark/historical/v2/captures/
