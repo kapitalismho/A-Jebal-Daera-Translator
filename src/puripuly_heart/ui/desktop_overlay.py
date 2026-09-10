@@ -2953,9 +2953,11 @@ class DesktopOverlayRenderer:
             )
             startup_error = _startup_error_cause(exc)
             failure_event = self._startup_error_event(
-                startup_error.failure_reason
-                if startup_error is not None
-                else unexpected_startup_failure_reason,
+                (
+                    startup_error.failure_reason
+                    if startup_error is not None
+                    else unexpected_startup_failure_reason
+                ),
                 startup_error=startup_error,
                 default_phase=getattr(self.window, "startup_phase", None),
             )

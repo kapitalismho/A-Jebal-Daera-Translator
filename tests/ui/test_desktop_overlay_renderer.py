@@ -5532,6 +5532,7 @@ async def test_desktop_overlay_rejects_flet_startup_without_canonical_bounds() -
     assert bridge_event["evidence"]["desktop_target"] is True
     assert app.page.visibility_updates == []
 
+
 @pytest.mark.asyncio
 async def test_desktop_overlay_window_start_failure_reports_window_configuration_error(
     caplog: pytest.LogCaptureFixture,

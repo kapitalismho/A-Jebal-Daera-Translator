@@ -282,9 +282,7 @@ async def test_eligible_recovery_reaps_a_before_distinct_b_and_connects() -> Non
 async def test_terminal_repeat_after_replacement_failure() -> None:
     harness = Harness()
     harness.install_transition_stub()
-    manager_a = RecoveryManager(
-        evidence=_evidence("window_reveal_lost"), instance_id="overlay-A"
-    )
+    manager_a = RecoveryManager(evidence=_evidence("window_reveal_lost"), instance_id="overlay-A")
     harness.attach_failed_manager(manager_a, "overlay-A")
 
     await harness.owner.handle_start_failure("window_reveal_lost")
@@ -563,8 +561,8 @@ async def test_fallback_schedules_without_prestart_peer_refresh() -> None:
 async def test_fallback_postconnect_refresh_failure_keeps_desktop_connected(
     monkeypatch: Any,
 ) -> None:
-    import tests.app.test_overlay_generation_start_owner as gen_module
     import puripuly_heart.app.services.overlay.overlay_generation_start as gen_start
+    import tests.app.test_overlay_generation_start_owner as gen_module
 
     gen_module.FakePresenter.instances = []
     gen_module.FakePresenter.events = []
@@ -598,9 +596,7 @@ async def test_fallback_postconnect_refresh_failure_keeps_desktop_connected(
         lambda message, level, exc: logged.append(message),
     )
 
-    async def watch(
-        manager: Any, monitor: asyncio.Task[None], rt: Any, instance_id: str
-    ) -> None:
+    async def watch(manager: Any, monitor: asyncio.Task[None], rt: Any, instance_id: str) -> None:
         watched.append(instance_id)
         await monitor
 
@@ -626,8 +622,8 @@ async def test_fallback_postconnect_refresh_failure_keeps_desktop_connected(
 async def test_direct_postconnect_refresh_failure_preserves_terminal_semantics(
     monkeypatch: Any,
 ) -> None:
-    import tests.app.test_overlay_generation_start_owner as gen_module
     import puripuly_heart.app.services.overlay.overlay_generation_start as gen_start
+    import tests.app.test_overlay_generation_start_owner as gen_module
 
     gen_module.FakePresenter.instances = []
     gen_module.FakePresenter.events = []

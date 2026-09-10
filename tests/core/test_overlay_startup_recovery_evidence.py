@@ -5,7 +5,9 @@ import pytest
 from puripuly_heart.core.overlay.process import OverlayProcessManager
 
 
-def _manager(instance_id: str = "overlay-test", target: str | None = "desktop") -> OverlayProcessManager:
+def _manager(
+    instance_id: str = "overlay-test", target: str | None = "desktop"
+) -> OverlayProcessManager:
     manager = OverlayProcessManager()
     manager.overlay_instance_id = instance_id
     manager.selected_target = target
@@ -81,12 +83,18 @@ def test_malformed_and_incomplete_evidence_rejected() -> None:
 
 def test_cross_instance_evidence_rejected() -> None:
     manager = _manager()
-    assert manager._startup_recovery_eligible(_reveal_lost_evidence("other")) is False  # noqa: SLF001
+    assert (
+        manager._startup_recovery_eligible(_reveal_lost_evidence("other")) is False
+    )  # noqa: SLF001
 
 
 def test_non_desktop_target_rejected() -> None:
-    assert _manager(target="steamvr")._startup_recovery_eligible(_reveal_lost_evidence()) is False  # noqa: SLF001
-    assert _manager(target=None)._startup_recovery_eligible(_reveal_lost_evidence()) is False  # noqa: SLF001
+    assert (
+        _manager(target="steamvr")._startup_recovery_eligible(_reveal_lost_evidence()) is False
+    )  # noqa: SLF001
+    assert (
+        _manager(target=None)._startup_recovery_eligible(_reveal_lost_evidence()) is False
+    )  # noqa: SLF001
 
 
 def test_nonrecoverable_reasons_rejected() -> None:
@@ -141,15 +149,21 @@ def test_failure_evidence_extraction() -> None:
         {"overlay_instance_id": "overlay-test", "evidence": {"a": 1}}
     )
     assert evidence == {"a": 1, "overlay_instance_id": "overlay-test"}
-    assert manager._extract_failure_evidence(  # noqa: SLF001
-        {"overlay_instance_id": "", "evidence": {"a": 1}},
-    ) is None
-    assert manager._extract_failure_evidence(  # noqa: SLF001
-        {
-            "overlay_instance_id": "overlay-test",
-            "evidence": {"a": 1, "overlay_instance_id": "overlay-other"},
-        },
-    ) is None
+    assert (
+        manager._extract_failure_evidence(  # noqa: SLF001
+            {"overlay_instance_id": "", "evidence": {"a": 1}},
+        )
+        is None
+    )
+    assert (
+        manager._extract_failure_evidence(  # noqa: SLF001
+            {
+                "overlay_instance_id": "overlay-test",
+                "evidence": {"a": 1, "overlay_instance_id": "overlay-other"},
+            },
+        )
+        is None
+    )
 
 
 def _live_reveal_lost_wire_body() -> dict[str, object]:

@@ -8,13 +8,7 @@ from puripuly_heart.ui.overlay_peer_contract import (
 )
 from puripuly_heart.ui.views.settings import SettingsView
 
-I18N_DIR = (
-    Path(__file__).resolve().parents[2]
-    / "src"
-    / "puripuly_heart"
-    / "data"
-    / "i18n"
-)
+I18N_DIR = Path(__file__).resolve().parents[2] / "src" / "puripuly_heart" / "data" / "i18n"
 
 
 def _action_kind(reason: str | None) -> str:

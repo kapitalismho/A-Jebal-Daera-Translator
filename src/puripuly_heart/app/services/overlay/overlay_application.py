@@ -542,6 +542,7 @@ class OverlayApplicationOwner:
             detailed_emitted = self.log_detailed(message, logging.WARNING, exc)
             if not detailed_emitted:
                 self.log_basic(message, logging.WARNING)
+
     async def begin_start(self) -> None:
         if self._ingress_stopped:
             return
@@ -853,14 +854,14 @@ class OverlayApplicationOwner:
         if runtime is None:
             return None, None, None, None
         instance_id = runtime.overlay_instance_id
-        if instance_id is None or not self.runtime_is_current(runtime, overlay_instance_id=instance_id):
+        if instance_id is None or not self.runtime_is_current(
+            runtime, overlay_instance_id=instance_id
+        ):
             return None, None, None, None
         manager = runtime.process_manager
         if manager is None or getattr(manager, "state", None) != "failed":
             return None, None, None, None
-        reason = self.normalize_failure_reason(
-            getattr(manager, "failure_reason", failure_reason)
-        )
+        reason = self.normalize_failure_reason(getattr(manager, "failure_reason", failure_reason))
         if reason not in DESKTOP_STARTUP_RECOVERABLE_REASONS:
             return None, None, None, None
         if not bool(getattr(manager, "startup_recovery_eligible", False)):
@@ -1048,17 +1049,17 @@ class OverlayApplicationOwner:
                 replacement_id = None
                 if recovery.get("replacement_started"):
                     replacement_id = (
-                        self._runtime.overlay_instance_id
-                        if self._runtime is not None
-                        else None
+                        self._runtime.overlay_instance_id if self._runtime is not None else None
                     )
                 self._last_startup_recovery = {
                     "failure_reason": recovery.get("failure_reason"),
                     "failed_overlay_instance_id": recovery.get("failed_overlay_instance_id"),
                     "replacement_overlay_instance_id": replacement_id,
-                    "evidence": dict(recovery.get("evidence", {}))
-                    if isinstance(recovery.get("evidence"), dict)
-                    else recovery.get("evidence"),
+                    "evidence": (
+                        dict(recovery.get("evidence", {}))
+                        if isinstance(recovery.get("evidence"), dict)
+                        else recovery.get("evidence")
+                    ),
                     "outcome": "failed",
                     "terminal_reason": reason,
                 }
@@ -1077,6 +1078,7 @@ class OverlayApplicationOwner:
                 logging.WARNING,
                 exc,
             )
+
     async def _complete_fallback_failure(
         self,
         failure_reason: str | None,
@@ -1245,9 +1247,11 @@ class OverlayApplicationOwner:
                     "failure_reason": recovery.get("failure_reason"),
                     "failed_overlay_instance_id": failed_id,
                     "replacement_overlay_instance_id": replacement_id,
-                    "evidence": dict(recovery.get("evidence", {}))
-                    if isinstance(recovery.get("evidence"), dict)
-                    else recovery.get("evidence"),
+                    "evidence": (
+                        dict(recovery.get("evidence", {}))
+                        if isinstance(recovery.get("evidence"), dict)
+                        else recovery.get("evidence")
+                    ),
                     "outcome": "connected",
                 }
                 self.log_detailed(
@@ -1284,7 +1288,10 @@ class OverlayApplicationOwner:
         self._state = next_state
         self._log_state_transition(previous, next_state)
         self.sync_peer_effective()
-        if next_state not in {"starting", "recovering", "connected"} and not preserve_peer_activation:
+        if (
+            next_state not in {"starting", "recovering", "connected"}
+            and not preserve_peer_activation
+        ):
             self.cancel_peer_activation()
 
     def _notify_state(self) -> None:
