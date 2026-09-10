@@ -74,11 +74,16 @@ def test_malformed_and_incomplete_evidence_rejected() -> None:
     assert eligible({}) is False
     assert eligible("window_reveal_lost") is False
     incomplete = _reveal_lost_evidence()
-    del incomplete["hwnd"]
-    assert eligible(incomplete) is False
-    incomplete = _reveal_lost_evidence()
     del incomplete["overlay_instance_id"]
     assert eligible(incomplete) is False
+
+
+def test_reveal_lost_ignores_forensic_gaps() -> None:
+    manager = _manager()
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    incomplete = _reveal_lost_evidence()
+    del incomplete["hwnd"]
+    assert eligible(incomplete) is True
 
 
 def test_cross_instance_evidence_rejected() -> None:
@@ -112,9 +117,10 @@ def test_nonrecoverable_reasons_rejected() -> None:
         assert manager._startup_recovery_eligible(evidence) is False  # noqa: SLF001
 
 
-def test_equivocal_visibility_evidence_rejected() -> None:
+def test_reveal_lost_ignores_forensic_drift_and_gaps() -> None:
     manager = _manager()
-    cases = [
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    for override in (
         {"title_confirmed": False},
         {"win32_error": 5},
         {"port_reason": "binding_changed"},
@@ -126,18 +132,103 @@ def test_equivocal_visibility_evidence_rejected() -> None:
         {"observed_bounds": None},
         {"canonical_bounds": [320, 720]},
         {"bounds_drift": None},
-    ]
-    for override in cases:
+        {"bounds_drift": True},
+    ):
         evidence = _reveal_lost_evidence()
         evidence.update(override)
-        assert manager._startup_recovery_eligible(evidence) is False  # noqa: SLF001
+        assert eligible(evidence) is True
 
 
-def test_reveal_lost_with_drift_rejected() -> None:
+def test_observation_failed_requires_observation_subreason() -> None:
     manager = _manager()
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    for port_reason in ("enum_windows_failed", "port_error"):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = "window_observation_failed"
+        evidence["port_reason"] = port_reason
+        evidence["win32_error"] = None
+        assert eligible(evidence) is True
     evidence = _reveal_lost_evidence()
-    evidence["bounds_drift"] = True
-    assert manager._startup_recovery_eligible(evidence) is False  # noqa: SLF001
+    evidence["failure_reason"] = "window_observation_failed"
+    evidence["port_reason"] = "visible_bounds_not_retained"
+    evidence["win32_error"] = 5
+    assert eligible(evidence) is True
+    for port_reason in ("visible_bounds_not_retained", "binding_changed", "closed"):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = "window_observation_failed"
+        evidence["port_reason"] = port_reason
+        evidence["win32_error"] = None
+        assert eligible(evidence) is False
+
+
+def test_bounds_failed_requires_valid_canonical_and_confirmation() -> None:
+    manager = _manager()
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    evidence = _reveal_lost_evidence()
+    evidence["failure_reason"] = "window_bounds_failed"
+    evidence["port_reason"] = "bounds_not_retained"
+    assert eligible(evidence) is True
+    for port_reason in ("canonical_bounds_missing", "visible_bounds_not_retained", "port_error"):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = "window_bounds_failed"
+        evidence["port_reason"] = port_reason
+        assert eligible(evidence) is False
+    for canonical in (None, [320, 720], [0, 0, 0, 0], [0, 0, -10, 20]):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = "window_bounds_failed"
+        evidence["port_reason"] = "bounds_not_retained"
+        evidence["canonical_bounds"] = canonical
+        assert eligible(evidence) is False
+
+
+def test_native_ready_failed_requires_timeout_subreason() -> None:
+    manager = _manager()
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    evidence = _reveal_lost_evidence()
+    evidence["failure_reason"] = "window_native_ready_failed"
+    evidence["port_reason"] = "native_ready_timeout"
+    assert eligible(evidence) is True
+    evidence = _reveal_lost_evidence()
+    evidence["failure_reason"] = "window_native_ready_failed"
+    evidence["port_reason"] = "visible_bounds_not_retained"
+    assert eligible(evidence) is False
+
+
+def test_identity_failed_requires_owned_selection_subreason() -> None:
+    manager = _manager()
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    for port_reason in (
+        "window_not_found",
+        "ambiguous_window",
+        "window_changed",
+        "pid_file_mismatch",
+    ):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = "window_identity_failed"
+        evidence["port_reason"] = port_reason
+        assert eligible(evidence) is True
+    for port_reason in ("binding_changed", "closed", "process_unbound", "enum_windows_failed"):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = "window_identity_failed"
+        evidence["port_reason"] = port_reason
+        assert eligible(evidence) is False
+
+
+def test_terminal_reasons_rejected() -> None:
+    manager = _manager()
+    eligible = manager._startup_recovery_eligible  # noqa: SLF001
+    for reason in (
+        "missing_executable",
+        "spawn_failed",
+        "manifest_invalid",
+        "bridge_auth_failed",
+        "renderer_init_failed",
+        "unknown",
+        "window_configuration_failed",
+    ):
+        evidence = _reveal_lost_evidence()
+        evidence["failure_reason"] = reason
+        assert eligible(evidence) is False
 
 
 def test_failure_evidence_extraction() -> None:
@@ -237,7 +328,14 @@ async def test_renderer_envelope_feeds_manager_eligibility() -> None:
             return None
 
         async def confirm_window_visible(
-            self, expected_title: str, *, x: int, y: int, width: int, height: int
+            self,
+            expected_title: str,
+            *,
+            x: int,
+            y: int,
+            width: int,
+            height: int,
+            on_first_visible=None,
         ) -> WindowVisibilityConfirmation:
             return WindowVisibilityConfirmation(
                 confirmed=False,

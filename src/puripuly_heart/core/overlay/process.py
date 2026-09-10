@@ -54,9 +54,28 @@ _RESET_TO_BOTTOM_CENTER_EVENT_KEYS = {"event"}
 _DESKTOP_STARTUP_TARGET = "desktop"
 _DESKTOP_STARTUP_BOUNDS_CONFIRMED_PHASE = "bounds_confirmed"
 _DESKTOP_STARTUP_RECOVERABLE_REASONS = frozenset(
-    {"window_reveal_lost", "window_visibility_unstable"}
+    {
+        "window_reveal_lost",
+        "window_visibility_unstable",
+        "window_observation_failed",
+        "window_bounds_failed",
+        "window_native_ready_failed",
+        "window_identity_failed",
+    }
 )
 _DESKTOP_STARTUP_VISIBILITY_RETAINED_REASON = "visible_bounds_not_retained"
+_DESKTOP_STARTUP_OBSERVATION_ELIGIBLE_PORT_REASONS = frozenset(
+    {"enum_windows_failed", "port_error"}
+)
+_DESKTOP_STARTUP_IDENTITY_ELIGIBLE_PORT_REASONS = frozenset(
+    {"window_not_found", "ambiguous_window", "window_changed", "pid_file_mismatch"}
+)
+_DESKTOP_STARTUP_IDENTITY_INELIGIBLE_PORT_REASONS = frozenset(
+    {"binding_changed", "closed", "process_unbound"}
+)
+_DESKTOP_STARTUP_BOUNDS_ELIGIBLE_PORT_REASON = "bounds_not_retained"
+_DESKTOP_STARTUP_NATIVE_READY_ELIGIBLE_PORT_REASON = "native_ready_timeout"
+_DESKTOP_STARTUP_FIRST_VISIBLE_EVENT = "desktop_first_visible"
 
 
 class OverlayPreparationError(Exception):
@@ -519,6 +538,7 @@ class OverlayProcessManager:
     selected_target: str | None = None
     fallback_reason: str | None = None
     geometry_authority: str | None = None
+    first_visible_callback: Callable[[], None] | None = None
 
     state: str = field(init=False, default="off")
     failure_reason: str | None = field(init=False, default=None)
@@ -535,8 +555,11 @@ class OverlayProcessManager:
     _failure_dumped: bool = field(init=False, default=False)
     _shutdown_requested: bool = field(init=False, default=False)
     _shutdown_acknowledged: bool = field(init=False, default=False)
+    _desktop_cleanup_complete: bool = field(init=False, default=False)
+    desktop_first_visible: bool = field(init=False, default=False)
     native_retry_owner_confirmed: bool = field(init=False, default=False)
     _accepted_ready_generation: int | None = field(init=False, default=None, repr=False)
+    _accepted_first_visible_generation: int | None = field(init=False, default=None, repr=False)
     _trace_generation: int = field(init=False, default=0, repr=False)
     _last_trace_phase: str | None = field(init=False, default=None, repr=False)
     _active_process_event_task: asyncio.Task[dict[str, object]] | None = field(
@@ -551,6 +574,10 @@ class OverlayProcessManager:
     )
 
     @property
+    def desktop_cleanup_complete(self) -> bool:
+        return self._desktop_cleanup_complete
+
+    @property
     def startup_recovery_eligible(self) -> bool:
         return self._startup_recovery_eligible(self.startup_failure_evidence)
 
@@ -563,46 +590,59 @@ class OverlayProcessManager:
             return False
         if evidence.get("desktop_target") is not True:
             return False
-        if evidence.get("startup_phase") != _DESKTOP_STARTUP_BOUNDS_CONFIRMED_PHASE:
+        failure_reason = evidence.get("failure_reason")
+        if not isinstance(failure_reason, str) or not failure_reason:
             return False
-        if evidence.get("failure_reason") not in _DESKTOP_STARTUP_RECOVERABLE_REASONS:
+        if failure_reason not in _DESKTOP_STARTUP_RECOVERABLE_REASONS:
             return False
-        if evidence.get("title_confirmed") is not True:
-            return False
-        if evidence.get("win32_error") is not None:
-            return False
-        if evidence.get("port_reason") != _DESKTOP_STARTUP_VISIBILITY_RETAINED_REASON:
-            return False
-        hwnd = evidence.get("hwnd")
-        owner_pid = evidence.get("owner_pid")
-        hwnd_owner_pid = evidence.get("hwnd_owner_pid")
-        if not self._is_positive_int(hwnd):
-            return False
-        if not self._is_positive_int(owner_pid):
-            return False
-        if hwnd_owner_pid != owner_pid:
-            return False
-        if evidence.get("endpoint_matches") is not True:
-            return False
-        pid_file_pid = evidence.get("pid_file_pid")
-        if pid_file_pid is not None and pid_file_pid != owner_pid:
-            return False
-        if not self._is_bounds_vector(evidence.get("canonical_bounds")):
-            return False
-        if not self._is_bounds_vector(evidence.get("observed_bounds")):
-            return False
-        if evidence.get("bounds_drift") is not True and evidence.get("bounds_drift") is not False:
-            return False
-        if evidence.get("failure_reason") == "window_reveal_lost":
-            if evidence.get("bounds_drift") is not False:
+        port_reason = evidence.get("port_reason")
+        if failure_reason in {"window_reveal_lost", "window_visibility_unstable"}:
+            return True
+        if failure_reason == "window_observation_failed":
+            if evidence.get("win32_error") is not None:
+                return True
+            return (
+                isinstance(port_reason, str)
+                and port_reason in _DESKTOP_STARTUP_OBSERVATION_ELIGIBLE_PORT_REASONS
+            )
+        if failure_reason == "window_bounds_failed":
+            if not isinstance(port_reason, str):
                 return False
-        return True
+            if port_reason != _DESKTOP_STARTUP_BOUNDS_ELIGIBLE_PORT_REASON:
+                return False
+            return self._is_positive_canonical_bounds(evidence.get("canonical_bounds"))
+        if failure_reason == "window_native_ready_failed":
+            return port_reason == _DESKTOP_STARTUP_NATIVE_READY_ELIGIBLE_PORT_REASON
+        if failure_reason == "window_identity_failed":
+            if not isinstance(port_reason, str) or not port_reason:
+                return False
+            if port_reason in _DESKTOP_STARTUP_IDENTITY_INELIGIBLE_PORT_REASONS:
+                return False
+            if port_reason in _DESKTOP_STARTUP_IDENTITY_ELIGIBLE_PORT_REASONS:
+                return True
+            if port_reason == _DESKTOP_STARTUP_VISIBILITY_RETAINED_REASON:
+                return evidence.get("title_confirmed") is False
+            return False
+        return False
 
     @classmethod
     def _is_bounds_vector(cls, value: object) -> bool:
         if not isinstance(value, (list, tuple)) or len(value) != 4:
             return False
         return all(cls._is_finite_non_bool_number(item) for item in value)
+
+    @classmethod
+    def _is_positive_canonical_bounds(cls, value: object) -> bool:
+        if not isinstance(value, (list, tuple)) or len(value) != 4:
+            return False
+        if not all(cls._is_finite_non_bool_number(item) for item in value):
+            return False
+        try:
+            width = float(value[2])
+            height = float(value[3])
+        except (TypeError, ValueError):
+            return False
+        return width > 0 and height > 0
 
     def __post_init__(self) -> None:
         self.logging_mode = normalize_overlay_logging_mode(self.logging_mode)
@@ -636,10 +676,13 @@ class OverlayProcessManager:
         self._failure_dumped = False
         self._shutdown_requested = False
         self._shutdown_acknowledged = False
+        self._desktop_cleanup_complete = False
+        self.desktop_first_visible = False
         self.restart_scheduled = False
         self.failure_reason = None
         self.startup_failure_evidence = None
         self._accepted_ready_generation = None
+        self._accepted_first_visible_generation = None
         self._trace_generation += 1
         self._last_trace_phase = None
         await self._set_native_retry_owner_confirmed(False, force_notify=True)
@@ -711,6 +754,7 @@ class OverlayProcessManager:
                 pid=getattr(process, "pid", None),
                 returncode=getattr(process, "returncode", None),
             )
+            self._note_outer_exit_for_cleanup(process)
             self._detach_process_lifecycle_sink(process)
             if self._process is process:
                 self._process = None
@@ -1062,6 +1106,10 @@ class OverlayProcessManager:
             if not self._shutdown_acknowledged:
                 self._shutdown_acknowledged = True
                 self._record_process("graceful_shutdown_acknowledged")
+            self._maybe_mark_desktop_cleanup_complete()
+            return "ignored"
+        if event_type == _DESKTOP_STARTUP_FIRST_VISIBLE_EVENT:
+            self._handle_desktop_first_visible(event, trusted_process_event)
             return "ignored"
         if allow_ready and trusted_process_event and event_type == "overlay_ready":
             event_instance_id = event.get("overlay_instance_id")
@@ -1131,6 +1179,113 @@ class OverlayProcessManager:
         version = capability.get("version")
         ownership = capability.get("ownership")
         return type(version) is int and version == 1 and ownership == "exclusive"
+
+    def _handle_desktop_first_visible(
+        self, event: dict[str, object], trusted_process_event: bool
+    ) -> None:
+        if not trusted_process_event:
+            self._record_process(
+                "renderer_message_ignored",
+                reason="untrusted_first_visible",
+                accepted=False,
+            )
+            return
+        event_instance_id = event.get("overlay_instance_id")
+        if not isinstance(event_instance_id, str) or event_instance_id != self.overlay_instance_id:
+            self._record_process(
+                "renderer_message_ignored",
+                reason="stale_overlay_instance",
+                event_overlay_instance_id=event_instance_id,
+                accepted=False,
+            )
+            return
+        generation = event.get("generation")
+        if not self._is_positive_int(generation):
+            self._record_process(
+                "renderer_message_ignored",
+                reason="invalid_first_visible_generation",
+                accepted=False,
+            )
+            return
+        if self.selected_target != _DESKTOP_STARTUP_TARGET:
+            self._record_process(
+                "renderer_message_ignored",
+                reason="non_desktop_first_visible",
+                accepted=False,
+            )
+            return
+        if self.state != "starting" or self._current_phase != "startup":
+            self._record_process(
+                "renderer_message_ignored",
+                reason="post_terminal_first_visible",
+                accepted=False,
+            )
+            return
+        if self.desktop_first_visible or self._accepted_first_visible_generation is not None:
+            self._record_process(
+                "renderer_message_ignored",
+                reason="duplicate_first_visible",
+                generation=generation,
+                accepted=False,
+            )
+            return
+        if self._accepted_ready_generation is not None:
+            self._record_process(
+                "renderer_message_ignored",
+                reason="post_terminal_first_visible",
+                generation=generation,
+                accepted=False,
+            )
+            return
+        self._accepted_first_visible_generation = int(generation)
+        self.desktop_first_visible = True
+        self._record_process(
+            "desktop_first_visible",
+            generation=generation,
+        )
+        callback = self.first_visible_callback
+        if callback is not None:
+            try:
+                callback()
+            except Exception as exc:
+                logger.warning(
+                    "[OverlayProcess] First visible callback failed: exception_type=%s",
+                    type(exc).__name__,
+                )
+
+    def _maybe_mark_desktop_cleanup_complete(self) -> None:
+        if self._desktop_cleanup_complete or not self._shutdown_acknowledged:
+            return
+        if self._outer_renderer_exit_confirmed():
+            self._desktop_cleanup_complete = True
+            self._record_process("desktop_cleanup_complete")
+
+    def _outer_renderer_exit_confirmed(self) -> bool:
+        if self._last_exit_code is not None:
+            return True
+        process = self._process
+        if process is not None and getattr(process, "returncode", None) is not None:
+            return True
+        exit_task = self._active_process_exit_task
+        if exit_task is not None and exit_task.done() and not exit_task.cancelled():
+            try:
+                if exit_task.exception() is None and exit_task.result() is not None:
+                    return True
+            except (asyncio.CancelledError, Exception):
+                return False
+        return False
+
+    def _note_outer_exit_for_cleanup(self, process: OverlayManagedProcess | None) -> None:
+        if self._desktop_cleanup_complete or not self._shutdown_acknowledged:
+            return
+        exit_confirmed = self._last_exit_code is not None
+        if not exit_confirmed and process is not None:
+            exit_confirmed = getattr(process, "returncode", None) is not None
+        if not exit_confirmed:
+            exit_confirmed = self._outer_renderer_exit_confirmed()
+        if exit_confirmed:
+            self._desktop_cleanup_complete = True
+            self._record_process("desktop_cleanup_complete")
 
     async def _set_native_retry_owner_confirmed(
         self,
@@ -1375,6 +1530,7 @@ class OverlayProcessManager:
                         "graceful_shutdown_process_exit",
                         exit_code=self._last_exit_code,
                     )
+                    self._maybe_mark_desktop_cleanup_complete()
                     return True
                 remaining_s = deadline - loop.time()
                 if remaining_s <= 0.0:
@@ -1421,6 +1577,7 @@ class OverlayProcessManager:
                                 "graceful_shutdown_process_exit",
                                 exit_code=self._last_exit_code,
                             )
+                            self._maybe_mark_desktop_cleanup_complete()
                             return True
                         if ack_task is None:
                             ack_task = self._create_cleanup_task(
@@ -1491,10 +1648,11 @@ class OverlayProcessManager:
         startup_evidence: dict[str, object] | None = None,
     ) -> None:
         self.state = "failed"
-        self.failure_reason = failure_reason
-        self.startup_failure_evidence = (
-            dict(startup_evidence) if isinstance(startup_evidence, dict) else None
-        )
+        if self.failure_reason is None:
+            self.failure_reason = failure_reason
+            self.startup_failure_evidence = (
+                dict(startup_evidence) if isinstance(startup_evidence, dict) else None
+            )
         connected_session = self._last_transition in {"overlay_ready", "bridge_ready"}
         self.restart_scheduled = connected_session and not self._shutdown_requested
         self._current_phase = "failed"
@@ -1569,12 +1727,14 @@ class OverlayProcessManager:
                 pid=getattr(process, "pid", None),
                 returncode=getattr(process, "returncode", None),
             )
+            self._note_outer_exit_for_cleanup(process)
             self._detach_process_lifecycle_sink(process)
             if self._process is process:
                 self._process = None
         elif not terminate_process:
             if process is not None:
                 await self._drain_process_events(process)
+                self._note_outer_exit_for_cleanup(process)
                 self._detach_process_lifecycle_sink(process)
             self._process = None
         await self._set_native_retry_owner_confirmed(False)

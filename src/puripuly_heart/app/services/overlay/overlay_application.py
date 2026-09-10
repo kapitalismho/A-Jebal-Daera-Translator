@@ -92,6 +92,10 @@ DESKTOP_STARTUP_RECOVERABLE_REASONS = frozenset(
     {
         "window_reveal_lost",
         "window_visibility_unstable",
+        "window_observation_failed",
+        "window_bounds_failed",
+        "window_native_ready_failed",
+        "window_identity_failed",
     }
 )
 DESKTOP_STARTUP_RECOVERY_MAX_ATTEMPTS = 1
@@ -333,7 +337,37 @@ class OverlayApplicationOwner:
             peer_effective_enabled=peer.effective_enabled,
             peer_warning_reason=peer.process_warning_reason,
             peer_activation_starting=peer.activation_starting or peer.model_loading,
+            desktop_first_visible=self._current_desktop_first_visible(),
         )
+
+    def _current_desktop_first_visible(self) -> bool:
+        runtime = self._runtime
+        if runtime is None:
+            return False
+        if self._active_target != OVERLAY_TARGET_DESKTOP:
+            return False
+        manager = runtime.process_manager
+        if manager is None:
+            return False
+        return bool(getattr(manager, "desktop_first_visible", False))
+
+    def on_desktop_first_visible(
+        self,
+        runtime: OverlayRuntimeHandle,
+        overlay_instance_id: str | None,
+    ) -> None:
+        try:
+            if self._runtime is not runtime:
+                return
+            if not self.runtime_is_current(runtime, overlay_instance_id=overlay_instance_id):
+                return
+            if self._state not in {"starting", "recovering"}:
+                return
+            if self._active_target != OVERLAY_TARGET_DESKTOP:
+                return
+        except Exception:
+            return
+        self.publish_presentation()
 
     def publish_presentation(self) -> None:
         with contextlib.suppress(Exception):
@@ -700,6 +734,7 @@ class OverlayApplicationOwner:
                 runtime=runtime,
                 overlay_instance_id=instance_id,
             ),
+            notify_first_visible=self.on_desktop_first_visible,
         )
 
     def _should_restart_after_terminal_failure(self, manager: OverlayProcessManager) -> bool:
@@ -866,15 +901,14 @@ class OverlayApplicationOwner:
             return None, None, None, None
         if not bool(getattr(manager, "startup_recovery_eligible", False)):
             return None, None, None, None
-        evidence = getattr(manager, "startup_failure_evidence", None)
-        if not isinstance(evidence, dict) or not evidence:
+        raw_evidence = getattr(manager, "startup_failure_evidence", None)
+        if raw_evidence is None:
+            evidence: dict[str, object] = {}
+        elif isinstance(raw_evidence, dict):
+            evidence = dict(raw_evidence)
+        else:
             return None, None, None, None
-        evidence_reason = evidence.get("failure_reason")
-        if evidence_reason != reason:
-            return None, None, None, None
-        if evidence.get("desktop_target") is not True:
-            return None, None, None, None
-        return manager, dict(evidence), reason, instance_id
+        return manager, evidence, reason, instance_id
 
     async def handle_start_failure(self, failure_reason: str | None) -> None:
         candidate = self._desktop_startup_recovery_candidate(failure_reason)
@@ -941,12 +975,15 @@ class OverlayApplicationOwner:
         self._transition_state("recovering")
         self._notify_state()
         previous = self._runtime
+        held_manager = manager
         teardown_succeeded = await self.teardown(preserve_presenter_state=True)
+        cleanup_complete = bool(getattr(held_manager, "desktop_cleanup_complete", False))
         if (
             not teardown_succeeded
             or previous is None
             or not previous.is_closed
             or not previous.transfer_reap_complete()
+            or not cleanup_complete
         ):
             self.log_detailed(
                 "[Overlay] Desktop startup recovery teardown uncertain; terminal",

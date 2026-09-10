@@ -802,6 +802,7 @@ class FletDesktopRendererWindow:
         window_z_order_port: WindowZOrderPort | None = None,
         window_process_info_provider: FletProcessInfoProvider | None = None,
         view_process_owner: FletDesktopViewProcessOwner | None = None,
+        overlay_instance_id: str | None = None,
     ) -> None:
         if (
             app_runner is not None
@@ -866,6 +867,8 @@ class FletDesktopRendererWindow:
         self._bound_owner_pid: int | None = None
         self._bound_pid_file_pid: int | None = None
         self._bound_endpoint_identity: str | None = None
+        self._overlay_instance_id = overlay_instance_id
+        self._first_visible_generation: int | None = None
         self._startup_generation = 0
         self._startup_coordinator: DesktopOverlayStartupCoordinator | None = None
         self._interaction_mode_lock = asyncio.Lock()
@@ -951,6 +954,7 @@ class FletDesktopRendererWindow:
                 trace_sink=self._record_startup_lifecycle,
             )
         self._programmatic_bounds_signatures.clear()
+        self._first_visible_generation = None
         self._last_snapshot_revision = self._snapshot.revision
         self._page_ready.clear()
         self._closed.clear()
@@ -1615,6 +1619,7 @@ class FletDesktopRendererWindow:
                 y=int(round(float(bounds["y"]))),
                 width=int(round(float(bounds["width"]))),
                 height=int(round(float(bounds["height"]))),
+                on_first_visible=self._on_first_visible_sample,
             )
         except asyncio.CancelledError:
             raise
@@ -1667,6 +1672,67 @@ class FletDesktopRendererWindow:
                 ),
             )
         return result
+
+    def _on_first_visible_sample(self) -> None:
+        generation = self._startup_generation
+        if self._preview_catalog is not None:
+            return
+        if self._first_visible_generation is not None:
+            return
+        if not isinstance(generation, int) or generation <= 0:
+            return
+        if self._closed.is_set():
+            return
+
+        async def emit_once() -> None:
+            await self._emit_first_visible_once(generation)
+
+        self._run_page_task(emit_once)
+
+    async def _emit_first_visible_once(self, generation: int) -> None:
+        if self._closed.is_set():
+            return
+        if self._preview_catalog is not None:
+            return
+        if self._first_visible_generation is not None:
+            return
+        if generation != self._startup_generation:
+            return
+        coordinator = self._startup_coordinator
+        if coordinator is None or coordinator.retired:
+            return
+        if not coordinator.accepts(generation):
+            coordinator.reject("first_visible_callback", generation)
+            return
+        if self._page is None:
+            return
+        if self._retained_caption_surface is None and self._last_render_trace is None:
+            return
+        instance_id = self._overlay_instance_id
+        if not isinstance(instance_id, str) or not instance_id:
+            return
+        self._first_visible_generation = generation
+        coordinator.record(
+            "first_visible",
+            canonical_bounds=dict(self._startup_window_bounds or {}),
+        )
+        self._emit_detailed_log(f"first_visible generation={generation}")
+        sink = self._event_sink
+        if sink is None:
+            return
+        try:
+            await sink(
+                {
+                    "type": "desktop_first_visible",
+                    "overlay_instance_id": instance_id,
+                    "generation": generation,
+                }
+            )
+        except Exception as exc:
+            logger.warning(
+                "[DesktopOverlay] First visible emission failed: exception_type=%s",
+                type(exc).__name__,
+            )
 
     def _window_title(self) -> str:
         return t_for_locale(
@@ -2847,7 +2913,11 @@ class DesktopOverlayRenderer:
             event_sink=self._emit_lifecycle,
             locale=manifest.locale,
             logging_mode=manifest.logging_mode,
+            overlay_instance_id=manifest.overlay_instance_id,
         )
+        if isinstance(self.window, FletDesktopRendererWindow):
+            if self.window._overlay_instance_id is None:
+                self.window._overlay_instance_id = manifest.overlay_instance_id
         self.parent_monitor = parent_monitor or create_parent_monitor(manifest.parent_pid)
         self.diagnostic_port = diagnostic_port or DetailedRendererDiagnosticPort(
             logging_mode=manifest.logging_mode

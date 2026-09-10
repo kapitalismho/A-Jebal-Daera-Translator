@@ -209,3 +209,79 @@ def test_overlay_button_shows_spinner_only_while_startup_pending() -> None:
         off_button = _pending_overlay_controls(False, overlay_state).overlay_control()
         assert off_button._progress_control.visible is False
         assert off_button._icon_control.visible is True
+
+
+def _pending_overlay_controls_with_first_visible(
+    intent_enabled: bool,
+    overlay_state: str,
+    first_visible: bool,
+    failure_reason: str | None = None,
+) -> DashboardCaptureControls:
+    controls = DashboardCaptureControls(
+        on_self_capture_click=lambda: None,
+        on_peer_capture_click=lambda: None,
+        on_overlay_click=lambda: None,
+    )
+    contract = build_overlay_peer_consumer_contract(
+        overlay_intent_enabled=intent_enabled,
+        overlay_state=overlay_state,
+        overlay_failure_reason=failure_reason,
+        peer_intent_enabled=False,
+        peer_effective_enabled=False,
+        desktop_first_visible=first_visible,
+    )
+    controls.apply_presentation(capture_presentation_from_contract(contract))
+    return controls
+
+
+def test_overlay_spinner_stops_on_first_visible_before_connected() -> None:
+    for overlay_state in ("starting", "recovering"):
+        controls = _pending_overlay_controls_with_first_visible(True, overlay_state, True)
+        overlay_button = controls.overlay_control()
+        assert overlay_button._progress_control.visible is False
+        assert overlay_button._icon_control.visible is True
+
+
+def test_overlay_spinner_returns_for_replacement_without_first_visible() -> None:
+    controls = _pending_overlay_controls_with_first_visible(True, "recovering", False)
+    overlay_button = controls.overlay_control()
+    assert overlay_button._progress_control.visible is True
+    assert overlay_button._icon_control.visible is False
+
+
+def test_first_visible_never_reports_effective_enabled() -> None:
+    contract = build_overlay_peer_consumer_contract(
+        overlay_intent_enabled=True,
+        overlay_state="starting",
+        overlay_failure_reason=None,
+        peer_intent_enabled=False,
+        peer_effective_enabled=False,
+        desktop_first_visible=True,
+    )
+    assert contract.overlay.state == "on"
+    assert contract.overlay.effective_enabled is False
+    assert contract.desktop_first_visible is True
+    presentation = capture_presentation_from_contract(contract)
+    assert presentation.overlay.enabled is True
+    assert presentation.overlay.starting is False
+
+
+def test_old_contract_without_first_visible_keeps_spinner() -> None:
+    contract = OverlayPeerConsumerContract(
+        peer=OverlayPeerToggleContract(
+            intent_enabled=False,
+            effective_enabled=False,
+            action_enabled=True,
+            state="off",
+            status_text="",
+        ),
+        overlay=OverlayPeerToggleContract(
+            intent_enabled=True,
+            effective_enabled=False,
+            action_enabled=True,
+            state="on",
+            status_text="",
+        ),
+    )
+    presentation = capture_presentation_from_contract(contract)
+    assert presentation.overlay.starting is True

@@ -41,12 +41,16 @@ class RecoveryManager:
         evidence: dict[str, object] | None = None,
         instance_id: str = "overlay-A",
         stop_error: BaseException | None = None,
+        cleanup_complete: bool = True,
+        first_visible: bool = False,
     ) -> None:
         self.state = state
         self.failure_reason = failure_reason
         self.startup_recovery_eligible = eligible
         self.startup_failure_evidence = evidence
         self.overlay_instance_id = instance_id
+        self.desktop_cleanup_complete = cleanup_complete
+        self.desktop_first_visible = first_visible
         self.stop_calls = 0
         self._stop_error = stop_error
         self._monitor_task: asyncio.Task[None] | None = None
@@ -332,10 +336,6 @@ async def test_recovery_never_reprobes_steamvr_and_preserves_fallback() -> None:
     "reason",
     [
         "window_configuration_failed",
-        "window_identity_failed",
-        "window_observation_failed",
-        "window_bounds_failed",
-        "window_native_ready_failed",
         "unknown",
     ],
 )
@@ -377,11 +377,13 @@ async def test_eligible_reason_without_sibling_approval_goes_terminal() -> None:
     assert harness.transition_calls == 0
 
 
-async def test_evidence_mismatch_goes_terminal() -> None:
+async def test_imperfect_evidence_still_recovers_when_sibling_approves() -> None:
     harness = Harness()
     harness.install_transition_stub()
     bad = _evidence("window_reveal_lost")
     bad["desktop_target"] = False
+    bad["title_confirmed"] = False
+    bad.pop("hwnd", None)
     manager = RecoveryManager(
         failure_reason="window_reveal_lost",
         eligible=True,
@@ -392,8 +394,27 @@ async def test_evidence_mismatch_goes_terminal() -> None:
 
     await harness.owner.handle_start_failure("window_reveal_lost")
 
+    assert harness.owner.state == "recovering"
+    await harness.await_recovery_replacement()
+    assert harness.transition_calls == 1
+
+
+async def test_missing_cleanup_proof_goes_terminal_without_replacement() -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+    manager = RecoveryManager(
+        evidence=_evidence(),
+        instance_id="overlay-A",
+        cleanup_complete=False,
+    )
+    harness.attach_failed_manager(manager, "overlay-A")
+
+    await harness.owner.handle_start_failure("window_reveal_lost")
+
     assert harness.owner.state == "failed"
+    assert harness.owner.failure_reason == "window_reveal_lost"
     assert harness.transition_calls == 0
+    assert harness.owner.snapshot.recovery_active is False
 
 
 async def test_uncertain_teardown_blocks_replacement() -> None:
@@ -662,3 +683,211 @@ async def test_direct_postconnect_refresh_failure_preserves_terminal_semantics(
         diagnostics_detach=None,
         emit_shutdown=False,
     )
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "window_reveal_lost",
+        "window_visibility_unstable",
+        "window_observation_failed",
+        "window_bounds_failed",
+        "window_native_ready_failed",
+        "window_identity_failed",
+    ],
+)
+async def test_broadened_window_failures_recover_with_proven_cleanup(
+    reason: str,
+) -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+    manager = RecoveryManager(
+        failure_reason=reason,
+        eligible=True,
+        evidence=_evidence(reason),
+        instance_id="overlay-A",
+        cleanup_complete=True,
+    )
+    harness.attach_failed_manager(manager, "overlay-A")
+
+    await harness.owner.handle_start_failure(reason)
+
+    assert harness.owner.state == "recovering"
+    await harness.await_recovery_replacement()
+    assert harness.transition_calls == 1
+    assert harness.owner.startup_recovery is not None
+    assert harness.owner.startup_recovery["failure_reason"] == reason
+    assert harness.owner.startup_recovery["failed_overlay_instance_id"] == "overlay-A"
+
+
+@pytest.mark.parametrize("evidence", [None, {}, {"failure_reason": "window_reveal_lost"}])
+async def test_sparse_evidence_still_recovers_when_sibling_approves(
+    evidence: dict[str, object] | None,
+) -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+    manager = RecoveryManager(
+        failure_reason="window_reveal_lost",
+        eligible=True,
+        evidence=evidence,
+        instance_id="overlay-A",
+        cleanup_complete=True,
+    )
+    harness.attach_failed_manager(manager, "overlay-A")
+
+    await harness.owner.handle_start_failure("window_reveal_lost")
+
+    assert harness.owner.state == "recovering"
+    await harness.await_recovery_replacement()
+    assert harness.transition_calls == 1
+
+
+async def test_native_ready_timeout_recovers_without_forensics() -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+    manager = RecoveryManager(
+        failure_reason="window_native_ready_failed",
+        eligible=True,
+        evidence={
+            "failure_reason": "window_native_ready_failed",
+            "port_reason": "native_ready_timeout",
+        },
+        instance_id="overlay-A",
+        cleanup_complete=True,
+    )
+    harness.attach_failed_manager(manager, "overlay-A")
+
+    await harness.owner.handle_start_failure("window_native_ready_failed")
+
+    assert harness.owner.state == "recovering"
+    await harness.await_recovery_replacement()
+    assert harness.transition_calls == 1
+
+
+async def test_first_visible_stops_spinner_before_connected() -> None:
+    harness = Harness()
+    manager = RecoveryManager(
+        state="starting",
+        failure_reason=None,
+        eligible=False,
+        evidence=None,
+        instance_id="overlay-A",
+        cleanup_complete=False,
+        first_visible=True,
+    )
+    harness.attach_failed_manager(manager, "overlay-A")
+    harness.owner.state = "starting"
+    harness.owner.active_target = "desktop"
+
+    state = harness.owner.presentation_state()
+    assert state is not None
+    assert state.desktop_first_visible is True
+
+    contract = build_overlay_peer_consumer_contract_from_state(state)
+    assert contract.overlay.state == "on"
+    assert contract.overlay.effective_enabled is False
+    assert contract.desktop_first_visible is True
+
+    from puripuly_heart.ui.dashboard.capture import capture_presentation_from_contract
+
+    presentation = capture_presentation_from_contract(contract)
+    assert presentation.overlay.enabled is True
+    assert presentation.overlay.starting is False
+
+
+async def test_starting_without_first_visible_keeps_spinner() -> None:
+    harness = Harness()
+    manager = RecoveryManager(
+        state="starting",
+        failure_reason=None,
+        eligible=False,
+        evidence=None,
+        instance_id="overlay-A",
+        cleanup_complete=False,
+        first_visible=False,
+    )
+    harness.attach_failed_manager(manager, "overlay-A")
+    harness.owner.state = "starting"
+    harness.owner.active_target = "desktop"
+
+    state = harness.owner.presentation_state()
+    assert state is not None
+    assert state.desktop_first_visible is False
+
+    contract = build_overlay_peer_consumer_contract_from_state(state)
+
+    from puripuly_heart.ui.dashboard.capture import capture_presentation_from_contract
+
+    presentation = capture_presentation_from_contract(contract)
+    assert presentation.overlay.starting is True
+
+
+async def test_recovery_resets_first_visible_for_replacement_spinner() -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+    manager_a = RecoveryManager(
+        evidence=_evidence(),
+        instance_id="overlay-A",
+        cleanup_complete=True,
+        first_visible=True,
+    )
+    harness.attach_failed_manager(manager_a, "overlay-A")
+
+    await harness.owner.handle_start_failure("window_reveal_lost")
+    assert harness.owner.state == "recovering"
+    await harness.await_recovery_replacement()
+
+    runtime_b = harness.owner.runtime
+    assert runtime_b is not None
+    assert runtime_b.overlay_instance_id == "overlay-B"
+    assert runtime_b.process_manager is None
+
+    state = harness.owner.presentation_state()
+    assert state is not None
+    assert state.desktop_first_visible is False
+
+    from puripuly_heart.ui.dashboard.capture import capture_presentation_from_contract
+
+    contract = build_overlay_peer_consumer_contract_from_state(state)
+    presentation = capture_presentation_from_contract(contract)
+    assert presentation.overlay.starting is True
+
+
+async def test_stale_first_visible_callback_is_ignored() -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+    manager_a = RecoveryManager(evidence=_evidence(), instance_id="overlay-A")
+    runtime_a = harness.attach_failed_manager(manager_a, "overlay-A")
+
+    await harness.owner.handle_start_failure("window_reveal_lost")
+    assert harness.owner.state == "recovering"
+    await harness.await_recovery_replacement()
+    runtime_b = harness.owner.runtime
+    assert runtime_b is not None
+
+    presentations_before = list(harness.presentations)
+    harness.owner.on_desktop_first_visible(runtime_a, "overlay-A")
+    assert harness.presentations == presentations_before
+
+
+async def test_duplicate_first_visible_callbacks_publish_idempotently() -> None:
+    harness = Harness()
+    manager = RecoveryManager(
+        state="starting",
+        failure_reason=None,
+        eligible=False,
+        evidence=None,
+        instance_id="overlay-A",
+        cleanup_complete=False,
+        first_visible=True,
+    )
+    runtime = harness.attach_failed_manager(manager, "overlay-A")
+    harness.owner.state = "starting"
+    harness.owner.active_target = "desktop"
+
+    harness.owner.on_desktop_first_visible(runtime, "overlay-A")
+    first_count = len(harness.presentations)
+    harness.owner.on_desktop_first_visible(runtime, "overlay-A")
+    assert len(harness.presentations) == first_count + 1
+    assert harness.presentations[-1] is not None
+    assert harness.presentations[-1].desktop_first_visible is True  # type: ignore[union-attr]

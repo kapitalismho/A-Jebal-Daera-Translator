@@ -84,6 +84,7 @@ class WindowZOrderPort(Protocol):
         y: int,
         width: int,
         height: int,
+        on_first_visible: Callable[[], None] | None = None,
     ) -> WindowVisibilityConfirmation: ...
 
     def close(self) -> None: ...
@@ -140,8 +141,14 @@ class NoopWindowZOrderPort:
         y: int,
         width: int,
         height: int,
+        on_first_visible: Callable[[], None] | None = None,
     ) -> WindowVisibilityConfirmation:
         _ = (expected_title, x, y, width, height)
+        if on_first_visible is not None:
+            try:
+                on_first_visible()
+            except Exception:
+                pass
         return WindowVisibilityConfirmation(
             confirmed=True,
             reason="framework_authority",
@@ -300,6 +307,7 @@ class WindowsWindowZOrderPort:
         y: int,
         width: int,
         height: int,
+        on_first_visible: Callable[[], None] | None = None,
     ) -> WindowVisibilityConfirmation:
         pid = self._pid
         generation = self._binding_generation
@@ -352,13 +360,13 @@ class WindowsWindowZOrderPort:
                 hwnd=hwnd,
                 hwnd_owner_pid=self._observed_owner_pid(hwnd),
             )
-
         logical_bounds = (x, y, width, height)
         target_bounds: tuple[int, int, int, int] | None = None
         observed_bounds: tuple[int, int, int, int] | None = None
         confirmed_since: float | None = None
         visible_confirmed = False
         bounds_confirmed = False
+        first_visible_notified = False
         deadline = loop.time() + self._visibility_timeout_s
         while True:
             if not self._binding_is_current(pid, generation):
@@ -388,6 +396,14 @@ class WindowsWindowZOrderPort:
                 and target_bounds is not None
                 and _window_bounds_close(observed_bounds, target_bounds)
             )
+            if visible_confirmed and bounds_confirmed and title_confirmed:
+                if not first_visible_notified:
+                    first_visible_notified = True
+                    if on_first_visible is not None:
+                        try:
+                            on_first_visible()
+                        except Exception:
+                            pass
             if visible_confirmed and bounds_confirmed:
                 if confirmed_since is None:
                     confirmed_since = now

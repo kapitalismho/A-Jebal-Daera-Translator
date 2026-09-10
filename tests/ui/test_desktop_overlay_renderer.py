@@ -1385,6 +1385,7 @@ class RecordingWindowZOrderPort:
         y: int,
         width: int,
         height: int,
+        on_first_visible=None,
     ) -> desktop_window_zorder.WindowVisibilityConfirmation:
         _ = (x, y, width, height)
         self.reveal_titles.append(expected_title)
@@ -2991,6 +2992,7 @@ async def test_desktop_overlay_start_waits_for_visible_confirmation_before_ready
             y: int,
             width: int,
             height: int,
+            on_first_visible=None,
         ) -> desktop_window_zorder.WindowVisibilityConfirmation:
             _ = (x, y, width, height)
             self.reveal_titles.append(expected_title)

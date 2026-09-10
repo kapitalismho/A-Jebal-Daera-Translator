@@ -51,6 +51,7 @@ def capture_presentation_from_contract(
         and is_process_capture_warning_reason(peer.warning_reason)
         and bool(peer.helper_text)
     )
+    desktop_first_visible = bool(getattr(contract, "desktop_first_visible", False))
     return DashboardCapturePresentation(
         peer=CaptureChannelPresentation(
             enabled=peer.state == "on",
@@ -59,7 +60,11 @@ def capture_presentation_from_contract(
         ),
         overlay=CaptureChannelPresentation(
             enabled=overlay.state == "on",
-            starting=overlay.state == "on" and not overlay.effective_enabled,
+            starting=(
+                overlay.state == "on"
+                and not overlay.effective_enabled
+                and not desktop_first_visible
+            ),
             warning=overlay.state == "warning",
         ),
         process_capture_warning_active=process_warning,

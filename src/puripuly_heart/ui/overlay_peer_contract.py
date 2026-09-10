@@ -25,6 +25,7 @@ class OverlayPeerToggleContract:
 class OverlayPeerConsumerContract:
     overlay: OverlayPeerToggleContract
     peer: OverlayPeerToggleContract
+    desktop_first_visible: bool = False
 
 
 def build_overlay_peer_consumer_contract(
@@ -36,6 +37,7 @@ def build_overlay_peer_consumer_contract(
     peer_effective_enabled: bool,
     peer_warning_reason: str | None = None,
     peer_activation_starting: bool = False,
+    desktop_first_visible: bool = False,
 ) -> OverlayPeerConsumerContract:
     overlay_contract = OverlayPeerToggleContract(
         intent_enabled=overlay_intent_enabled,
@@ -75,7 +77,11 @@ def build_overlay_peer_consumer_contract(
             overlay_failure_reason if resolved_peer_warning_reason == "overlay_failed" else None
         ),
     )
-    return OverlayPeerConsumerContract(overlay=overlay_contract, peer=peer_contract)
+    return OverlayPeerConsumerContract(
+        overlay=overlay_contract,
+        peer=peer_contract,
+        desktop_first_visible=bool(desktop_first_visible),
+    )
 
 
 def build_overlay_peer_consumer_contract_from_state(
@@ -89,6 +95,7 @@ def build_overlay_peer_consumer_contract_from_state(
         peer_effective_enabled=state.peer_effective_enabled,
         peer_warning_reason=state.peer_warning_reason,
         peer_activation_starting=state.peer_activation_starting,
+        desktop_first_visible=bool(getattr(state, "desktop_first_visible", False)),
     )
 
 
