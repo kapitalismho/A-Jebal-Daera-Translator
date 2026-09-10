@@ -713,12 +713,12 @@ def test_create_llm_provider_deepseek_uses_secret_and_model() -> None:
     assert isinstance(provider, SemaphoreLLMProvider)
     assert isinstance(provider.inner, DeepSeekLLMProvider)
     assert provider.inner.api_key == "ds-key"
-    assert provider.inner.model == "deepseek-v4-flash"
+    assert provider.inner.model == "deepseek-flash"
     assert provider.inner.base_url == "https://api.deepseek.com"
     assert_bounded_concurrency(provider, 4)
 
 
-def test_create_llm_provider_deepseek_uses_v4_flash_model() -> None:
+def test_create_llm_provider_deepseek_uses_flash_model() -> None:
     settings = _vnext(llm="deepseek", deepseek_model=DeepSeekLLMModel.DEEPSEEK_V4_FLASH.value)
     secrets = InMemorySecretStore()
     secrets.set("deepseek_api_key", "ds-key")
@@ -727,7 +727,7 @@ def test_create_llm_provider_deepseek_uses_v4_flash_model() -> None:
 
     assert isinstance(provider, SemaphoreLLMProvider)
     assert isinstance(provider.inner, DeepSeekLLMProvider)
-    assert provider.inner.model == "deepseek-v4-flash"
+    assert provider.inner.model == "deepseek-flash"
 
 
 def test_create_llm_provider_deepseek_passes_runtime_logging() -> None:
@@ -1200,7 +1200,7 @@ def test_create_llm_provider_from_resolved_openrouter_fallback_uses_resolved_rou
     assert isinstance(provider.inner.fallback, _LazyFactoryLLMProvider)
     assert provider.inner.runtime_logging is runtime_logging
     assert provider.inner.attempts[1].log_summary == (
-        "provider=openrouter, model=deepseek/deepseek-v4-flash-0731, mode=latency, "
+        "provider=openrouter, model=deepseek/deepseek-v4.1-flash, mode=latency, "
         "route=deepseek_only, delay=1300ms"
     )
 

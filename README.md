@@ -104,7 +104,7 @@ It works in many environments, including VRChat and Discord.
 |---|---|---|---|---|
 | **Gemma 4 E4B (Local)** | Unlimited | Unlimited | 5,000 | 3,660 |
 | **Gemma 4 26B A4B + 31B** | 13,940 | 13,940 | 3,680 | 2,900 |
-| **DeepSeek V4 Flash** | 11,620 | 11,620 | 3,500 | 2,780 |
+| **DeepSeek V4.1 Flash** | 16,800 | 16,800 | 3,860 | 3,000 |
 
 #### Other Models
 
@@ -125,7 +125,7 @@ It works in many environments, including VRChat and Discord.
 |---|---|---|---|---|
 | **Gemma 4 E4B (Local)** | $0 | $0 | ~$0.0002 | ~$0.0003 |
 | **Gemma 4 26B A4B + 31B** | ~$0.00007 | ~$0.00007 | ~$0.0003 | ~$0.0003 |
-| **DeepSeek V4 Flash** | ~$0.00009 | ~$0.00009 | ~$0.0003 | ~$0.0003 |
+| **DeepSeek V4.1 Flash** | ~$0.00006 | ~$0.00006 | ~$0.0003 | ~$0.0003 |
 
 #### Other Models
 
@@ -143,7 +143,8 @@ It works in many environments, including VRChat and Discord.
 *   *All costs and usage counts are approximate.*
 *   *DeepSeek assumes a 70% cache hit rate.*
 *   *Qwen API costs are based on the Beijing region.*
-*   *Pricing as of August 21, 2026.*
+*   *Pricing as of September 10, 2026.*
+*   *The benchmark chart measures DeepSeek-V4 Flash 0731; the cost table reflects V4.1 Flash pricing.*
 
 ### Free Credits
 
@@ -213,7 +214,7 @@ If audio capture does not work, open **Settings > General** and follow these ste
 If Soniox/Gemini/Deepgram are blocked in your region, please use the following combination:
 
 - STT: **Qwen Audio**
-- LLM: **DeepSeek V4 Flash**
+- LLM: **DeepSeek V4.1 Flash**
 
    > You can authenticate through QQ instead of Discord.
 

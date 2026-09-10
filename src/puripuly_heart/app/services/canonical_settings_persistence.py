@@ -641,7 +641,7 @@ def materialize_canonical_translation_settings(settings: AppSettingsVNext) -> Ap
         if connection == "official_byok":
             updates = {
                 "openrouter_provider_routing": "default",
-                "deepseek": replace(translation.deepseek, llm_model="deepseek-v4-flash"),
+                "deepseek": replace(translation.deepseek, llm_model="deepseek-flash"),
             }
         else:
             selected_source = "managed" if connection in {"managed", "managed_china"} else "byok"

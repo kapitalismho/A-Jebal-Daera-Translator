@@ -201,19 +201,73 @@ def test_vnext_dict_migrates_legacy_deepseek_openrouter_model() -> None:
     migrated = migration.from_dict(canonical)
     result = serialization.to_dict(migrated)["intent"]["translation"]
 
-    assert result["openrouter_model"] == "deepseek/deepseek-v4-flash-0731"
+    assert result["openrouter_model"] == "deepseek/deepseek-v4.1-flash"
     assert result["openrouter_selection_alias"] == "deepseek_v4_flash_byok"
 
 
-def test_serialization_from_dict_normalizes_legacy_deepseek_openrouter_model() -> None:
+def test_vnext_dict_migrates_pinned_legacy_deepseek_openrouter_model() -> None:
+    from puripuly_heart.config.settings_vnext import migration, serialization
+
+    canonical = serialization.to_dict(AppSettingsVNext())
+    translation = canonical["intent"]["translation"]
+    translation["model"] = "deepseek_v4_flash"
+    translation["connection"] = "openrouter"
+    translation["openrouter_model"] = "deepseek/deepseek-v4-flash-0731"
+    translation["openrouter_selected_source"] = "byok"
+    translation["openrouter_selection_alias"] = "deepseek_v4_flash_byok"
+
+    migrated = migration.from_dict(canonical)
+    result = serialization.to_dict(migrated)["intent"]["translation"]
+
+    assert result["openrouter_model"] == "deepseek/deepseek-v4.1-flash"
+    assert result["openrouter_selection_alias"] == "deepseek_v4_flash_byok"
+
+
+@pytest.mark.parametrize(
+    "legacy_model",
+    [
+        "deepseek/deepseek-v4-flash",
+        "deepseek/deepseek-v4-flash-0731",
+    ],
+)
+def test_serialization_from_dict_normalizes_legacy_deepseek_openrouter_model(
+    legacy_model: str,
+) -> None:
     from puripuly_heart.config.settings_vnext import serialization
 
     canonical = serialization.to_dict(AppSettingsVNext())
-    canonical["intent"]["translation"]["openrouter_model"] = "deepseek/deepseek-v4-flash"
+    canonical["intent"]["translation"]["openrouter_model"] = legacy_model
 
     loaded = serialization.from_dict(canonical)
 
-    assert loaded.intent.translation.openrouter_model == "deepseek/deepseek-v4-flash-0731"
+    assert loaded.intent.translation.openrouter_model == "deepseek/deepseek-v4.1-flash"
+
+
+def test_compat_load_rewrites_legacy_deepseek_models_to_v4_1(tmp_path: Path) -> None:
+    compat = _compat()
+    serialization = _serialization()
+    raw = serialization.to_dict(AppSettingsVNext())
+    translation = raw["intent"]["translation"]
+    translation["model"] = "deepseek_v4_flash"
+    translation["connection"] = "official_byok"
+    translation["deepseek"] = {"llm_model": "deepseek-v4-flash"}
+    translation["openrouter_model"] = "deepseek/deepseek-v4-flash-0731"
+    translation["openrouter_selected_source"] = "byok"
+    translation["openrouter_selection_alias"] = "deepseek_v4_flash_byok"
+    path = tmp_path / "settings.json"
+    _write_json_bytes(path, raw)
+
+    result = compat.load_vnext_settings(path)
+
+    assert result.ok
+    assert result.migrated is True
+    assert result.settings is not None
+    loaded = serialization.to_dict(result.settings)["intent"]["translation"]
+    assert loaded["deepseek"]["llm_model"] == "deepseek-flash"
+    assert loaded["openrouter_model"] == "deepseek/deepseek-v4.1-flash"
+    persisted_text = path.read_text(encoding="utf-8")
+    assert "deepseek-v4-flash" not in persisted_text
+    assert "deepseek/deepseek-v4.1-flash" in persisted_text
 
 
 def test_restart_roundtrip_preserves_gemma_main_model_with_stale_openrouter_url() -> None:
@@ -303,6 +357,17 @@ def test_current_version_deepseek_v4_pro_remnant_normalizes_to_flash() -> None:
     assert translated.previous_llm_model == "deepseek_v4_flash"
     assert translated.connection_history == {"deepseek_v4_flash": "official_byok"}
     assert "deepseek_v4_pro" not in json.dumps(serialization.to_dict(loaded))
+
+
+def test_current_version_deepseek_v4_flash_api_model_normalizes_to_deepseek_flash() -> None:
+    migration = _migration()
+    serialization = _serialization()
+    raw = serialization.to_dict(AppSettingsVNext())
+    raw["intent"]["translation"]["deepseek"]["llm_model"] = "deepseek-v4-flash"
+
+    loaded = migration.from_dict(raw)
+
+    assert loaded.intent.translation.deepseek.llm_model == "deepseek-flash"
 
 
 def test_vnext_dict_migrates_shared_qwen_audio_model_to_per_channel_provider() -> None:

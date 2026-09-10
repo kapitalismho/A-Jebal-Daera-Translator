@@ -97,7 +97,7 @@
 | 0 | Gemma 4 26B + 31B |
 | 1 | Gemma 4 31B |
 | 2 | Gemma 4 26B A4B |
-| 3 | DeepSeek V4 Flash |
+| 3 | DeepSeek V4.1 Flash |
 | 5 | Gemini 3.7 Flash |
 | 7 | Qwen 3.8 Flash |
 | 8 | OpenAI-compatible API |
@@ -114,8 +114,8 @@
 | ID | Fallback |
 | ---: | --- |
 | 0 | Off |
-| 1 | DeepSeek V4 Flash (Official API) |
-| 2 | DeepSeek V4 Flash (OpenRouter) |
+| 1 | DeepSeek V4.1 Flash (Official API) |
+| 2 | DeepSeek V4.1 Flash (OpenRouter) |
 | 3 | Gemma 4 26B A4B (OpenRouter) |
 | 4 | Gemma 4 26B + 31B (OpenRouter) |
 | 5 | Gemma 4 31B (OpenRouter) |

@@ -121,7 +121,7 @@ def _prepare_vnext_migration_dict(data: Mapping[str, Any]) -> dict[str, Any]:
             _migrate_multi_model_gemma_translation(translation)
         if migrate_cerebras_connection:
             _migrate_cerebras_connection_translation(translation)
-        _migrate_deepseek_v4_pro_translation(translation)
+        _migrate_deepseek_translation(translation)
         _migrate_gemini_3_flash_translation(translation)
         _migrate_qwen_35_plus_translation(translation)
         _migrate_legacy_openrouter_model_translation(translation)
@@ -670,7 +670,7 @@ def _migrate_qwen_35_plus_translation(translation: dict[str, Any]) -> None:
                 history.pop(legacy_model, None)
 
 
-def _migrate_deepseek_v4_pro_translation(translation: dict[str, Any]) -> None:
+def _migrate_deepseek_translation(translation: dict[str, Any]) -> None:
     if translation.get("model") == "deepseek_v4_pro":
         translation["model"] = "deepseek_v4_flash"
         translation["connection"] = "official_byok"
@@ -684,6 +684,9 @@ def _migrate_deepseek_v4_pro_translation(translation: dict[str, Any]) -> None:
     if isinstance(fallback, dict) and fallback.get("model") == "deepseek_v4_pro":
         fallback["model"] = "deepseek_v4_flash"
         fallback["connection"] = "official_byok"
+    deepseek = translation.get("deepseek")
+    if isinstance(deepseek, dict) and deepseek.get("llm_model") == "deepseek-v4-flash":
+        deepseek["llm_model"] = "deepseek-flash"
 
 
 def _migrate_legacy_openrouter_model_translation(translation: dict[str, Any]) -> None:

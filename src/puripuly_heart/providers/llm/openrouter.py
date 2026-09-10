@@ -166,22 +166,18 @@ def _build_provider_preferences(
             "only": ["cerebras/fp16"],
             "allow_fallbacks": False,
         }
-    if provider_routing == OpenRouterProviderRouting.DEEPSEEK_ONLY:
+    if (
+        provider_routing
+        in (
+            OpenRouterProviderRouting.DEEPSEEK_ONLY,
+            OpenRouterProviderRouting.DEEPSEEK_V4_FLASH_LATENCY,
+        )
+        or model == OPENROUTER_MODEL_DEEPSEEK_V4_FLASH
+    ):
         return {
-            "only": ["baidu/fp8", "deepseek/fp8", "siliconflow/fp8"],
             "sort": {"by": "latency"},
             "allow_fallbacks": True,
-        }
-    if provider_routing == OpenRouterProviderRouting.DEEPSEEK_V4_FLASH_LATENCY:
-        return {
-            "only": [
-                "coreweave/fp8",
-                "baidu/fp8",
-                "deepseek/fp8",
-                "cloudflare/fp8",
-            ],
-            "sort": {"by": "latency"},
-            "allow_fallbacks": True,
+            "ignore": ["deepinfra", "novita"],
         }
     if provider_routing == OpenRouterProviderRouting.GOOGLE_GEMINI_LATENCY:
         return {
@@ -194,17 +190,6 @@ def _build_provider_preferences(
         return {
             "order": ["wafer", "cloudflare", "deepinfra"],
             "only": ["wafer", "cloudflare", "deepinfra"],
-            "allow_fallbacks": True,
-        }
-    if model == OPENROUTER_MODEL_DEEPSEEK_V4_FLASH:
-        return {
-            "only": [
-                "coreweave/fp8",
-                "baidu/fp8",
-                "deepseek/fp8",
-                "cloudflare/fp8",
-            ],
-            "sort": {"by": "latency"},
             "allow_fallbacks": True,
         }
     return {
