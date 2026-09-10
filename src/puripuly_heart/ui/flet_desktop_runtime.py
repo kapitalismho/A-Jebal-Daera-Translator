@@ -277,6 +277,10 @@ class FletDesktopViewProcessOwner:
         return self._generation
 
     @property
+    def endpoint_identity(self) -> str | None:
+        return self._endpoint_identity
+
+    @property
     def process_info(self) -> tuple[int, str | None] | None:
         process = self._process
         if process is None or process.pid is None:

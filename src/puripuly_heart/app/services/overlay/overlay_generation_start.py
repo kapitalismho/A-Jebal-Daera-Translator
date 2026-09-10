@@ -288,7 +288,19 @@ class OverlayGenerationStartOwner:
                 self._emit("failed", request, overlay_instance_id)
                 return "failed"
             effects.mark_connected()
-            await effects.refresh_dependencies()
+            if request.fallback_reason is not None:
+                try:
+                    await effects.refresh_dependencies()
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:
+                    effects.log_failure(
+                        "[Overlay] Peer dependency refresh failed after overlay connect",
+                        logging.WARNING,
+                        exc,
+                    )
+            else:
+                await effects.refresh_dependencies()
             monitor_task = getattr(manager, "_monitor_task", None)
             if monitor_task is not None:
                 runtime.create_monitor_task(

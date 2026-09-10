@@ -46,6 +46,7 @@ class WindowVisibilityConfirmation:
     bounds_confirmed: bool = False
     win32_error: int | None = None
     observed_bounds: tuple[int, int, int, int] | None = None
+    hwnd_owner_pid: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +58,7 @@ class WindowBoundsConfirmation:
     bounds_confirmed: bool = False
     win32_error: int | None = None
     observed_bounds: tuple[int, int, int, int] | None = None
+    hwnd_owner_pid: int | None = None
 
 
 class WindowZOrderPort(Protocol):
@@ -241,6 +243,7 @@ class WindowsWindowZOrderPort:
                     reason="binding_changed",
                     hwnd=hwnd,
                     title_confirmed=title_confirmed,
+                    hwnd_owner_pid=self._observed_owner_pid(hwnd),
                 )
             if not self._window_belongs_to_process(hwnd, pid):
                 return WindowBoundsConfirmation(
@@ -248,6 +251,7 @@ class WindowsWindowZOrderPort:
                     reason="window_changed",
                     hwnd=hwnd,
                     title_confirmed=title_confirmed,
+                    hwnd_owner_pid=self._observed_owner_pid(hwnd),
                 )
             now = loop.time()
             observed_bounds = self._api.window_bounds(hwnd)
@@ -271,6 +275,7 @@ class WindowsWindowZOrderPort:
                         title_confirmed=title_confirmed,
                         bounds_confirmed=True,
                         observed_bounds=observed_bounds,
+                        hwnd_owner_pid=self._observed_owner_pid(hwnd),
                     )
             else:
                 confirmed_since = None
@@ -283,6 +288,7 @@ class WindowsWindowZOrderPort:
                     title_confirmed=title_confirmed,
                     bounds_confirmed=confirmed_since is not None,
                     observed_bounds=observed_bounds,
+                    hwnd_owner_pid=self._observed_owner_pid(hwnd),
                 )
             await self._sleep(min(self._poll_interval_s, remaining))
 
@@ -340,7 +346,12 @@ class WindowsWindowZOrderPort:
         if hwnd is None:
             return WindowVisibilityConfirmation(confirmed=False, reason="window_not_found")
         if not self._window_belongs_to_process(hwnd, pid):
-            return WindowVisibilityConfirmation(confirmed=False, reason="window_changed")
+            return WindowVisibilityConfirmation(
+                confirmed=False,
+                reason="window_changed",
+                hwnd=hwnd,
+                hwnd_owner_pid=self._observed_owner_pid(hwnd),
+            )
 
         logical_bounds = (x, y, width, height)
         target_bounds: tuple[int, int, int, int] | None = None
@@ -355,12 +366,14 @@ class WindowsWindowZOrderPort:
                     confirmed=False,
                     reason="binding_changed",
                     hwnd=hwnd,
+                    hwnd_owner_pid=self._observed_owner_pid(hwnd),
                 )
             if not self._window_belongs_to_process(hwnd, pid):
                 return WindowVisibilityConfirmation(
                     confirmed=False,
                     reason="window_changed",
                     hwnd=hwnd,
+                    hwnd_owner_pid=self._observed_owner_pid(hwnd),
                 )
             now = loop.time()
             visible_confirmed = self._api.is_window_visible(hwnd)
@@ -387,6 +400,7 @@ class WindowsWindowZOrderPort:
                         visible_confirmed=True,
                         bounds_confirmed=True,
                         observed_bounds=observed_bounds,
+                        hwnd_owner_pid=self._observed_owner_pid(hwnd),
                     )
             else:
                 confirmed_since = None
@@ -400,6 +414,7 @@ class WindowsWindowZOrderPort:
                     visible_confirmed=visible_confirmed,
                     bounds_confirmed=bounds_confirmed,
                     observed_bounds=observed_bounds,
+                    hwnd_owner_pid=self._observed_owner_pid(hwnd),
                 )
             await self._sleep(min(self._poll_interval_s, remaining))
 
@@ -508,6 +523,15 @@ class WindowsWindowZOrderPort:
 
     def _window_belongs_to_process(self, hwnd: int, pid: int) -> bool:
         return self._api.is_window(hwnd) and self._api.process_id(hwnd) == pid
+
+    def _observed_owner_pid(self, hwnd: int | None) -> int | None:
+        if hwnd is None:
+            return None
+        try:
+            owner_pid = self._api.process_id(hwnd)
+        except Exception:
+            return None
+        return owner_pid if type(owner_pid) is int and owner_pid > 0 else None
 
 
 def _native_target_bounds(

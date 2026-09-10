@@ -51,6 +51,12 @@ _MIN_DESKTOP_WINDOW_HEIGHT = 160
 _INTERACTION_MODE_EVENT_MODES = {"edit", "pass_through"}
 _INTERACTION_MODE_EVENT_KEYS = {"event", "mode"}
 _RESET_TO_BOTTOM_CENTER_EVENT_KEYS = {"event"}
+_DESKTOP_STARTUP_TARGET = "desktop"
+_DESKTOP_STARTUP_BOUNDS_CONFIRMED_PHASE = "bounds_confirmed"
+_DESKTOP_STARTUP_RECOVERABLE_REASONS = frozenset(
+    {"window_reveal_lost", "window_visibility_unstable"}
+)
+_DESKTOP_STARTUP_VISIBILITY_RETAINED_REASON = "visible_bounds_not_retained"
 
 
 class OverlayPreparationError(Exception):
@@ -516,6 +522,7 @@ class OverlayProcessManager:
 
     state: str = field(init=False, default="off")
     failure_reason: str | None = field(init=False, default=None)
+    startup_failure_evidence: dict[str, object] | None = field(init=False, default=None)
     restart_scheduled: bool = field(init=False, default=False)
     _manifest_path: Path | None = field(init=False, default=None)
     _process: OverlayManagedProcess | None = field(init=False, default=None)
@@ -542,6 +549,60 @@ class OverlayProcessManager:
         default=None,
         repr=False,
     )
+
+    @property
+    def startup_recovery_eligible(self) -> bool:
+        return self._startup_recovery_eligible(self.startup_failure_evidence)
+
+    def _startup_recovery_eligible(self, evidence: dict[str, object] | None) -> bool:
+        if not isinstance(evidence, dict):
+            return False
+        if evidence.get("overlay_instance_id") != self.overlay_instance_id:
+            return False
+        if self.selected_target != _DESKTOP_STARTUP_TARGET:
+            return False
+        if evidence.get("desktop_target") is not True:
+            return False
+        if evidence.get("startup_phase") != _DESKTOP_STARTUP_BOUNDS_CONFIRMED_PHASE:
+            return False
+        if evidence.get("failure_reason") not in _DESKTOP_STARTUP_RECOVERABLE_REASONS:
+            return False
+        if evidence.get("title_confirmed") is not True:
+            return False
+        if evidence.get("win32_error") is not None:
+            return False
+        if evidence.get("port_reason") != _DESKTOP_STARTUP_VISIBILITY_RETAINED_REASON:
+            return False
+        hwnd = evidence.get("hwnd")
+        owner_pid = evidence.get("owner_pid")
+        hwnd_owner_pid = evidence.get("hwnd_owner_pid")
+        if not self._is_positive_int(hwnd):
+            return False
+        if not self._is_positive_int(owner_pid):
+            return False
+        if hwnd_owner_pid != owner_pid:
+            return False
+        if evidence.get("endpoint_matches") is not True:
+            return False
+        pid_file_pid = evidence.get("pid_file_pid")
+        if pid_file_pid is not None and pid_file_pid != owner_pid:
+            return False
+        if not self._is_bounds_vector(evidence.get("canonical_bounds")):
+            return False
+        if not self._is_bounds_vector(evidence.get("observed_bounds")):
+            return False
+        if evidence.get("bounds_drift") is not True and evidence.get("bounds_drift") is not False:
+            return False
+        if evidence.get("failure_reason") == "window_reveal_lost":
+            if evidence.get("bounds_drift") is not False:
+                return False
+        return True
+
+    @classmethod
+    def _is_bounds_vector(cls, value: object) -> bool:
+        if not isinstance(value, (list, tuple)) or len(value) != 4:
+            return False
+        return all(cls._is_finite_non_bool_number(item) for item in value)
 
     def __post_init__(self) -> None:
         self.logging_mode = normalize_overlay_logging_mode(self.logging_mode)
@@ -577,6 +638,7 @@ class OverlayProcessManager:
         self._shutdown_acknowledged = False
         self.restart_scheduled = False
         self.failure_reason = None
+        self.startup_failure_evidence = None
         self._accepted_ready_generation = None
         self._trace_generation += 1
         self._last_trace_phase = None
@@ -1035,6 +1097,7 @@ class OverlayProcessManager:
             )
             self.state = "connected"
             self.failure_reason = None
+            self.startup_failure_evidence = None
             logger.info(
                 "[OverlayProcess] Ready: overlay_instance_id=%s phase=%s manifest_path=%s",
                 self.overlay_instance_id,
@@ -1046,7 +1109,13 @@ class OverlayProcessManager:
             startup_phase = event.get("startup_phase")
             if isinstance(startup_phase, str):
                 self._last_trace_phase = startup_phase
-            await self._fail(self._extract_failure_reason(event))
+            startup_evidence = (
+                self._extract_failure_evidence(event) if event_type == "startup_error" else None
+            )
+            await self._fail(
+                self._extract_failure_reason(event),
+                startup_evidence=startup_evidence,
+            )
             return "failed"
         if event_type == "overlay_event":
             self._handle_renderer_event(event)
@@ -1221,6 +1290,21 @@ class OverlayProcessManager:
         if isinstance(failure_reason, str) and failure_reason:
             return failure_reason
         return "unknown"
+
+    def _extract_failure_evidence(self, event: dict[str, object]) -> dict[str, object] | None:
+        evidence = event.get("evidence")
+        if not isinstance(evidence, dict):
+            return None
+        wire_instance_id = event.get("overlay_instance_id")
+        if not isinstance(wire_instance_id, str) or not wire_instance_id:
+            return None
+        stored = dict(evidence)
+        nested_instance_id = stored.get("overlay_instance_id")
+        if nested_instance_id is None:
+            stored["overlay_instance_id"] = wire_instance_id
+        elif nested_instance_id != wire_instance_id:
+            return None
+        return stored
 
     def _map_exit_code_to_failure_reason(self, exit_code: int | None) -> str:
         if exit_code is None:
@@ -1404,9 +1488,13 @@ class OverlayProcessManager:
         *,
         cleanup_manifest: bool = True,
         terminate_process: bool = True,
+        startup_evidence: dict[str, object] | None = None,
     ) -> None:
         self.state = "failed"
         self.failure_reason = failure_reason
+        self.startup_failure_evidence = (
+            dict(startup_evidence) if isinstance(startup_evidence, dict) else None
+        )
         connected_session = self._last_transition in {"overlay_ready", "bridge_ready"}
         self.restart_scheduled = connected_session and not self._shutdown_requested
         self._current_phase = "failed"

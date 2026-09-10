@@ -98,7 +98,7 @@ def _overlay_surface_state(
 ) -> OverlayPeerSurfaceState:
     if not overlay_intent_enabled:
         return "off"
-    if overlay_state in {"starting", "connected"}:
+    if overlay_state in {"starting", "recovering", "connected"}:
         return "on"
     return "warning"
 
@@ -107,7 +107,7 @@ def _overlay_warning_reason(
     overlay_intent_enabled: bool,
     overlay_state: str,
 ) -> str | None:
-    if not overlay_intent_enabled or overlay_state in {"starting", "connected"}:
+    if not overlay_intent_enabled or overlay_state in {"starting", "recovering", "connected"}:
         return None
     if overlay_state == "failed":
         return "overlay_failed"
@@ -164,7 +164,7 @@ def _resolve_peer_warning_reason(
         return None
     if peer_warning_reason is not None:
         return peer_warning_reason
-    if overlay_state == "starting":
+    if overlay_state in {"starting", "recovering"}:
         return "overlay_starting"
     if overlay_state == "stopping":
         return "overlay_stopping"

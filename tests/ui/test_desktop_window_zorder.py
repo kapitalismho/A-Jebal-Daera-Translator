@@ -383,6 +383,7 @@ async def test_windows_zorder_port_confirms_flet_owned_hidden_bounds_without_mut
         title_confirmed=True,
         bounds_confirmed=True,
         observed_bounds=(320, 720, 1344, 320),
+        hwnd_owner_pid=4321,
     )
     assert api.placement_calls == []
     assert api.show_calls == []
@@ -535,6 +536,8 @@ async def test_windows_zorder_port_requires_visibility_to_be_retained() -> None:
 
     assert result.confirmed is False
     assert result.reason == "visible_bounds_not_retained"
+    assert result.hwnd == 101
+    assert result.hwnd_owner_pid == 4321
     assert api.show_calls == []
 
 
