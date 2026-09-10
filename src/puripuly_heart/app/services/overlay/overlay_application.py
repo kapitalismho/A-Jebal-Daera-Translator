@@ -587,6 +587,7 @@ class OverlayApplicationOwner:
         if self._ingress_stopped:
             return None
         self._cancel_startup_recovery()
+        await self._drain_startup_recovery_task()
         return await self._transition_owner.begin_start(self._start_execution)
 
     async def _begin_fallback_start(self) -> None:
@@ -611,9 +612,16 @@ class OverlayApplicationOwner:
         self._startup_recovery_generation += 1
         self._startup_recovery = None
         task = self._startup_recovery_task
-        self._startup_recovery_task = None
         if task is not None and task is not asyncio.current_task() and not task.done():
             task.cancel()
+
+    async def _drain_startup_recovery_task(self) -> None:
+        task = self._startup_recovery_task
+        if task is None or task is asyncio.current_task():
+            return
+        await asyncio.gather(task, return_exceptions=True)
+        if self._startup_recovery_task is task:
+            self._startup_recovery_task = None
 
     def _start_execution(
         self,
@@ -1011,6 +1019,9 @@ class OverlayApplicationOwner:
             and previous_task is not asyncio.current_task()
         ):
             previous_task.cancel()
+            await asyncio.gather(previous_task, return_exceptions=True)
+            if self._startup_recovery_task is previous_task:
+                self._startup_recovery_task = None
         self._startup_recovery_task = asyncio.create_task(
             self._start_recovery_replacement(
                 previous=previous,
@@ -1177,6 +1188,7 @@ class OverlayApplicationOwner:
                 preserve_failure_reason=preserve_failure_reason,
             )
         )
+        await self._drain_startup_recovery_task()
 
     def _shutdown_execution(
         self,
@@ -1425,10 +1437,7 @@ class OverlayApplicationOwner:
         await self.shutdown(preserve_failure_reason=True)
         self.clear_fallback()
         await self._fallback_owner.close()
-        task = self._startup_recovery_task
-        self._startup_recovery_task = None
-        if task is not None:
-            await asyncio.gather(task, return_exceptions=True)
+        await self._drain_startup_recovery_task()
 
 
 __all__ = [

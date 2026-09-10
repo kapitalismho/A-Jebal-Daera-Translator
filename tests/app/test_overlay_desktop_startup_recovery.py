@@ -891,3 +891,78 @@ async def test_duplicate_first_visible_callbacks_publish_idempotently() -> None:
     assert len(harness.presentations) == first_count + 1
     assert harness.presentations[-1] is not None
     assert harness.presentations[-1].desktop_first_visible is True  # type: ignore[union-attr]
+
+
+async def test_shutdown_waits_for_canceled_recovery_cleanup() -> None:
+    harness = Harness()
+    entered = asyncio.Event()
+    cleanup_started = asyncio.Event()
+    cleanup_finished = asyncio.Event()
+
+    class BlockingTransition:
+        async def begin_start(self, execution_factory: Any) -> str:
+            entered.set()
+            try:
+                await asyncio.sleep(30)
+            except asyncio.CancelledError:
+                cleanup_started.set()
+                await asyncio.sleep(0.2)
+                cleanup_finished.set()
+                raise
+            return "started"
+
+        async def shutdown(self, execution_factory: Any) -> str:
+            execution = execution_factory()
+            execution.on_stopping()
+            teardown_ok = await execution.teardown()
+            if not teardown_ok and execution.has_resources_after_teardown():
+                await execution.on_failed()
+                return "failed"
+            await execution.on_stopped()
+            return "stopped"
+
+    harness.owner._transition_owner = cast(Any, BlockingTransition())
+    manager = RecoveryManager(evidence=_evidence(), instance_id="overlay-A")
+    harness.attach_failed_manager(manager, "overlay-A")
+
+    await harness.owner.handle_start_failure("window_reveal_lost")
+    assert harness.owner.state == "recovering"
+    await asyncio.wait_for(entered.wait(), timeout=5)
+    recovery_task = harness.owner._startup_recovery_task
+    assert recovery_task is not None
+
+    shutdown_task = asyncio.create_task(harness.owner.shutdown(preserve_failure_reason=True))
+    await asyncio.wait_for(cleanup_started.wait(), timeout=5)
+    assert not shutdown_task.done()
+    await asyncio.wait_for(asyncio.shield(shutdown_task), timeout=5)
+    assert cleanup_finished.is_set()
+    assert harness.owner.state == "off"
+    assert harness.owner._startup_recovery_task is None
+    assert recovery_task.done()
+
+    harness.install_transition_stub()
+    status = await asyncio.wait_for(harness.owner.begin_start(), timeout=5)
+    assert status == "started"
+    await harness.owner.close()
+    await harness.owner.shutdown(preserve_failure_reason=True)
+
+
+async def test_close_drains_owned_recovery_failure_without_propagating() -> None:
+    harness = Harness()
+    harness.install_transition_stub()
+
+    async def failing() -> None:
+        await asyncio.sleep(0)
+        raise RuntimeError("recovery boom")
+
+    task = asyncio.create_task(failing())
+    await asyncio.sleep(0)
+    await asyncio.sleep(0)
+    assert task.done()
+    harness.owner._startup_recovery_task = task
+    await harness.owner.close()
+    assert harness.owner._startup_recovery_task is None
+    assert task.done()
+    assert isinstance(task.exception(), RuntimeError)
+    await harness.owner.close()
+    await harness.owner.shutdown(preserve_failure_reason=True)
