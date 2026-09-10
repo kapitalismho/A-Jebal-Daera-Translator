@@ -202,7 +202,13 @@ _OVERLAY_TEXT_SCALE_PRESETS = (
     ("normal", 1.0),
     ("small", 0.8),
 )
-_DESKTOP_OVERLAY_REOPEN_FAILURE_REASONS = frozenset({"window_configuration_failed"})
+_DESKTOP_OVERLAY_REOPEN_FAILURE_REASONS = frozenset(
+    {
+        "window_configuration_failed",
+        "window_reveal_lost",
+        "window_visibility_unstable",
+    }
+)
 _CUSTOM_VOCAB_DELIMITER_RE = re.compile(r"\s+")
 _STT_UI_PROVIDERS = (
     STTProviderName.QWEN_AUDIO,
