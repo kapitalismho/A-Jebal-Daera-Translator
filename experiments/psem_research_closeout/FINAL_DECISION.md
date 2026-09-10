@@ -56,7 +56,7 @@ GitHub issue 상태 변경 없음.
 아카이브 검증 포함: `python experiments/psem_research_closeout/replay.py --verify-archive`
 요구사항은 Perl과 표준 라이브러리뿐이다. 점수 재현에는 비공개 아카이브·GPU가
 필요 없다. 전체 native/ASR 재생성은 비공개 아카이브·원본·모델이 별도로 필요하다.
-푸시 대상은 compact 12파일이며 원본 ZIP은 푸시하지 않는다.
+푸시 대상은 compact 13파일이며 원본 ZIP은 푸시하지 않는다.
 
 ## 범위·행정 상태
 
