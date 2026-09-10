@@ -2,7 +2,10 @@
  "format": "psem-compact-evidence.v1",
  "scorer": {
   "file": "scorer/md-eval-22.pl",
-  "sha256": "872aa955cbc3d57e6d4fd6fe2e699791739c1cb716cc89105bb4717415b9400d",
+  "sha256": "88e84932f6702c95a0eaae9602858a27fbd7ebab456e3a38216d5ccac0ecacfc",
+  "upstream_download_sha256": "872aa955cbc3d57e6d4fd6fe2e699791739c1cb716cc89105bb4717415b9400d",
+  "normalization": "CRLF to LF only for portable Git checkout; unchanged Perl source",
+  ".gitattributes": "experiments/psem_research_closeout/scorer/md-eval-22.pl text eol=lf",
   "dscore_commit": "e02f949ac6592279300a2c33d03daf9e0c12fd27",
   "flags": "official md-eval-22, no -1/-o, collar via -c"
  },

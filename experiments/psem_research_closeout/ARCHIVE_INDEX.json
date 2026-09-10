@@ -27,7 +27,10 @@
   "np2_target_pcm_sha256": "461e7f5d93fde95559fb673e1429b5cb64d0bbc7e05a18d470dc76b78fbf4df1",
   "np2_source_wav_sha256": "b5ef423361ce67c804042ec479c6aeaf2cb8c19f73a779d61fabb7501e9e9b10",
   "perl": "system perl 5.38.2",
-  "python_stdlib_only": "no numpy needed by replay"
+  "python_stdlib_only": "no numpy needed by replay",
+  "canonical_replay_scorer": "88e84932f6702c95a0eaae9602858a27fbd7ebab456e3a38216d5ccac0ecacfc",
+  "archived_original_scorer": "872aa955cbc3d57e6d4fd6fe2e699791739c1cb716cc89105bb4717415b9400d",
+  "scorer_normalization": "CRLF to LF only; archive whole 0758968f and member manifest keep original 872aa955; no ZIP rewrite"
  },
  "restore": {
   "prerequisite": "python experiments/psem_research_closeout/replay.py --verify-archive",

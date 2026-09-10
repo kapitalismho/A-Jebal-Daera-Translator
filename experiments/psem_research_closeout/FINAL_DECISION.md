@@ -41,7 +41,9 @@ warm conf 0이나 MISS 악화로 일반 수정이 아니다.
 - 12 에피소드를 전 항목 완료로 표기하지 않는다.
 
 ## 출처
-- scorer md-eval-22 sha 872aa955, refs BUT 2509d893. 상세 수치·입력·재현은
+- scorer md-eval-22: 재현용 canonical sha 88e84932, 원본 다운로드 sha 872aa955
+  (CRLF→LF 정규화만, 동일 Perl 소스, 공식 소스 커밋 e02f949 불변),
+  refs BUT 2509d893. 상세 수치·입력·재현은
   `EVIDENCE.json` + `replay.py`(54회 공식 실행) 참조. 과거 freeze 오류는
   철회 기록으로 보존되며 현행으로 주장하지 않는다.
 
